@@ -457,7 +457,7 @@ groups.
 > andS                          =  and . map (\(_,_,x,y) -> x && y)
 
 > unBalancedIf                  :: CondInfo -> String
-> unBalancedIf (f,l,_,_)        =  "%if from " ++ f ++ " line " ++ show l ++ " not closed"
+> unBalancedIf (f,l,_,_)        =  "%if at " ++ f ++ " line " ++ show l ++ " not closed"
 
 > skip				:: [Numbered Class] -> Formatter
 > skip []			=  return ()

@@ -52,10 +52,12 @@ able to suppress blank lines in the \LaTeX\ text.
 > classify ('\n' : s)		=  classify0 "\n" s
 
 Commands disguised as comments (AKA pseudo-comments).
+ks, 19.08.2004: changed |classify v| to |classify0 v| calls, to recognize
+(incorrect-Haskell) bird tracks directly after a directive.
 
 > classify ('%' : s)		=  case encode t of
->         Nothing		-> Many ('%' : t ++ arg) : classify v
->         Just cmd		-> Directive cmd arg : classify v
+>         Nothing		-> Many ('%' : t ++ arg)  :  classify0 "" v
+>         Just cmd		-> Directive cmd arg      :  classify0 "" v
 >     where (t, u)		=  break isSpace s
 >           (arg, v)		=  breakAfter (== '\n') u
 
