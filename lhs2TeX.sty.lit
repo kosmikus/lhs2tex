@@ -121,7 +121,7 @@ column specifiers. It only works for @poly@ style.
 \newcommand{\onelinecommentchars}{\quad--- }
 %else
 \newcommand{\onelinecommentchars}{\quad-{}- }
-%fi
+%endif
 \newcommand{\commentbeginchars}{\enskip\{-}
 \newcommand{\commentendchars}{-\}\enskip}
 
