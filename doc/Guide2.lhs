@@ -360,7 +360,7 @@ the option @--disable-polytable@ to @configure@. In this case,
 the two files must be manually installed to
 a location where your \TeX\ distribution will find them.
 Assuming that you have a local \TeX\ tree at @/usr/local/share/texmf@,
-this can usually be avhieved by placing the files in the directory
+this can usually be achieved by placing the files in the directory
 @/usr/local/share/texmf/tex/latex/polytable@ and subsequently running
 \input{MkTeXLsrCall}%
 to update the \TeX\ filename database.
@@ -444,7 +444,7 @@ the code in a colored box.
 \subsection{Space-preserving formatting with ``tt'' style}
 
 The \textbf{tt} style is very similar to \textbf{verb} style,
-but applys a tiny bit of formatting to the code and allows
+but applies a tiny bit of formatting to the code and allows
 for more customizabilty:
 \input{ZipTT}%
 By default, some of the Haskell symbols are expressed more
@@ -583,7 +583,7 @@ style works for you, you should use it.
 The following example demonstrates that the visual appearance
 of ``poly'' style is in no way dictated by @lhs2TeX@. There
 are several possibilities to modify the output by means
-of formatting directivs. Here, we try to mimic \textbf{tt}
+of formatting directives. Here, we try to mimic \textbf{tt}
 style by choosing a typewriter font again and using the same
 symbols that are default in \textbf{tt} style.
 \input{ZipPolyTT}%
@@ -602,10 +602,10 @@ not code is thrown away. In addition, \textbf{newcode} does
 a few things extra. It applies formatting directives which
 can here be used as simple macros on the Haskell source level,
 and it generates line pragmas for the Haskell compiler that will
-result in error messages pointing to the original file (befoe
+result in error messages pointing to the original file (before
 processing with @lhs2TeX@). The plain \textbf{code} style
 does not have this extra functionality. Again, \textbf{code}
-is mainly intended for compatiblity with old documents. You
+is mainly intended for compatibility with old documents. You
 should use \textbf{newcode}.
 
 \paragraph{``code'' summary}
@@ -625,7 +625,7 @@ should use \textbf{newcode}.
       formatting directives, 
       copied unchanged, prefixed by a line pragma indicating the
       original source location of the code block
-\item plain text, inline code, specfication code, 
+\item plain text, inline code, specification code, 
       and inline verbatim are discarded
 \end{compactitem}
 
@@ -1071,7 +1071,7 @@ Here is exactly what happens:
 Both latency and separation can be modified by means of associated
 directives:
 \input{SepLatSyntax}%
-It can occasionaly be useful to increase the default settings of 2 and
+It can occasionally be useful to increase the default settings of 2 and
 2 for large code blocks where accidental alignments become very
 likely! It does not really make sense to set latency to a value that
 is strictly smaller than the separation, but you can do so -- there
@@ -1091,7 +1091,7 @@ the \emph{previous} code line is taken into account:
 \begin{compactitem} 
 \item If there is an aligned token at column |n| in the previous
       line, then the indented line will be aligned normally.
-\item Otherwise, the line will be indendet with respect to the
+\item Otherwise, the line will be indented with respect to the
       first aligned token in the previous line to the left of column |n|.
 \end{compactitem}
 
@@ -1122,7 +1122,7 @@ to the \TeX\ control sequence @\hsindent@ is inserted at the
 appropriate position in the output, which gets as argument the
 column difference in the source between the token that is 
 indented, and the base token. In the situation of the
-above exmple, the call is @\hsindent{12}@. The default definition
+above example, the call is @\hsindent{12}@. The default definition
 in @lhs2TeX.sty@
 ignores the argument and inserts a fixed amount of space:
 \input{HsIndent}%
@@ -1204,7 +1204,7 @@ ADD EXAMPLE!!
 \subsection{Saving and restoring column information}
 
 It is possible to share alignment information between different
-code blocks. This can be desireable, especially when one wants
+code blocks. This can be desirable, especially when one wants
 to interleave the definition of a single function with longer
 comments. This feature is implemented on the \TeX\ level 
 (the commands are defined in @lhs2TeX.sty@).
@@ -1338,7 +1338,7 @@ where to insert spaces into the output while in \textbf{math} or
 \textbf{poly} style. 
 
 The disadvantage is that in
-rare cases, this default spacing produces unsatisying results.
+rare cases, this default spacing produces unsatisfying results.
 However, there is also a big advantage: dialects of Haskell can
 be processed by @lhs2TeX@, too. In theory, even completely 
 different languages can be handled. The more difference between
@@ -1677,7 +1677,7 @@ that there is an old version in the working directory. Now,
 usually a local old copy of @lhs2TeX.fmt@ can be removed.
 
 \begin{problem}
-Everytime at the end of processing a file, \LaTeX\ complains.
+Every time at the end of processing a file, \LaTeX\ complains.
 This happens only when using the @\savecolumns@ feature.
 \end{problem}
 This is the result of a name clash between the @amsmath@ package 
