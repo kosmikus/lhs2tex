@@ -70,7 +70,12 @@ Format directives. \NB @%format ( = "(\;"@ is legal.
 >     tex (Qual (m:ms) s)	=  Conid m : tex (Qual ms s)
 >      -- ks, 03.09.2003: was "tex (Qual m s) = Conid m : tex s"; 
 >      -- seems strange though ...
->     subscript f s		=  [f (reverse w), TeX (Text ("_{" ++ reverse v ++ "}" ++ reverse t))]
+>     subscript f s		=  [f (reverse w)
+>                                  , TeX (Text ((if   not (null v)
+>                                                then "_{" ++ reverse v ++ "}" 
+>                                                else ""
+>                                               ) ++ reverse t))
+>                                  ]
 >         where s'		=  reverse s
 >               (t, u)		=  span (== '\'') s'
 >               (v, w)		=  span isDigit u
