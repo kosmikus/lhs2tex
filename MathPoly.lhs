@@ -62,6 +62,7 @@
 >                                                           ++ [("E",error "E column")]
 >                                                    in  (autocols cs' ats,ats)
 >                                       )
+>                               @> return *** when auto (lift (fmap (fmap (filter (isNotSpace . token)))))
 >       --                      @> return *** when auto (lift (fmap (fmap (addSpaces . filter (isNotSpace . token)))))
 >                               @> lift (\((cs,z),ats) -> (cs,(z,ats)))
 >				@> return *** lift (\(z,ats) -> leftIndent fmts auto z known rel ats)
@@ -395,7 +396,8 @@ after a keyword (hence |before b| really means not immediately after).
 >     where
 >     before b []		=  []
 >     before b (t : ts)		=  case token t of
->         u | selfSpacing u	-> t : before False ts
+>         u | not (isNotSpace u)-> t : before b ts
+>           | selfSpacing u	-> t : before False ts
 >         Special c
 >           | c `elem` ",;([{"	-> t : before False ts
 >         Keyword _		-> [ fromToken (TeX sub'space) | b ] ++ t : after ts
@@ -403,7 +405,8 @@ after a keyword (hence |before b| really means not immediately after).
 > 
 >     after []			=  []
 >     after (t : ts)		=  case token t of
->         u | selfSpacing u	-> t : before False ts
+>         u | not (isNotSpace u)-> t : after ts
+>           | selfSpacing u	-> t : before False ts
 >         Special c
 >           | c `elem` ",;([{"	-> fromToken (TeX sub'space) : t : before False ts
 >         Keyword _		-> fromToken (TeX sub'space) : t : after ts
