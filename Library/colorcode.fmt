@@ -1,0 +1,60 @@
+%if False
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% colorcode.fmt
+%
+% code in a colored box for poly style in lhs2TeX
+%
+% Andres Loeh, August 2004, ver 1.0
+%
+% TODO: split in fmt and sty
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%endif
+
+%include polycode.fmt
+
+%if style /= newcode
+
+\RequirePackage{colortbl}
+\RequirePackage{calc}
+
+% The color environment displays each code block in a colored box.
+
+\makeatletter
+\newenvironment{colorhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \tabular{@@{}>{\columncolor{codecolor}}p{\linewidth}@@{}}%
+   \let\\=\@@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+\makeatother
+
+\def\colorcode{\columncolor{codecolor}}
+\definecolor{codecolor}{rgb}{1,1,.667}
+
+\newcommand{\colorhs}{\sethscode{colorhscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+
+\makeatletter
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \tabular{@@{}||p{\linewidth-2\arraycolsep-2\codeframewidth-2pt}||@@{}}%
+   \hline \\[-1.5ex]%
+   \let\endoflinesave=\\
+   \let\\=\@@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \endoflinesave[.5ex]\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+\makeatother
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+%endif

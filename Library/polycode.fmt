@@ -38,7 +38,8 @@
    \advance\leftskip\mathindent
    \(\pboxed}%
   {\endpboxed\)%
-   \parskip=\belowdisplayskip\par\noindent}
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
 
 % The command \sethscode can be used to switch the code formatting
 % behaviour by mapping the hscode environment in the subst directive
@@ -61,7 +62,8 @@
    \advance\leftskip\mathindent
    \(\parray}%
   {\endparray\)%
-   \parskip=\belowdisplayskip\par\noindent}
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
 
 \newcommand{\arrayhs}{\sethscode{arrayhscode}}
 
