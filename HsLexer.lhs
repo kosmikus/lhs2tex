@@ -268,8 +268,15 @@ Breaking a string into string items.
 >     _				-> [String (c : s)]
 >
 > isGap				:: String -> Bool
-> isGap ('\\' : c : _)		=  isSpace c
+> isGap ('\\' : '\n' : _)	=  True
 > isGap _			=  False
+
+ks, 12.01.2004: changed the definition of |isGap| to be |True|
+only if the character following a backslash is a newline. Otherwise,
+the sequence |"\\ "| will be incorrectly treated as a string gap.
+I am not convinced that the special treatment of string gaps is a
+good thing at all. String gaps don't work in newcode style, as it
+is right now.
 
 > splitSpace                    :: String -> [Token]
 > splitSpace []			=  []

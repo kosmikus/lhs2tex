@@ -4,7 +4,7 @@
 \let\origtt=\tt
 \def\tt#1{\origtt}
 \begin{code}
-%if style == "newcode"
+%if style == newcode
 %format ^  =
 %format ^^ = " "
 %else

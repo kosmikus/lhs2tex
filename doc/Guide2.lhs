@@ -1241,8 +1241,10 @@ variable in a @%format@ directive.
 
 In every run of @lhs2TeX@, the version of @lhs2TeX@ is available
 as a numerical value in the predefined variable @version@. Similarly,
-the current style is available as a string in the predefined variable 
-@style@.
+the current style is available as an integer in the predefined 
+variable @style@. There also are integer variables @verb@, @tt@, 
+@math@, @poly@, @code@, and @newcode@ predefined that can be used
+to test @style@.
 
 It is thus possible to write documents in a way that they can be
 processed beautifully in different styles, or to make safe use of

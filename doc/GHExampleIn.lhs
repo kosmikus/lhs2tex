@@ -4,7 +4,7 @@
 \let\small\scriptsize
 \def\tt#1#2{\origtt\makebox[0pt]{\phantom{X}}}
 
->%if style == "newcode"
+>%if style == newcode
 >%format ^
 >%format ^^    = " "
 >%format ti(a) = "{|" a "|}"
