@@ -30,7 +30,11 @@ gleichzeitig Math und Verbatim formatieren zu k"onnen.
 \subsection{Typewriter style}
 %-------------------------------=  --------------------------------------------
 
+ks, 17.07.2003: Added a conditional that only includes this part
+if the selected style is typewriter style.
+
 \begin{code}
+%if style == tt
 %if not latex209
 \DeclareFontFamily{OT1}{cmtex}{}
 \DeclareFontShape{OT1}{cmtex}{m}{n}
@@ -54,13 +58,18 @@ gleichzeitig Math und Verbatim formatieren zu k"onnen.
 %endif
 
 \newcommand{\Sp}{\hskip.33334em\relax}
+%endif
 \end{code}
 
 %-------------------------------=  --------------------------------------------
 \subsection{Math style}
 %-------------------------------=  --------------------------------------------
 
+ks, 17.07.2003: As with the typewriter path, this is now conditionally
+included for math or poly mode.
+
 \begin{code}
+%if anyMath
 %if times
 \usepackage{times}\renewcommand{\ttdefault}{cmtt}
 \SetMathAlphabet{\mathrm}{normal}{OT1}{ptm}{m}{n}
@@ -88,6 +97,44 @@ gleichzeitig Math und Verbatim formatieren zu k"onnen.
 %if not standardsymbols
 \renewcommand{\leq}{\leqslant}
 \renewcommand{\geq}{\geqslant}
+%endif
+%endif
+\end{code}
+
+The following definitions facilitate the saving and restoring
+of column width information as well as the redefinition of
+column specifiers. It only works for @poly@ style.
+
+\begin{code}
+%if style == poly
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@@addto@@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@@addto@@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@@addto@@macro\ColumnHook{\column{#1}{#2}}}
+
+%if standardsymbols
+\newcommand{\@@onelinecommentchars}{\quad--- }
+%else
+\newcommand{\@@onelinecommentchars}{\quad-{}- }
+\newcommand{\@@commentbeginchars}{\enskip\{-}
+\newcommand{\@@commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\@@onelinecommentchars
+  \let\commentbegin=\@@commentbeginchars
+  \let\commentend=\@@commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
 %endif
 \end{code}
 

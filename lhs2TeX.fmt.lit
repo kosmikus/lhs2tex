@@ -192,19 +192,15 @@ etc~(for all lower and upper case greek letters).
 %-------------------------------=  --------------------------------------------
 
 Some things modified due to introduction of @poly@ formattet by ks,
-14.05.2003. Since both formatters share a lot of declarations, both
-declare |mathCommon| to be true. The common parts are then declared
-in a conditional checking |mathCommon|.
+17.07.2003. Since both formatters share a lot of declarations, both
+declare |anyMath| to be true. The common parts are then declared
+in a conditional checking |anyMath|.
 
 \begin{code}
 %elif style == math
-%let autoSpacing	= True
-%subst dummy		= "\cdot "
-%subst inline a  	= "\ensuremath{" a "}"
-%subst comment a	= "\mbox{\qquad-{}- " a "}"
-%subst nested a	= "\mbox{\enskip\{- " a " -\}\enskip}"
-%subst hskip a	= "\hskip" a "em\relax"
 %subst phantom a	= "\phantom{" a "\mbox{}}"
+%subst comment a	= "\mbox{\qquad-{}- " a "}"
+%subst nested a	        = "\mbox{\enskip\{- " a " -\}\enskip}"
 %if array
 %subst code a    	= "\[\begin{array}{@{}lcl}'n\hspace{\lwidth}&\hspace{\cwidth}&\\[-10pt]'n" a "'n\end{array}\]"
 %subst column3 l c r	= "{}" l " & " c " & {" r "}"
@@ -216,27 +212,30 @@ in a conditional checking |mathCommon|.
 %endif
 %subst newline   	= "\\'n"
 %subst blankline 	= "\\[1mm]'n"
-%let mathCommon         = True
+%let anyMath            = True
 %elif style == poly
+%subst comment a	= "\mbox{\onelinecomment " a "}"
+%subst nested a	        = "\mbox{\commentbegin " a " \commentend}"
+%if array
+%subst code a    	= "\['n\begin{parray}\SaveRestoreHook'n" a "\ColumnHook'n\end{parray}'n\]\resethooks'n"
+%else
+%subst code a    	= "\begingroup\par\advance\leftskip\mathindent\('n\begin{pboxed}\SaveRestoreHook'n" a "\ColumnHook'n\end{pboxed}'n\)\par\endgroup\resethooks'n"
+%endif
+%subst column c a       = "\column{" c "}{" a "}'n"
+%subst fromto b e t     = "\fromto{" b "}{" e "}{{}" t "{}}'n"
+%subst left             = "@{}l@{}"
+%subst centered         = "@{}c@{}"
+%subst dummycol         = "@{}l@{}"
+%subst newline   	= "\nextline'n"
+%subst blankline        = "\nextline[\blanklineskip]'n"
+%subst indent n         = "\hsindent{" n "}"
+%let anyMath            = True
+%endif
+%if anyMath
 %let autoSpacing	= True
 %subst dummy		= "\cdot "
 %subst inline a  	= "\ensuremath{" a "}"
-%subst comment a	= "\mbox{\quad--- " a "}"
-%subst nested a	= "\mbox{\enskip\{- " a " -\}\enskip}"
-%subst hskip a	= "\hskip" a "em\relax"
-%subst phantom a	= "\phantom{" a "\mbox{}}"
-%subst code a    	= "\['n\begin{parray}'n" a "\end{parray}'n\]'n"
-%subst column c a       = "\column{" c "}{" a "}'n"
-%subst fromto b e t     = "\fromto{" b "}{" e "}{{}" t "{}}'n"
-%subst left             = "@{}l@{\;}"
-%subst centered         = "@{}c@{\;}"
-%subst dummycol         = "@{}l@{}"
-%subst newline   	= "\nextline'n"
-%subst blankline        = "\nextline[1mm]'n"
-%subst indent n         = "\hsindent{" n "}"
-%let mathCommon         = True
-%endif
-%if mathCommon
+%subst hskip a	        = "\hskip" a "em\relax"
 %if latex209
 %subst numeral a 	= "{\mathrm " a "}"
 %subst keyword a 	= "{\mathbf " a "}"
