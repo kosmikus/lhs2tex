@@ -71,7 +71,7 @@
   {\PT@add@argtomacro\PT@makearg}
 
 \def\PT@add@argtomacro#1#2#3%
-  {\expandafter\expandafter\expandafter\def
+  {\expandafter\expandafter\expandafter\gdef
      \expandafter\expandafter\expandafter\PT@temp
        \expandafter\expandafter\expandafter{\csname #3\endcsname}%
    #1%
@@ -174,7 +174,10 @@
          \PackageWarning{polytable}{Redefining column #2}%
        \fi
        \@namedef{PT@col@#2.type}{#3}%
-       % TODO: allow redefinition of width
+       \expandafter\ifdim#1>0pt
+         \PT@typeout@{Redefining column #2 at #1.}%
+         \@namedef{PT@col@#2.width}{#1}%
+       \fi
       }%
    \@ifundefined{PT@col@#2.max}%
       {\@namedef{PT@col@#2.max}{#1}%
@@ -414,10 +417,16 @@
    \ignorespaces}%
 \newcommand*{\PT@setmaxwidth}[3][\PT@false]% #2 column name, #3 maximum width
   {\@namedef{PT@col@#2.max}{#3}%
-   \expandafter\let\csname PT@col@#2.trusted\endcsname=#1%
+   \ifdim#3=0pt
+     \expandafter\let\csname PT@col@#2.trusted\endcsname=\PT@true%
+   \else
+     \expandafter\let\csname PT@col@#2.trusted\endcsname=#1%
+   \fi
    \column{#2}{}}
 \def\PT@loadtable#1% #1 table id number
-  {\PT@typeout@
+  {%\expandafter\show\csname PT@restore@\romannumeral #1\endcsname
+   %\show\column
+   \PT@typeout@
      {Calling \expandafter\string
                 \csname PT@restore@\romannumeral #1\endcsname.}%
    \let\maxcolumn\PT@setmaxwidth

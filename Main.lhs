@@ -83,8 +83,7 @@ State.
 >				           stacks     :: (Math.Stack, Math.Stack),	-- math: indentation stacks
 >                                          separation :: Int,           -- poly: separation
 >                                          latency    :: Int,           -- poly: latency
->                                          known      :: [Int],         -- poly: known columns
->                                          relevant   :: [(String,Int)] -- poly: relevant columns
+>                                          pstack     :: Poly.Stack     -- poly: indentation stack
 >                                        }
 
 Initial state.
@@ -104,8 +103,7 @@ Initial state.
 >				           stacks     = ([], []),
 >                                          separation = 2,
 >                                          latency    = 1,
->                                          known      = [],
->                                          relevant   = []
+>                                          pstack     = []
 >                                        }
 
 > initState			:: Style -> FilePath -> [FilePath] -> State -> State
@@ -260,11 +258,11 @@ Remove trailing blank line.
 \NB @%align@ also resets the left identation stacks.
 
 Also, the @poly@ directives @%separation@ and @%latency@ reset the corresponding
-lists |known| and |relevant|.
+indentation stack |pstack|.
 
 > format (Directive Separation s )
->                               =  update (\st -> st{separation = read s, known = [], relevant = []})
-> format (Directive Latency s)  =  update (\st -> st{latency = read s, known = [], relevant = []})  
+>                               =  update (\st -> st{separation = read s, pstack = []})
+> format (Directive Latency s)  =  update (\st -> st{latency = read s, pstack = []})  
 
 > format (Directive File s)	=  update (\st -> st{file = withoutSpaces s})
 > format (Directive Options s)	=  update (\st -> st{opts = trim s})
@@ -320,8 +318,8 @@ Printing documents.
 >         select Typewriter st	=  do d <- Typewriter.display (fmts st) s; return (d, st)
 >         select Math st	=  do (d, sts) <- Math.display (fmts st) (isTrue (toggles st) auto) (stacks st) (align st) s
 >				      return (d, st{stacks = sts})
->         select Poly st        =  do (d, known', relevant') <- Poly.display (fmts st) (isTrue (toggles st) auto) (separation st) (latency st) (known st) (relevant st) s
->                                     return (d, st{known = known', relevant = relevant'})
+>         select Poly st        =  do (d, pstack') <- Poly.display (fmts st) (isTrue (toggles st) auto) (separation st) (latency st) (pstack st) s
+>                                     return (d, st{pstack = pstack'})
 >         select CodeOnly st	=  return (Text (trim s), st)
 
 > auto				=  "autoSpacing"
@@ -427,7 +425,7 @@ This situation is unclear to me. It should be clarified.]
 >   where major                 =  numversion `div` 100
 >         minor                 =  numversion `mod` 100
 > numversion                    :: Int
-> numversion                    =  102
+> numversion                    =  103
 
 > programInfo                   :: String
 > programInfo                   =

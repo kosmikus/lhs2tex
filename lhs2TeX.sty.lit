@@ -71,6 +71,7 @@ gleichzeitig Math und Verbatim formatieren zu k"onnen.
 \newlength{\lwidth}\setlength{\lwidth}{4.5cm}
 \newlength{\cwidth}\setlength{\cwidth}{8mm} % 3mm
 
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
 
 %if latex209
 \newcommand{\Conid}[1]{{\mathit #1}}

@@ -70,3 +70,4 @@ Added by ks, 14.05.2003.
 > sub'centered                  =  Sub "centered" []
 > sub'left                      =  Sub "left" []
 > sub'dummycol                  =  Sub "dummycol" []
+> sub'indent n                  =  Sub "indent" [n]

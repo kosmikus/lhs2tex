@@ -42,9 +42,9 @@
 >				@> lift (latexs fmts)
 >				@> lift sub'inline
 
-> display			:: Formats -> Bool -> Int -> Int -> [Int] -> [(String,Int)]
->				-> String -> Either Exc (Doc, [Int], [(String,Int)])
-> display fmts auto sep lat known rel
+> display			:: Formats -> Bool -> Int -> Int -> Stack
+>				-> String -> Either Exc (Doc, Stack)
+> display fmts auto sep lat stack
 >                               =  lift trim
 >				@> lift (expand 0)
 >				@> tokenize
@@ -65,8 +65,8 @@
 >                               @> return *** when auto (lift (fmap (fmap (filter (isNotSpace . token)))))
 >       --                      @> return *** when auto (lift (fmap (fmap (addSpaces . filter (isNotSpace . token)))))
 >                               @> lift (\((cs,z),ats) -> (cs,(z,ats)))
->				@> return *** lift (\(z,ats) -> leftIndent fmts auto z known rel ats)
->				@> lift (\(cs,(d,k,r)) -> (sub'code (columns cs <> d),k,r))
+>                               @> return *** lift (\(z,ats) -> leftIndent fmts auto z stack ats)
+>				@> lift (\(cs,(d,stack)) -> (sub'code (columns cs <> d),stack))
 >
 > columns                       :: [(String,Doc)] -> Doc
 > columns                       =  foldr (<>) Empty 
@@ -295,7 +295,7 @@ legal atom (|string| is applied to it).
 >                               .  fmap findCols 
 >                               $  toks
 >   where
->   findCols                    :: (CToken tok,Show tok) => [Pos tok] -> [Int]
+>   findCols                    :: (CToken tok,Show tok) => [Pos tok] -> [Col]
 >   findCols ts                 =  case {- |trace (show ts)| -} 
 >                                       (break (\t -> not . isNotSpace . token $ t) ts) of
 >       (_, [])                 -> []   -- done
@@ -339,8 +339,10 @@ legal atom (|string| is applied to it).
 >                               -> (cc,us,ind) : splitn (n,i) True oas (v:vs)
 >               | otherwise
 >                               -> (cc,us,ind) : splitn (n,i) False oas (v:vs)
->
->
+
+Die Funktion |isInternal| pr"uft, ob |v| ein spezielles Symbol wie
+@::@, @=@ etc~oder ein Operator wie @++@ ist.
+
 > isInternal			:: (CToken tok) => tok -> Bool
 > isInternal t			=  case token t of
 >     Consym _			-> True
@@ -363,7 +365,7 @@ same amount of space.
 
 > autocols                      :: (CToken tok, Show tok) => [(String,Int)]   -- column info
 >                                               -> [Line [Pos tok]] -- aligned tokens
->                                               -> ([(String,Doc)],[Int]) -- cols+alignment, plus centered columns
+>                                               -> ([(String,Doc)],[Col]) -- cols+alignment, plus centered columns
 > autocols cs ats               = (\(x,y) -> (concat x,concat y)) $ unzip 
 >                               $ zipWith3 (\(cn,n) ml ai -> 
 >                                              if ml <= 2 && ai then ([(cn,sub'centered)
@@ -432,82 +434,94 @@ for example, a macro like @%format mu = "\mu "@.
 \subsubsection{Left indentation}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
+ks, 16.07.2003: Die Bedeutung von |auto| verstehe ich nicht so ganz:
 Auch wenn |auto = False| wird der Stack auf dem laufenden gehalten.
 
-> type Stack			=  [(Col, Doc, [Pos Token])]
->
+ks, 16.07.2003: Ich versuche nun, das folgende relativ einfache
+Einrueckungsverhalten zu implementieren -- aus meiner bisherigen Erfahrung
+mit dem @poly@-style heraus habe ich den Eindruck, als muesste das
+weitgehend genuegen. Ansonsten kann man ja immer noch explizit die
+Einrueckung mit Annotationen formatieren.
+
+> type Stack			=  [(Col, Line [Pos Token])]
+
+Der Stack besteht also aus einer Liste von Paaren aus Spaltennummern
+und Token. Der Kopf der Liste hat die hoechste Spaltennummer, und die
+Spaltennummern in der Liste sind absteigend.
+
+Einrueckung findet immer am Beginn einer neuen Zeile statt, wobei
+die Position des ersten Tokens in der Zeile relevant ist.
+Als erstes wird der Stack adjustiert: alle Elemente, die hoehere
+oder gleiche Spaltennummern haben als die augenblickliche Zeile, 
+werden entfernt.
+
+Dann wird in dem nun obersten Stackelement nach dem letzten Token
+gesucht, das eine Spaltenposition kleiner oder gleich dem aktuellen
+Element hat. Bezueglich diesem wird nun eingerueckt.
+Achtung: Derzeit findet das \emph{immer} statt. Das ist vielleicht
+keine so gute Idee, aber mir fallen nur wenige Situationen ein,
+in denen es von Schaden waere.
+
+Letztlich wird die augenblickliche Zeile auf den Stack gelegt.
+
 > leftIndent                    :: Formats -> Bool 
->                               -> [Int]        -- zentrierte Spalten
->                               -> [Int]        -- bekannte alignment-Spalten
->                               -> [(String,Int)] -- relevante alignment-Spalten
+>                               -> [Col]        -- zentrierte Spalten
+>                               -> Stack        -- augenblicklicher Stack
 >                               -> [Line [Pos Token]]
->                               -> (Doc, [Int], [(String,Int)])
-> leftIndent dict auto z known rel
->				=  loop False known rel 
->   -- set all loop calls to loop False because indentation does not
->   -- work correctly; with False, it should be disabled ...
+>                               -> (Doc, Stack)
+> leftIndent dict auto z stack
+>				=  loop True stack
 >   where
 >   copy d | auto		=  d
 >          | otherwise		=  Empty
 
-Die Funktion |isInternal| pr"uft, ob |v| ein spezielles Symbol wie
-@::@, @=@ etc~oder ein Operator wie @++@ ist.
-
->   loop first known rel []	=  (Empty, known, rel)
->   loop first known rel (l:ls) =  case l of
->       Blank                   -> loop False known rel ls
+>   loop                        :: Bool -> Stack -> [Line [Pos Token]] -> (Doc, Stack)
+>   loop first stack []	        =  (Empty, stack)  -- fertig
+>   loop first stack (l:ls)     =  case l of
+>       Blank                   -> loop True stack ls -- Leerzeilen ignorieren
 >    {- Poly x | trace (show x) False -> undefined -}
->       Poly []                 -> loop False known rel ls
->       Poly (((n,c),ts,ind):rs)
->         | c `elem` z          -> mkFromTo known rel n (n ++ "E") c ts first rs ls
->       Poly [((n,c),ts,ind)]   -> mkFromTo known rel n "E" c ts first [] ls
->       Poly (((n,c),ts,ind):rs@(((nn,_),_,_):_))
->                               -> mkFromTo known rel n nn  c ts first rs ls 
+>       Poly []                 -> loop True stack ls -- naechste Zeile
+>       Poly (((n,c),[],ind):rs)
+>         | first               -> loop True stack (Poly rs:ls) -- ignoriere leere Spalten zu Beginn
+>       Poly p@(((n,c),ts,ind):rs)
+>         | first               -> -- ueberpruefe Einrueckung:
+>                                  let -- Schritt 1: Stack verkleinern
+>                                      rstack  = dropWhile (\(rc,_) -> rc >= c) stack
+>                                      -- Schritt 2: relevante Spalte finden
+>                                      (rn,rc) = findrel (n,c) rstack
+>                                      -- Schritt 3: Zeile auf Stack legen
+>                                      fstack  = (c,l) : rstack
+>                                  in mkFromTo fstack rn n rc [fromToken $ TeX (indent (rn,rc) (n,c))] p ls
+>                                              
 >
->   mkFromTo known rel bn en c ts ind rs ls
->     | not ind                 =  (sub'fromto bn en (latexs dict ts)
+>         | c `elem` z          -> mkFromTo stack n (n ++ "E") c ts rs ls
+>                                                     -- zentrierte Spalten gesondert behandeln
+>       Poly [((n,c),ts,ind)]   -> mkFromTo stack n "E" c ts [] ls
+>                                                     -- letzte Spalten
+>       Poly (((n,c),ts,ind):rs@(((nn,_),_,_):_))
+>                               -> mkFromTo stack n nn  c ts rs ls 
+>
+>   mkFromTo stack bn en c ts rs ls
+>     | bn == en                =  -- dies kann am Beginn einer Zeile durch Einrueckung passieren
+>                                  (rest,stack')
+>     | otherwise               =  (sub'fromto bn en (latexs dict ts)
 >                                     <> (if null rs then sep ls else Empty) <> rest
->                                  ,known',rel'
->                                  )
->     | otherwise               =  (let nc = findrel c rel
->                                   in  indent nc (bn,c) <> sub'fromto bn en (latexs dict ts)
->                                     <> (if null rs then sep ls else Empty) <> rest
->                                  ,known',rel'
+>                                  ,stack'
 >                                  )
 >     where
->       (rest,known',rel')      =  loop False  -- not first of a line;
->                                              -- primitive indentation hack
->                                       (addknown c known)
->                                       (addrel (bn,c) ts rel)
+>       (rest,stack')           =  loop False  -- not first of a line
+>                                       stack
 >                                       (Poly rs : ls)
 >
 >
->   addknown                    :: Int -> [Int] -> [Int]
->   addknown c cs | c `elem` cs =  cs
->                 | otherwise   =  insert c cs
->
->   addrel                      :: (String,Int) -> [Pos Token] -> [(String,Int)] -> [(String,Int)]
->   addrel (n,c) ts []          =  [(n,c)]
->   addrel _ [] rel             =  rel
->   addrel (n,c) ts ((n',c'):rel)
->     | c' < c                  =  (n',c') : addrel (n,c) ts rel
->     | otherwise               =  let lts = last ts
->                                  in  if not (isNotSpace (token lts)) then
->                                         (n,c) : updrel (col lts) ((n',c'):rel)
->                                      else
->                                         (n,c) : updrel (col lts + length (string (token lts)))
->                                                        ((n',c'):rel) -- probably wrong!
->  
->   updrel                      :: Int -> [(String,Int)] -> [(String,Int)]
->   updrel c []                 =  []
->   updrel c ((n,c'):rel)
->     | c' < c                  =  updrel c rel
->     | otherwise               =  (n,c):rel
->
->   findrel                     :: Int -> [(String,Int)] -> (String,Int)
->   findrel c rel               =  case break (\(n,c') -> c >= c') rel of
->                                    (_,[])     -> ("B",0)
->                                    (_,nc:xs)  -> nc
+>   findrel                     :: (String,Col) -> Stack -> (String,Col)
+>   findrel (n,c) []            =  (n,c)
+>   findrel (n,c) ((_,Blank):r) =  findrel (n,c) r  -- should never happen
+>   findrel (n,c) ((_,Poly t):_)
+>                               =  case break (\((n',c'),_,_) -> c' > c) t of
+>                                    ([],_)     -> error "findrel: the impossible happened"
+>                                    (pre,_)    -> let ((rn,rc),_,_) = last pre
+>                                                  in  (rn,rc)
 >
 >   sep []			=  Empty
 >   sep (Blank : _ )		=  sub'blankline
@@ -515,13 +529,8 @@ Die Funktion |isInternal| pr"uft, ob |v| ein spezielles Symbol wie
 >
 >   indent                      :: (String,Int) -> (String,Int) -> Doc
 >   indent (n,c) (n',c')
->     | c /= c'                 =  sub'fromto n n' (sub'hskip (Text "1.0"))
+>     | c /= c'                 =  (sub'indent (Text (show (c' - c))))
 >     | otherwise               =  Empty
->   {-
->   indent _ _                  =  Empty  -- does not work
->   indent (n,c) (n',c')        =  sub'fromto n n' (sub'hskip (Text em))
->     where em                  =  showFFloat (Just 2) (0.5 * fromIntegral (c' - c) :: Double) ""
->   -}
 
 M"ussen |v| und |t| zueinander passen?
 %
