@@ -72,6 +72,8 @@
 
 State.
 
+> type CondInfo                 =  (FilePath, LineNo, Bool, Bool)
+
 > data State			=  State { style      :: Style,
 >                                          verbose    :: Bool,
 >                                          searchpath :: [FilePath],
@@ -84,7 +86,7 @@ State.
 >				           subst      :: Substs,
 >				           stack      :: [Formats],	-- for grouping
 >				           toggles    :: Toggles,	-- @%let@ defined toggles
->					   conds      :: [Bool],	-- for conditional directives
+>					   conds      :: [CondInfo],	-- for conditional directives
 >					   align      :: Maybe Int,	-- math: internal alignment column
 >				           stacks     :: (Math.Stack, Math.Stack),	-- math: indentation stacks
 >                                          separation :: Int,           -- poly: separation
@@ -134,7 +136,8 @@ Initial state.
 >                                     expandedpath <- expandPath (searchpath flags)
 >				      toIO (do store (initState s file expandedpath flags)
 >					       formats (map (No 0) dirs) `handle` abort
->				               formatStr str)
+>				               formatStr (addEndEOF str))
+>   where   addEndEOF           =  (++"%EOF\n") . unlines . lines
 
 > input				:: [String] -> IO (String, FilePath)
 > input []			=  do s <- getContents; return (s, "<stdin>")
@@ -220,11 +223,12 @@ We abort immediately if an error has occured.
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
 > formats			:: [Numbered Class] -> Formatter
-> formats []			=  return ()
+> formats []                    =  return ()
 > formats (No n  (Directive d s) : ts)
 >     | conditional d		=  do update (\st -> st{lineno = n})
 >				      st <- fetch
->				      directive d s (conds st) (toggles st) ts
+>				      directive d s (file st,n) 
+>                                                   (conds st) (toggles st) ts
 > formats (No n t : ts)		=  do update (\st -> st{lineno = n})
 >				      format t
 >				      formats ts
@@ -330,8 +334,8 @@ ks, 11.09.03: added exception handling for unbalanced grouping
 
 \NB @%align@ also resets the left identation stacks.
 
-Also, the @poly@ directives @%separation@ and @%latency@ reset the corresponding
-indentation stack |pstack|.
+Also, the @poly@ directives @%separation@ and @%latency@ reset 
+the corresponding indentation stack |pstack|.
 
 > format (Directive Separation s )
 >                               =  update (\st -> st{separation = read s, pstack = []})
@@ -340,6 +344,7 @@ indentation stack |pstack|.
 > format (Directive File s)	=  update (\st -> st{file = withoutSpaces s})
 > format (Directive Options s)	=  update (\st -> st{opts = trim s})
 >     where trim		=  dropWhile isSpace .> reverse .> dropWhile isSpace .> reverse
+
 > format (Error exc)		=  raise exc
 
 Printing documents.
@@ -424,22 +429,35 @@ to \emph{two} entries; if @%elif@ is not used the second entry is
 always |True|, otherwise it holds the negation of all previous
 conditions of the current @%if@-chain.
 
-> directive			:: Directive -> String -> [Bool] -> Toggles
+ks, 16.08.2004: At the end of the input, we might want to check for unbalanced if's or
+groups.
+
+> directive			:: Directive -> String 
+>                               -> (FilePath,LineNo) -> [CondInfo] -> Toggles
 >				-> [Numbered Class] -> Formatter
-> directive d s stack togs ts	=  dir d s stack
+> directive d s (f,l) stack togs ts
+>                               =  dir d s stack
 >   where
 >   dir If s bs			=  do b <- fromEither (eval togs s)
->				      skipOrFormat (bool b : True : bs) ts
->   dir Elif s (b2 : b1 : bs)	=  do b <- fromEither (eval togs s)
->				      skipOrFormat (bool b : (not b2 && b1) : bs) ts
->   dir Else _ (b2 : b1 : bs)	=  skipOrFormat ((not b2 && b1) : True : bs) ts
->   dir Endif _ (b2 : b1 : bs)	=  skipOrFormat bs ts
+>				      skipOrFormat ((f, l, bool b, True) : bs) ts
+>   dir Elif s ((f,l,b2,b1):bs) =  do b <- fromEither (eval togs s)
+>				      skipOrFormat ((f, l, bool b, not b2 && b1) : bs) ts
+>   dir Else _ ((f,l,b2,b1):bs) =  skipOrFormat ((f, l, not b2 && b1, True) : bs) ts
+>   dir Endif _ ((f,l,b2,b1):bs)=  skipOrFormat bs ts
+>   dir EOF _ []                =  return ()  -- nothing left to do
+>   dir EOF s bs                =  raise (init $ unlines (map unBalancedIf bs), s)
 >   dir d s _			=  raise ("spurious %" ++ decode d, s)
 
-> skipOrFormat			:: [Bool] -> [Numbered Class] -> Formatter
-> skipOrFormat stack ts		=  do update (\st -> st{conds = stack})
->				      if and stack then formats ts
->				                   else skip ts
+> skipOrFormat			:: [CondInfo] -> [Numbered Class] -> Formatter
+> skipOrFormat stack ts		=  do  update (\st -> st{conds = stack})
+>				       if andS stack  then formats ts
+>				                      else skip ts
+
+> andS                          :: [CondInfo] -> Bool
+> andS                          =  and . map (\(_,_,x,y) -> x && y)
+
+> unBalancedIf                  :: CondInfo -> String
+> unBalancedIf (f,l,_,_)        =  "%if from " ++ f ++ " line " ++ show l ++ " not closed"
 
 > skip				:: [Numbered Class] -> Formatter
 > skip []			=  return ()

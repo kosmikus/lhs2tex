@@ -35,11 +35,12 @@
 >				   deriving (Eq, Show)
 
 \NB |Hs|, |Haskell|, |Hide|, and |Ignore| are obsolete.
+ks, 16.08.2004: added EOF.
 
 >
 > data Directive		=  Format | Include | Let | File | Options
 >				|  Align | Separation | Latency | Begin | End | Subst
->				|  If | Elif | Else | Endif
+>				|  If | Elif | Else | Endif | EOF
 >				   deriving (Eq, Show)
 
 > data Numbered a		=  No !LineNo a
@@ -54,6 +55,7 @@
 > conditional Elif		=  True
 > conditional Else		=  True
 > conditional Endif		=  True
+> conditional EOF               =  True
 > conditional _			=  False
 
 Encoding and decoding of commands, environments, and directives.
@@ -82,7 +84,8 @@ Encoding and decoding of commands, environments, and directives.
 >				     ("let", Let), ("file", File),
 >				     ("options", Options), ("align", Align),
 >                                    ("separation", Separation), ("latency", Latency),
->				     ("{", Begin), ("}", End), ("subst", Subst) ]
+>				     ("{", Begin), ("}", End), ("subst", Subst),
+>                                    ("EOF",EOF) ]
 >
 > encode			:: (Representation a) => String -> Maybe a
 > encode s			=  FM.lookup s (FM.fromList representation)
