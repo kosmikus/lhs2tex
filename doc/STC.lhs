@@ -1,3 +1,4 @@
+
 \documentclass[10pt]{scrartcl}
 
 % save linebreak; see below
@@ -34,11 +35,12 @@
 %latency 2
 
 \let\origcolor=\color
+\definecolor{hcolor}{rgb}{1,0,0}
 \newcommand{\dep}[1]{{\origcolor{red}#1}}
 \def\swgt#1{\switch[\value{step}>#1]}%
 \def\ro#1{\ifthenelse{\value{step}=#1}{\origcolor{red}}{}}%
 
-\defaultitem{\ding{217}}{}{}{}
+\setdefaultitem{\ding{217}}{}{}{}
 
 \usepackage[display]{texpower}
 
@@ -180,7 +182,7 @@
 \author{{\color{section2}Andres L\"oh}\\
   Universiteit Utrecht\\
   \color{section2}\texttt{andres@@cs.uu.nl}}%
-\date{October 30, 2003}
+\date{September 8, 2004}
 \maketitle
 
 %%%
@@ -192,7 +194,7 @@
 \item @lhs2TeX@ is a preprocessor
   \begin{compactitem}
   \item Input: a literate Haskell source file
-  \item Output: a formatted file, depending on mode of operation
+  \item Output: a formatted file, depending on style of operation
   \end{compactitem}
 \item Possible input:
 \input{HelloWorldInput}
@@ -207,7 +209,7 @@
 \item @lhs2TeX@ is a preprocessor
   \begin{compactitem}
   \item Input: a literate Haskell source file
-  \item Output: a formatted file, depending on mode of operation
+  \item Output: a formatted file, depending on selected style
   \end{compactitem}
 \item Possible output:
 \begin{colorsurround}
@@ -220,10 +222,10 @@
 %%%
 %%%
 
-\slide{Modes of operation}
+\slide{Styles}
 
 \begin{compactitem}
-\item @lhs2TeX@ has several modes with different behaviour:
+\item @lhs2TeX@ has several styles with different behaviour:
   \begin{compactitem}
   \item \textbf{verb} (verbatim): format code completely verbatim
   \item \textbf{tt} (typewriter): format code verbatim, but allow special
@@ -241,18 +243,18 @@
 %%%
 %%%
 
-\slide{Example of ``verb'' mode}
+\slide{Example of ``verb'' style}
 
 \input{Zip}
 
 %%%
 %%%
 
-\slide{Example of ``tt'' mode}
+\slide{Example of ``tt'' style}
 
 \input{ZipTT}
 
-Differences from \textbf{verb} mode:
+Differences from \textbf{verb} style:
 \begin{compactitem}
 \item Some of Haskells symbols can be expressed more naturally.
 \item Keywords can be highlighted.
@@ -272,7 +274,7 @@ Differences from \textbf{verb} mode:
 %%%
 %%%
 
-\slide{Example of ``math'' mode}
+\slide{Example of ``math'' style}
 
 \input{ZipMath}
 
@@ -283,7 +285,7 @@ Differences from \textbf{verb} mode:
 %%%
 %%%
 
-\slide{Example of ``poly'' mode}
+\slide{Example of ``poly'' style}
 
 \input{ZipPoly}
 \begin{compactitem}
@@ -301,8 +303,8 @@ Differences from \textbf{verb} mode:
 \item The program is based on @smugweb@ and @pphs@, both of which are
   no longer available and I do not know.
 \item I picked up development in 2002, and added
-  the \textbf{poly} and \textbf{newcode} modes.
-%\item Future: I consider the \textbf{tt} and \textbf{math} modes as deprecated,
+  the \textbf{poly} and \textbf{newcode} styles.
+%\item Future: I consider the \textbf{tt} and \textbf{math} styles as deprecated,
 %  I want to add more language independence (customizable lexer) and 
 %  extend/improve the formatting language.
 \end{compactitem}
@@ -555,19 +557,19 @@ The right-hand sides of formatting directives are processed as follows:
 %%%
 %%%
 
-\slide{Formatting across the modes}
+\slide{Formatting in the various styles}
 
 \begin{compactitem}
 \item Formatting directives are applied in \textbf{math}, \textbf{poly}, and
-      \text{newcode} modes. 
-\item In \textbf{tt} mode, only non-parametrized apply.
-\item In \textbf{verb} and \textbf{code} modes, formatting directives are ignored.
+      \textbf{newcode} styles. 
+\item In \textbf{tt} style, only non-parametrized apply.
+\item In \textbf{verb} and \textbf{code} styles, formatting directives are ignored.
 \end{compactitem}
 
 %%%
 %%%
 
-\slide{Alignment in ``poly'' mode}
+\slide{Alignment in ``poly'' style}
 
 \begin{compactitem}
 \item Alignment is computed per code block.
@@ -624,6 +626,7 @@ The right-hand sides of formatting directives are processed as follows:
 %%%
 %%%
 
+%if False
 \slide{Tweaking the alignment behaviour}
 
 \begin{compactitem}
@@ -640,12 +643,12 @@ The right-hand sides of formatting directives are processed as follows:
 \end{compactitem}
 
 \input{SepLatSyntax}
-
+%endif
 
 %%%
 %%%
 
-\slide{Indentation in ``poly'' mode}
+\slide{Indentation in ``poly'' style}
 
 \begin{compactitem} 
 \item If a line is indented in column |n|, then
@@ -661,7 +664,7 @@ the \textbf{previous} code line is taken into account:
 %%%
 %%%
 
-\slide{Indentation in ``poly'' mode -- example}
+\slide{Indentation in ``poly'' style -- example}
 
 \begin{compactitem}
 \item Input:
@@ -675,7 +678,7 @@ the \textbf{previous} code line is taken into account:
 %%%
 %%%
 
-\slide{Indentation in ``poly'' mode -- example}
+\slide{Indentation in ``poly'' style -- example}
 
 \begin{compactitem}
 \item Input:
@@ -691,7 +694,7 @@ the \textbf{previous} code line is taken into account:
 %%%
 %%%
 
-\slide{Indentation in ``poly'' mode -- example}
+\slide{Indentation in ``poly'' style -- example}
 
 \begin{compactitem}
 \item Input:
@@ -768,6 +771,20 @@ the \textbf{previous} code line is taken into account:
 
 \input{AGExample}
 
+%%%
+%%%
+
+\slide{Calculation example -- input}
+
+\vspace*{-\baselineskip}
+
+\input{CalcExampleIn}
+
+%%%
+
+\slide{Calculation example -- output}
+
+\input{CalcExample}
 
 %%%
 %%%
@@ -784,7 +801,7 @@ the \textbf{previous} code line is taken into account:
 \item Variables can also be defined by using the @-l@ or @-s@
   command line options.
 \item @lhs2TeX@'s version is available as predefined @version@ variable,
-  and the current mode is available as predefined @style@ variable.
+  and the current style is available as predefined @style@ variable.
 \end{compactitem}
 
 %%%
@@ -816,7 +833,7 @@ the \textbf{previous} code line is taken into account:
       and @%endif@ directives, \textbf{or:}
 \item If Haskell code has to be annotated for @lhs2TeX@ to produce
       the right output, define different formatting directives for
-      the annotation depending on mode (\textbf{poly} or \textbf{newcode}).
+      the annotation depending on style (\textbf{poly} or \textbf{newcode}).
       Both code and \TeX\ file can then still be produced from a
       common source!
 \end{compactitem}
@@ -847,7 +864,7 @@ the \textbf{previous} code line is taken into account:
       \input{InteractiveIn}
 \item Output:
       \begin{colorsurround}
-      \input{Interactive}
+      \input{InteractiveGhci}
       \end{colorsurround}
 \end{compactitem}
 
@@ -858,14 +875,13 @@ the \textbf{previous} code line is taken into account:
 
 \begin{compactitem}
 \item @lhs2TeX@ is written in Haskell
-\item \textbf{poly} mode makes use of a specifically written \LaTeX\ package
+\item \textbf{poly} style makes use of a specifically written \LaTeX\ package
       @polytable@, which is included in the distribution
 \item License is {\smaller GPL}.
 \item There has not been an official release for a long time, so get the
-      most recent version from {\smaller CVS} (or subversion soon).
-\item It does work on Unix-alikes. It should work on Windows/Cygwin, and
-      on native Windows with minor modifications -- help welcome.
-\item It has been used for several recent papers and seems to be quite stable.
+      most recent version from the Subversion repository.
+\item It is reported to work on Linux, Mac OS X, and Windows.
+\item It has been used for several papers and seems to be quite stable.
 \end{compactitem}
 
 %%%
@@ -897,7 +913,7 @@ that it is urgent!
 %%%
 %%%
 
-\slide{@poly@-mode is customizable}
+\slide{@poly@-style is customizable}
 
 \input{ZipPolyTT}
 

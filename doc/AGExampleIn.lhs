@@ -1,7 +1,9 @@
 %include verbatim.fmt
 \begingroup
 \let\origtt=\tt
-%\let\small\scriptsize
+%if stc
+\let\small\scriptsize
+%endif
 \def\tt#1#2{\origtt\makebox[0pt]{\phantom{X}}}
 
 >%format ^  = " "

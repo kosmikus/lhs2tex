@@ -4,7 +4,7 @@
 %
 % code in a colored box for poly style in lhs2TeX
 %
-% Andres Loeh, August 2004, ver 1.4
+% Andres Loeh, September 2004, ver 1.5
 %
 % TODO: split in fmt and sty
 %       fix spacing behaviour for other environments
@@ -23,6 +23,7 @@
 \makeatletter
 \newenvironment{colorhscode}%
   {{\parskip=0pt\parindent=0pt\par\vskip\abovedisplayskip\noindent}%
+   \hscodestyle
    \tabular{@@{}>{\columncolor{codecolor}}p{\linewidth}@@{}}%
    \let\\=\@@normalcr
    \(\pboxed}%
@@ -33,6 +34,7 @@
 
 \newenvironment{barhscode}%
   {\hsnewpar\abovedisplayskip
+   \hscodestyle
    \arrayrulecolor{codecolor}%
    \arrayrulewidth=\coderulewidth
    \tabular{||p{\linewidth-\arrayrulewidth-\tabcolsep}@@{}}%

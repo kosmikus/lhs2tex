@@ -784,7 +784,7 @@ if test -n "$ac_init_help"; then
 Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --disable-polytable     do not install TeX package
+  --disable-polytable     do not install polytable TeX package
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -2030,15 +2030,7 @@ echo "${ECHO_T}no" >&6
 fi
 
 
-# texmf tree (for polytable)
-# Check whether --enable-polytable or --disable-polytable was given.
-if test "${enable_polytable+set}" = set; then
-  enableval="$enable_polytable"
-  POLYTABLE_INSTALL=$enableval
-else
-  POLYTABLE_INSTALL=yes
-fi;
-if test "z$POLYTABLE_INSTALL" = "zyes"; then
+# texmf tree
 
 
 # Check whether --with-texmf or --without-texmf was given.
@@ -2151,6 +2143,14 @@ echo "${ECHO_T}no" >&6
 fi
 
 
+# Check whether --enable-polytable or --disable-polytable was given.
+if test "${enable_polytable+set}" = set; then
+  enableval="$enable_polytable"
+  POLYTABLE_INSTALL=$enableval
+else
+  POLYTABLE_INSTALL=yes
+fi;
+if test "z$POLYTABLE_INSTALL" = "zyes"; then
 
 echo "$as_me:$LINENO: checking for the polytable package" >&5
 echo $ECHO_N "checking for the polytable package... $ECHO_C" >&6
@@ -2176,7 +2176,7 @@ echo $ECHO_N "checking whether polytable needs to be installed... $ECHO_C" >&6
   POLYTABLE_INSTALL=no
   if test -n $POLYTABLE; then
     if ( IFS=".";
-      a="$POLYTABLE_VERSION";  b="0.7.2";
+      a="$POLYTABLE_VERSION";  b="0.7.4";
       while test -n "$a$b"
       do
               set -- $a;  h1="$1";  shift 2>/dev/null;  a="$*"

@@ -4,7 +4,7 @@
 %
 % better code environment for poly style in lhs2TeX
 %
-% Andres Loeh, August 2004, ver 1.3
+% Andres Loeh, September 2004, ver 1.4
 %
 % TODO: split in fmt and sty
 %       use \[ \] in arrayhs (fleqn problem)
@@ -39,10 +39,15 @@
 \newcommand{\hsnewpar}[1]%
   {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
 
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
 \makeatletter
 \newenvironment{plainhscode}%
   {\hsnewpar\abovedisplayskip
    \advance\leftskip\mathindent
+   \hscodestyle
    \let\\=\@@normalcr
    \(\pboxed}%
   {\endpboxed\)%
@@ -69,6 +74,7 @@
 \newenvironment{arrayhscode}%
   {\hsnewpar\abovedisplayskip
    \advance\leftskip\mathindent
+   \hscodestyle
    \let\\=\@@normalcr
    \(\parray}%
   {\endparray\)%
@@ -93,6 +99,7 @@
 \makeatletter
 \newenvironment{framedhscode}%
   {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
    \arrayrulewidth=\codeframewidth
    \tabular{@@{}||p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}||@@{}}%
    \hline\framedhslinecorrect\\{-1.5ex}%

@@ -4,7 +4,10 @@ include ../config.mk
 LHS2TEX = ../lhs2TeX
 
 SNIPPETSGD  = $(shell $(GREP) "\\\\input{" Guide2.lhs | $(SED) "s/^.*input{\(.*\)}.*$$/\1.tex/")
-# SNIPPETSSTC = $(shell $(GREP) "\\\\input{" STC.lhs | $(SED) "s/^.*input{\(.*\)}.*$$/\1.tex/")
+ifdef STC
+SNIPPETSSTC = $(shell $(GREP) "\\\\input{" STC.lhs | $(SED) "s/^.*input{\(.*\)}.*$$/\1.tex/")
+STCFLAGS="--let=stc=True"
+endif
 
 # default target
 all : Guide2.pdf
@@ -44,7 +47,7 @@ STC.tex : STC.lhs $(SNIPPETSSTC)
 %.tex : %.lhs
 	MODE=`cat $< \
 		| $(GREP) "^%include" \
-		| head -1 \
+		| head -n 1 \
 		| $(SED) -e "s/^%include \(.*\)\.fmt/\1/" \
 		| $(SED) -e "s/verbatim/verb/" \
 			 -e "s/stupid/math/" \
@@ -52,7 +55,7 @@ STC.tex : STC.lhs $(SNIPPETSSTC)
 		      	 -e "s/polytt/poly/" \
 		      	 -e "s/typewriter/tt/"` && \
 	echo $${MODE} && \
-	$(LHS2TEX) --$${MODE} $< > $@
+	$(LHS2TEX) --$${MODE} $(STCFLAGS) $< > $@
 
 .PHONY : all srcdist clean
 clean :

@@ -143,16 +143,19 @@ install : bin
 	$(INSTALL) -m 755 lhs2TeX $(DESTDIR)$(bindir)
 	$(MKINSTDIR) $(DESTDIR)$(stydir)
 	$(INSTALL) -m 644 lhs2TeX.sty lhs2TeX.fmt $(DESTDIR)$(stydir)
+	$(INSTALL) -m 644 Library/*.fmt $(DESTDIR)$(stydir)
 # TODO: install documentation
 ifeq ($(INSTALL_POLYTABLE),yes)
 # install polytable package
 	$(MKINSTDIR) $(DESTDIR)$(polydir)
 	$(INSTALL) -m 644 polytable/*.sty $(DESTDIR)$(polydir)
+endif
+	$(MKINSTDIR) $(DESTDIR)$(texdir)
+	$(INSTALL) -m 644 Library/*.sty $(DESTDIR)$(texdir)
 ifndef DESTDIR
 	$(MKTEXLSR)
 else
 	echo "Please update the TeX filename database."
-endif
 endif
 
 srcdist : doc
@@ -162,6 +165,7 @@ srcdist : doc
 	$(MKINSTDIR) $(DISTDIR)/polytable
 	$(MKINSTDIR) $(DISTDIR)/Testsuite
 	$(MKINSTDIR) $(DISTDIR)/Examples
+	$(MKINSTDIR) $(DISTDIR)/Library
 	$(INSTALL) -m 644 $(psources) Version.lhs.in $(snipssrc) $(DISTDIR)
 	$(INSTALL) -m 644 lhs2TeX.fmt.lit lhs2TeX.sty.lit $(DISTDIR)
 	$(INSTALL) -m 644 Makefile common.mk config.mk.in $(DISTDIR)
@@ -175,6 +179,7 @@ srcdist : doc
 	$(INSTALL) -m 644 Testsuite/*.{lhs,snip} Makefile $(DISTDIR)/Testsuite
 	$(INSTALL) -m 644 Examples/*.lhs $(DISTDIR)/Examples
 	$(INSTALL) -m 755 Examples/lhs2TeXpre $(DISTDIR)/Examples
+	$(INSTALL) -m 644 Library/*.{fmt,sty} $(DISTDIR)/Library
 	tar cvjf $(DISTDIR).tar.bz2 $(DISTDIR)
 	chmod 644 $(DISTDIR).tar.bz2
 

@@ -8,7 +8,7 @@
 %% 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{polytable}%
-   [2004/02/27 v0.7.2 `polytable' package (Andres Loeh)]
+   [2004/08/10 v0.7.4 `polytable' package (Andres Loeh)]
 \let\PT@original@And\And
 \RequirePackage{lazylist}
 \let\PT@And\And
@@ -187,6 +187,7 @@
    \let\nextline=\PT@resetandcr
    \expandafter\PT@begin\expandafter{\PT@temp}%
    \the\toks@
+   \PT@fill% new in 0.7.3: balance the last line
    \PT@end
    \endgroup
    \PT@typeout@{Finished.}%
@@ -273,7 +274,9 @@
        \expandafter\expandafter\expandafter
          {\csname PT@col@#1.type\endcsname}%
    \setbox0=\hbox{%
-     \expandafter\@mkpream\expandafter{\PT@currentpreamble}%
+     {\expandafter\@mkpream\expandafter{\PT@currentpreamble}%
+     \@addtopreamble\@empty}%
+     \let\CT@row@color\relax% colortbl compatibility
      \def\@sharp{\strut #3}%
      %\show\@preamble
      \@preamble}%
@@ -363,6 +366,21 @@
    \fi
    \PT@typeout@{Next line ...}%
    \PT@resetcolumn\\[#1]}
+\newcommand{\PT@fill}%
+  {\ifx\PT@currentcol\PT@lastcol
+   \else
+     \ifx\PT@currentcol\PT@nullcol
+     \else
+       \edef\PT@currentcol@{\StripColumn\PT@currentcol}%
+       \edef\PT@lastcol@
+         {\StripColumn\PT@lastcol}%
+       \PT@typeout@{adding implicit fromto from \PT@currentcol@
+                                    \space to \PT@lastcol@}%
+       \expandafter\expandafter\expandafter\fromto
+         \expandafter\expandafter\expandafter{%
+           \expandafter\expandafter\expandafter\PT@currentcol@
+             \expandafter}\expandafter{\PT@lastcol@}{}%
+   \fi\fi}
 \def\PT@multicolumn #1#2#3%
   {%\omit\PT@disableomitonce
    % skip to current position
@@ -419,7 +437,9 @@
    \advance\PT@colwidth by -\expandafter\csname\PT@currentcol.max\endcsname
    \leavevmode
    \hb@xt@\PT@colwidth{%
-     \expandafter\@mkpream\expandafter{@{}l@{}}%
+     {\expandafter\@mkpream\expandafter{@{}l@{}}%
+     \@addtopreamble\@empty}%
+     \let\CT@row@color\relax% colortbl compatibility
      \let\@sharp\empty%
      %\show\@preamble
      \@preamble}%
@@ -446,7 +466,9 @@
    %  \PT@addbeginmacro\PT@currentpreamble{@{}}%
    %\fi
    \hb@xt@\PT@colwidth{%
-     \expandafter\@mkpream\expandafter{\PT@currentpreamble}%
+     {\expandafter\@mkpream\expandafter{\PT@currentpreamble}%
+     \@addtopreamble\@empty}%
+     \let\CT@row@color\relax% colortbl compatibility
      \def\@sharp{\strut #3}%
      %\show\@preamble
      \@preamble}%

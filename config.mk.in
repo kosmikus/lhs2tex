@@ -36,6 +36,7 @@ SORT            = @SORT@
 UNIQ            = @UNIQ@
 
 polydir         = @texmf@/tex/latex/polytable
+texdir          = @texmf@/tex/latex/lhs2tex
 INSTALL_POLYTABLE = @POLYTABLE_INSTALL@
 MKTEXLSR        = @MKTEXLSR@
 
