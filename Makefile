@@ -3,7 +3,7 @@ include config.mk
 
 psources        := Main.lhs TeXCommands.lhs TeXParser.lhs \
 		   Typewriter.lhs Math.lhs MathPoly.lhs \
-                   NewCode.lhs \
+                   MathCommon.lhs NewCode.lhs \
 		   Directives.lhs HsLexer.lhs FileNameUtils.lhs \
 		   Parser.lhs FiniteMap.lhs Auxiliaries.lhs \
 		   StateT.lhs Document.lhs Verbatim.lhs Value.lhs

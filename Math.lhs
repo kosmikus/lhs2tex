@@ -4,7 +4,7 @@
 
 %if codeOnly || showModuleHeader
 
-> module Math			(  module Math  )
+> module Math			(  module Math, substitute, number  )
 > where
 >
 > import Prelude hiding ( lines )
@@ -14,6 +14,7 @@
 >
 > import Verbatim ( expand, trim )
 > import Typewriter ( latex )
+> import MathCommon
 > import Document
 > import Directives
 > import HsLexer
@@ -58,75 +59,12 @@
 >				@> lift (leftIndent fmts auto sts)
 >				@> lift sub'code *** return
 
-> when True f			=  f
-> when False f			=  return
-
-% - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
-\subsubsection{Adding positional information}
-% - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
-
-> type Row			=  Int
-> type Col			=  Int
->
-> data Pos a			=  Pos {row :: !Row, col :: !Col, ann :: a}
->				   deriving (Show)
-
-%{
-%format r1
-%format r2
-%format c1
-%format c2
-
-> instance Eq (Pos a) where
->     Pos r1 c1 _ == Pos r2 c2 _=  r1 == r2 && c1 == c2
-> instance Ord (Pos a) where
->     Pos r1 c1 _ <= Pos r2 c2 _=  (r1, c1) <= (r2, c2)
-
-%}
-
-> instance (CToken tok) => CToken (Pos tok) where
->     catCode (Pos _ _ t)	=  catCode t
->     token (Pos _ _ t)		=  token t
->     inherit (Pos r c t') t	=  Pos r c (inherit t' t)
->     fromToken t		=  Pos 0 0 (fromToken t)
-
-Tokenliste durchnumerieren.
-
-> number			:: Row -> Col -> [Token] -> [Pos Token]
-> number r c []			=  []
-> number r c (t : ts)		=  Pos r c t : number r' c' ts
->     where (r', c')		=  count r c (string t)
->
-> count				:: Row -> Col -> String -> (Row, Col)
-> count r c []			=  (r, c)
-> count r c (a : s)
->     | a == '\n'		=  count (r + 1) 1       s
->     | otherwise		=  count r       (c + 1) s
-
-Tokenliste in Zeilen auftrennen.
-
-> lines				:: [Pos a] -> [[Pos a]]
-> lines				=  split 1
->     where
->     split _   []		=  []
->     split r ts		=  us : split (r + 1) vs
->         where (us, vs)	=  span (\t -> row t <= r) ts
-
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{A very simple Haskell Parser}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
-> type Chunk a			=  [Item a]
->
-> data Item a			=  Delim a
->				|  Apply [Atom a]
->				   deriving (Show)
->
-> data Atom a			=  Atom a
->				|  Paren a (Chunk a) a
->				   deriving (Show)
-
 The parser is based on the Smugweb parser.
+This variant cannot handle unbalanced parentheses.
 
 > exprParse			:: (CToken tok, Show tok) => [Pos tok] -> Either Exc [Item (Pos tok)]
 > exprParse s			=  case run chunk s of
@@ -160,94 +98,6 @@ Primitive parser.
 > right l			=  satisfy (\c -> case (catCode l, catCode c) of
 >				       (Del o, Del c) -> (o,c) `elem` zip "([" ")]" 
 >				       _     -> False)
-
-% - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
-\subsubsection{Making replacements}
-% - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
-
-> data Mode			=  Mandatory
->				|  Optional Bool
-
-If |eval e| returns |Mandatory| then parenthesis around |e| must not be
-dropped; |Optional True| indicates that it can be dropped; |Optional
-False| indicates that the decision is up the caller.
-
-> substitute			:: (CToken tok) => Formats -> Bool -> [Item tok] -> [tok]
-> substitute d auto chunk	=  snd (eval chunk)
->   where
->   eval [e]			=  eval' e
->   eval chunk			=  (Optional False, concat [ snd (eval' i) | i <- chunk ])
->
->   eval' (Delim s)		=  (Optional False, [s])
->   eval' (Apply [])		=  impossible "eval'"
->   eval' (Apply (e : es))	=  eval'' False e es
->
->   eval'' _ (Atom s) es	=  case FM.lookup (string (token s)) d of
->     Nothing			-> (Optional False, s : args es)
->     Just (opt, opts, lhs, rhs)-> (Optional opt, set s (concat (fmap sub rhs)) ++ args bs)
->         where
->         (as, bs) | m <= n	=  (es ++ replicate (n - m) dummy, [])
->                  | otherwise	=  splitAt n es
->         n			=  length lhs
->         m			=  length es
->         binds			=  zip lhs [ snd (eval'' b a []) | (b, a) <- zip opts as ]
->         sub t@(Varid x)	=  case FM.lookup x (FM.fromList binds) of
->             Nothing		-> [fromToken t]
->             Just ts		-> ts
->         sub t			=  [fromToken t]
-
-Wenn ein Token ersetzt bzw.~entfernt wird, dann erbt das jeweils erste
-Token des Ersetzungstexts dessen Position.
-
->   eval'' opt (Paren l e r) es
->       | optional		=  (Mandatory, set l s ++ args es)
->       | otherwise		=  (Optional False, [l] ++ s ++ [r] ++ args es)
->       where (flag, s)		=  eval e
->             optional		=  catCode l == Del '(' && not (mandatory e)
->				&& case flag of Mandatory -> False; Optional f -> opt || f
-
-\NB Es ist keine gute Idee Klammern um Atome wegzulassen, dann werden
-auch bei @deriving (Eq)@ und @module M (a)@ die Klammern entfernt.
-
->   args es			=  concat [ sp ++ snd (eval'' False i []) | i <- es ] -- $\cong$ Applikation
->   sp | auto			=  [fromToken (TeX sub'space)]
->      | otherwise		=  []
-
-Um Makros der Form @%format Parser (a) = a@ besser zu unterst"utzen.
-
-> set				:: (CToken tok) => tok -> [tok] -> [tok]
-> set s []			=  []
-> set s (t : ts)		=  inherit s (token t) : ts
->
-> mandatory			:: (CToken tok) => Chunk tok -> Bool
-> mandatory e			=  False
-
-Code before:
-
-< mandatory e			=  null e		-- nullary tuple
-<				|| or [ isComma i | i <- e ] -- tuple
-<				|| isOp (head e)	-- left section
-<				|| isOp (last e)	-- right section
-
-> isComma, isOp			:: (CToken tok) => Item tok -> Bool
-> isComma (Delim t)		=  case token t of
->     Special c			-> c == ','
->     _				-> False
-> isComma _			=  False
->
-> isOp (Delim t)		=  case token t of
->     Special c			-> c == '`'	-- f"ur @` div `@
->     Consym _			-> True
->     Varsym s			-> s /= "\\"
->     Op _			-> True
->     _				-> False
-> isOp _			=  False
-
-> dummy				:: (CToken tok) => Atom tok
-> dummy				=  Atom (fromToken (Varid ""))
-
-\NB We cannot use embedded \TeX\ text here, because |TeX| is not a
-legal atom (|string| is applied to it).
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Internal alignment}
@@ -376,9 +226,6 @@ Die Funktion |isInternal| pr"uft, ob |v| ein spezielles Symbol wie
 >               _		-> skip <> sub'hskip (Text em)
 >                   where em	=  showFFloat (Just 2) (0.5 * fromIntegral (col t - c) :: Double) ""
 
-< fromInt			:: Num a => Int -> a
-< fromInt i			=  fromInteger (toInteger i)
-
 M"ussen |v| und |t| zueinander passen?
 %
 \begin{verbatim}
@@ -387,7 +234,3 @@ where |a      =    where |Str c =    [    [    (    {
                                      ]    ]    )    }
 \end{verbatim}
 
-F"ur inline-code.
-
-> latexs			:: (CToken tok) => Formats -> [tok] -> Doc
-> latexs dict			=  catenate . fmap (latex sub'space sub'space dict . token)
