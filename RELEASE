@@ -29,6 +29,9 @@ The most notable changes are:
 * Specification code is now handled correctly (that is, ignored) 
   in the "code" and "newcode" styles.
 
+* Comments and Pragmas are handled in a better way by 
+  the "newcode" style.
+
 * There are some new forms of implicit formatting directives.
 
 Requirements and Download
