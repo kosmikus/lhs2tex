@@ -174,7 +174,7 @@
          \PackageWarning{polytable}{Redefining column #2}%
        \fi
        \@namedef{PT@col@#2.type}{#3}%
-       \expandafter\ifdim#1>0pt
+       \expandafter\ifdim#1>0pt\relax
          \PT@typeout@{Redefining column #2 at #1.}%
          \@namedef{PT@col@#2.width}{#1}%
        \fi
@@ -334,7 +334,7 @@
    \global\advance\PT@cols
      by -\expandafter\csname\PT@currentcol.num\endcsname\relax
    \ifx\PT@currentcol\PT@nullcol
-     \global\advance\PT@cols by -1%
+     \global\advance\PT@cols by -1\relax%
    \fi
    \PT@typeout@{skipping:
                 nf=\expandafter\ShowColumn
@@ -388,7 +388,7 @@
      %\show\@preamble
      \@preamble}%
    \PT@colwidth=\@nameuse{PT@col@#2.max}%
-   \advance\PT@colwidth by -\@nameuse{PT@col@#1.max}%
+   \advance\PT@colwidth by -\@nameuse{PT@col@#1.max}\relax%
    \ifmmode
      \PT@typeout@{YES, WE ARE IN MATH MODE!}%
      \let\d@llarbegin=$%$
@@ -417,7 +417,7 @@
    \ignorespaces}%
 \newcommand*{\PT@setmaxwidth}[3][\PT@false]% #2 column name, #3 maximum width
   {\@namedef{PT@col@#2.max}{#3}%
-   \ifdim#3=0pt
+   \ifdim#3=0pt\relax
      \expandafter\let\csname PT@col@#2.trusted\endcsname=\PT@true%
    \else
      \expandafter\let\csname PT@col@#2.trusted\endcsname=#1%
