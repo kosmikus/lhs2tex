@@ -4,7 +4,7 @@
 
 %if codeOnly || showModuleHeader
 
-> module Parser			(  Parser, run, satisfy, lit, lits, wrap, nonnull  )
+> module Parser			(  Parser, run, satisfy, lit, lits, wrap, nonnull, eof  )
 > where
 >
 > import Char			(  isSpace  )
@@ -45,6 +45,13 @@ Deterministische Mini-Parser.
 >
 > lit				:: (Eq tok) => tok -> Parser tok tok
 > lit c				=  satisfy (== c)
+
+ks, 06.09.2003: Adding eof that accepts succeeds only at the end of input.
+
+> eof                           :: Parser tok ()
+> eof                           =  MkParser (\inp -> case inp of
+>                                      []                -> Just ((),[])
+>                                      _                 -> Nothing)
 
 |lits s| corresponds to |mapM_ lit_ s|.
 

@@ -15,12 +15,14 @@
 >
 > import Control.Monad
 >
+> -- import IOExts
 > import TeXCommands
 > import TeXParser
 > import qualified Verbatim
 > import qualified Typewriter
 > import qualified Math
 > import qualified MathPoly as Poly
+> import qualified NewCode
 > import Directives
 > import Document
 > import StateT
@@ -105,7 +107,7 @@ Initial state.
 >				           align      = Nothing,
 >				           stacks     = ([], []),
 >                                          separation = 2,
->                                          latency    = 1,
+>                                          latency    = 2,
 >                                          pstack     = []
 >                                        }
 
@@ -151,6 +153,7 @@ usage.
 >   , Option []    ["math"]    (NoArg (id, id, [Math]))                                 "math mode"
 >   , Option []    ["poly"]    (NoArg (id, id, [Poly]))                                 "poly mode"
 >   , Option []    ["code"]    (NoArg (id, id, [CodeOnly]))                             "code mode"
+>   , Option []    ["newcode"] (NoArg (id, id, [NewCode]))                              "new code mode"
 >   , Option []    ["verb"]    (NoArg (id, id, [Verb]))                                 "verbatim"
 >   , Option ['A'] ["align"]   (ReqArg (\c -> (id, (Directive Align c:), [])) "col")    "align at <col>"
 >   , Option ['i'] ["include"] (ReqArg (\f -> (id, (Directive Include f:), [])) "file") "include <file>"
@@ -254,7 +257,7 @@ Remove trailing blank line.
 > format (Environment (Verbatim b) s)
 >				=  out (Verbatim.display 120 b s)
 > format (Directive Format s)	=  do st <- fetch
->				      b <- fromEither (parseFormat s)
+>				      b@(n,e) <- fromEither (parseFormat s)
 >				      store (st{fmts = FM.add b (fmts st)})
 > format (Directive Subst s)	=  do st <- fetch
 >				      b <- fromEither (parseSubst s)
@@ -330,6 +333,7 @@ Printing documents.
 > out				:: Doc -> Formatter
 > out d				=  do st <- fetch; eject (select (style st))
 >     where select CodeOnly	=  Empty
+>           select NewCode      =  Empty
 >           select _		=  d
 
 > inline, display		:: String -> Formatter
@@ -341,6 +345,7 @@ Printing documents.
 >         select Math st	=  Math.inline (fmts st) (isTrue (toggles st) auto) s
 >         select Poly st        =  Poly.inline (fmts st) (isTrue (toggles st) auto) s
 >         select CodeOnly st	=  return Empty
+>         select NewCode st     =  return Empty   -- generate PRAGMA or something?
 
 > display s			=  do st <- fetch
 >				      (d, st') <- fromEither (select (style st) st)
@@ -352,6 +357,9 @@ Printing documents.
 >				      return (d, st{stacks = sts})
 >         select Poly st        =  do (d, pstack') <- Poly.display (fmts st) (isTrue (toggles st) auto) (separation st) (latency st) (pstack st) s
 >                                     return (d, st{pstack = pstack'})
+>         select NewCode st     =  do d <- NewCode.display (fmts st) s
+>                                     let p = sub'pragma $ Text ("LINE " ++ show (lineno st + 1) ++ " " ++ show (filename $ file st))
+>                                     return (p <> sub'nl <> d, st)
 >         select CodeOnly st	=  return (Text (trim s), st)
 
 > auto				=  "autoSpacing"

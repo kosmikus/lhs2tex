@@ -10,7 +10,7 @@ are subtle differences, and they will grow over time \dots
 
 %if codeOnly || showModuleHeader
 
-> module MathPoly		(  module MathPoly  )
+> module MathPoly               (  module MathPoly  )
 > where
 >
 > import Prelude hiding ( lines )
@@ -34,36 +34,36 @@ are subtle differences, and they will grow over time \dots
 \subsubsection{Inline and display code}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
-> inline			:: Formats -> Bool -> String -> Either Exc Doc
-> inline fmts auto		=  fmap unNL
->				.> tokenize
->				@> lift (number 1 1)
->				@> when auto (lift (filter (isNotSpace . token)))
->				@> lift (partition (\t -> catCode t /= White))
->				@> exprParse *** return
->				@> lift (substitute fmts auto) *** return
->				@> lift (uncurry merge)
->				@> lift (fmap token)
->				@> when auto (lift addSpaces)
->				@> lift (latexs fmts)
->				@> lift sub'inline
+> inline                        :: Formats -> Bool -> String -> Either Exc Doc
+> inline fmts auto              =  fmap unNL
+>                               .> tokenize
+>                               @> lift (number 1 1)
+>                               @> when auto (lift (filter (isNotSpace . token)))
+>                               @> lift (partition (\t -> catCode t /= White))
+>                               @> exprParse *** return
+>                               @> lift (substitute fmts auto) *** return
+>                               @> lift (uncurry merge)
+>                               @> lift (fmap token)
+>                               @> when auto (lift addSpaces)
+>                               @> lift (latexs fmts)
+>                               @> lift sub'inline
 
-> display			:: Formats -> Bool -> Int -> Int -> Stack
->				-> String -> Either Exc (Doc, Stack)
+> display                       :: Formats -> Bool -> Int -> Int -> Stack
+>                               -> String -> Either Exc (Doc, Stack)
 > display fmts auto sep lat stack
 >                               =  lift trim
->				@> lift (expand 0)
->				@> tokenize
->				@> lift (number 1 1)
->	--		       |@> when auto (lift (filter (isNotSpace . token)))|
->				@> lift (partition (\t -> catCode t /= White))
->				@> exprParse *** return
->				@> lift (substitute fmts auto) *** return
->				@> lift (uncurry merge)
->				@> lift lines
+>                               @> lift (expand 0)
+>                               @> tokenize
+>                               @> lift (number 1 1)
+>       --                     |@> when auto (lift (filter (isNotSpace . token)))|
+>                               @> lift (partition (\t -> catCode t /= White))
+>                               @> exprParse *** return
+>                               @> lift (substitute fmts auto) *** return
+>                               @> lift (uncurry merge)
+>                               @> lift lines
 >                               @> when auto (lift (fmap addSpaces))
 >                               @> lift (\ts -> (autoalign sep ts,ts))
->				@> lift (\(cs,ts) -> let ats = align cs sep lat ts
+>                               @> lift (\(cs,ts) -> let ats = align cs sep lat ts
 >                                                        cs' = [("B",0)] ++ cs 
 >                                                           ++ [("E",error "E column")]
 >                                                    in  (autocols cs' ats,ats)
@@ -74,24 +74,24 @@ are subtle differences, and they will grow over time \dots
 >                               @> return *** lift (\(z,ats) -> leftIndent fmts auto z [] ats)
 >       -- ks, 17.07.2003: i've changed "stack" into "[]" and thereby disabled
 >       -- the global stack for now as it leads to unexepected behaviour
->				@> lift (\(cs,(d,stack)) -> (sub'code (columns cs <> d),stack))
+>                               @> lift (\(cs,(d,stack)) -> (sub'code (columns cs <> d),stack))
 >
 > columns                       :: [(String,Doc)] -> Doc
 > columns                       =  foldr (<>) Empty 
 >                               .  map (uncurry sub'column)
 
-> when True f			=  f
-> when False f			=  return
+> when True f                   =  f
+> when False f                  =  return
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Adding positional information}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
-> type Row			=  Int
-> type Col			=  Int
+> type Row                      =  Int
+> type Col                      =  Int
 >
-> data Pos a			=  Pos {row :: !Row, col :: !Col, ann :: a}
->				   deriving (Show)
+> data Pos a                    =  Pos {row :: !Row, col :: !Col, ann :: a}
+>                                  deriving (Show)
 
 %{
 %format r1
@@ -107,32 +107,32 @@ are subtle differences, and they will grow over time \dots
 %}
 
 > instance (CToken tok) => CToken (Pos tok) where
->     catCode (Pos _ _ t)	=  catCode t
->     token (Pos _ _ t)		=  token t
->     inherit (Pos r c t') t	=  Pos r c (inherit t' t)
->     fromToken t		=  Pos 0 0 (fromToken t)
+>     catCode (Pos _ _ t)       =  catCode t
+>     token (Pos _ _ t)         =  token t
+>     inherit (Pos r c t') t    =  Pos r c (inherit t' t)
+>     fromToken t               =  Pos 0 0 (fromToken t)
 
 Tokenliste durchnumerieren.
 
-> number			:: Row -> Col -> [Token] -> [Pos Token]
-> number r c []			=  []
-> number r c (t : ts)		=  Pos r c t : number r' c' ts
->     where (r', c')		=  count r c (string t)
+> number                        :: Row -> Col -> [Token] -> [Pos Token]
+> number r c []                 =  []
+> number r c (t : ts)           =  Pos r c t : number r' c' ts
+>     where (r', c')            =  count r c (string t)
 >
-> count				:: Row -> Col -> String -> (Row, Col)
-> count r c []			=  (r, c)
+> count                         :: Row -> Col -> String -> (Row, Col)
+> count r c []                  =  (r, c)
 > count r c (a : s)
->     | a == '\n'		=  count (r + 1) 1       s
->     | otherwise		=  count r       (c + 1) s
+>     | a == '\n'               =  count (r + 1) 1       s
+>     | otherwise               =  count r       (c + 1) s
 
 Tokenliste in Zeilen auftrennen.
 
-> lines				:: [Pos a] -> [[Pos a]]
-> lines				=  split 1
+> lines                         :: [Pos a] -> [[Pos a]]
+> lines                         =  split 1
 >     where
->     split _   []		=  []
->     split r ts		=  us : split (r + 1) vs
->         where (us, vs)	=  span (\t -> row t <= r) ts
+>     split _   []              =  []
+>     split r ts                =  us : split (r + 1) vs
+>         where (us, vs)        =  span (\t -> row t <= r) ts
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{A very simple Haskell Parser}
@@ -153,57 +153,73 @@ this will occur frequently).
 An |atom| is a single identifier (not an operator, though -- those are
 delimiters), or a chunk in parentheses.
 
-> type Chunk a			=  [Item a]
+> type Chunk a                  =  [Item a]
 >
-> data Item a			=  Delim a
->				|  Apply [Atom a]
->				   deriving (Show)
+> data Item a                   =  Delim a
+>                               |  Apply [Atom a]
+>                                  deriving (Show)
 >
-> data Atom a			=  Atom a
->				|  Paren a (Chunk a) a
->				   deriving (Show)
+> data Atom a                   =  Atom a
+>                               |  Paren a (Chunk a) a
+>                                  deriving (Show)
 
 The parser is based on the Smugweb parser.
 
-> exprParse			:: (CToken tok, Show tok) => [Pos tok] -> Either Exc (Chunk (Pos tok))
-> exprParse s			=  case run chunk s of
->     Nothing			-> Left ("syntax error", show s) -- HACK: |show s|
->     Just e			-> Right e
+> exprParse                     :: (CToken tok, Show tok) => [Pos tok] -> Either Exc (Chunk (Pos tok))
+> exprParse s                   =  case run (chunk 0) s of
+>     Nothing                   -> Left ("syntax error", show s) -- HACK: |show s|
+>     Just e                    -> Right e
 >
-> chunk				:: (CToken tok) => Parser (Pos tok) (Chunk (Pos tok))
-> chunk				=  do a <- many atom
->				      as <- many (do s <- sep; a <- many atom; return ([Delim s] ++ offside a))
->				      return (offside a ++ concat as)
->     where offside []		=  []
+> chunk                         :: (CToken tok) => Int -> Parser (Pos tok) (Chunk (Pos tok))
+> chunk d                       =  do a <- many (atom d)
+>                                     as <- many (do s <- sep; a <- many (atom d); return ([Delim s] ++ offside a))
+>                                     return (offside a ++ concat as)
+>     where offside []          =  []
 >           -- old: |opt a =  [Apply a]|
->           offside (a : as)	=  Apply (a : bs) : offside cs
->               where (bs, cs)	=  span (\a' -> col' a < col' a') as
->           col' (Atom a)	=  col a
->	    col' (Paren a _ _)	=  col a
+>           offside (a : as)    =  Apply (a : bs) : offside cs
+>               where (bs, cs)  =  span (\a' -> col' a < col' a') as
+>           col' (Atom a)       =  col a
+>           col' (Paren a _ _)  =  col a
 >
-> atom				:: (CToken tok) => Parser (Pos tok) (Atom (Pos tok))
-> atom				=  fmap Atom noSep
->				`mplus` do l <- left
->				           e <- chunk
->				           r <- right l
->				           return (Paren l e r)
+> atom                          :: (CToken tok) => Int -> Parser (Pos tok) (Atom (Pos tok))
+> atom d                        =  fmap Atom noSep
+>                               `mplus` do l <- left
+>                                          e <- chunk (d+1)
+>                                          r <- right l
+>                                          return (Paren l e r)
+>                               `mplus` if d == 0 then do r <- anyright
+>                                                         return (Paren (fromToken $ TeX Empty) [] r)
+>                                                 else mzero
+
+ks, 09.09.2003: Added handling of unbalanced parentheses, surely not in the
+most elegant way. Both |chunk| and |atom| now take an integer argument
+indicating the nesting level. Only on the top-level unbalanced right
+parentheses are accepted. The end of file (end of code block) can be
+parsed as an arbitrary amount of right parentheses.
 
 Primitive parser.
 
-> sep, noSep, left		:: (CToken tok) => Parser tok tok
-> sep				=  satisfy (\t -> catCode t == Sep)
-> noSep				=  satisfy (\t -> catCode t == NoSep)
-> left				=  satisfy (\t -> case catCode t of Del c -> c `elem` "(["; _-> False)
-> right l			=  satisfy (\c -> case (catCode l, catCode c) of
->				       (Del o, Del c) -> (o,c) `elem` zip "([" ")]" 
->				       _     -> False)
+> sep, noSep, left, anyright    :: (CToken tok) => Parser tok tok
+> sep                           =  satisfy (\t -> catCode t == Sep)
+> noSep                         =  satisfy (\t -> catCode t == NoSep)
+> left                          =  satisfy (\t -> case catCode t of Del c -> c `elem` "(["; _ -> False)
+> anyright                      =  satisfy (\t -> case catCode t of Del c -> c `elem` ")]"; _ -> False)
+> right l                       =  (satisfy (\c -> case (catCode l, catCode c) of
+>                                       (Del o, Del c) -> (o,c) `elem` zip "([" ")]" 
+>                                       _     -> False)
+>                                  ) `mplus` do eof
+>                                               return (fromToken $ TeX Empty)
+
+ks, 06.09.2003: Modified the |right| parser to accept the end of file,
+to allow for unbalanced parentheses. This behaviour is not (yet) backported
+to |math| style. Also added |anyright|.
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Making replacements}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
-> data Mode			=  Mandatory
->				|  Optional Bool
+> data Mode                     =  Mandatory
+>                               |  Optional Bool
 
 If |eval e| returns |Mandatory| then parenthesis around |e| must not be
 dropped; |Optional True| indicates that it can be dropped; |Optional
@@ -214,84 +230,84 @@ To change this is on my TODO list. Substitutions without arguments,
 hovewer, do work recursively because they are handled again at a later
 stage (by the call to latexs, for instance in leftIndent).
 
-> substitute			:: (CToken tok,Show tok) => Formats -> Bool -> Chunk tok -> [tok]
-> substitute d auto chunk	=  snd (eval chunk)
+> substitute                    :: (CToken tok,Show tok) => Formats -> Bool -> Chunk tok -> [tok]
+> substitute d auto chunk       =  snd (eval chunk)
 >   where
 >   eval                        :: (CToken tok) => [Item tok] -> (Mode,[tok])
->   eval [e]			=  eval' e
->   eval chunk			=  (Optional False, concat [ snd (eval' i) | i <- chunk ])
+>   eval [e]                    =  eval' e
+>   eval chunk                  =  (Optional False, concat [ snd (eval' i) | i <- chunk ])
 >
 >   eval'                       :: (CToken tok) => Item tok -> (Mode,[tok])
->   eval' (Delim s)		=  (Optional False, [s])
->   eval' (Apply [])		=  impossible "eval'"
->   eval' (Apply (e : es))	=  eval'' False e es
+>   eval' (Delim s)             =  (Optional False, [s])
+>   eval' (Apply [])            =  impossible "eval'"
+>   eval' (Apply (e : es))      =  eval'' False e es
 >
 >   eval''                      :: (CToken tok) => Bool -> Atom tok -> [Atom tok] -> (Mode,[tok])
->   eval'' _ (Atom s) es	=  case FM.lookup (string (token s)) d of
->     Nothing			-> (Optional False, s : args es)
+>   eval'' _ (Atom s) es        =  case FM.lookup (string (token s)) d of
+>     Nothing                   -> (Optional False, s : args es)
 >     Just (opt, opts, lhs, rhs)-> (Optional opt, set s (concat (fmap sub rhs)) ++ args bs)
 >         where
->         (as, bs) | m <= n	=  (es ++ replicate (n - m) dummy, [])
->                  | otherwise	=  splitAt n es
->         n			=  length lhs
->         m			=  length es
->         binds			=  zip lhs [ snd (eval'' b a []) | (b, a) <- zip opts as ]
->         sub t@(Varid x)	=  case FM.lookup x (FM.fromList binds) of
->             Nothing		-> [fromToken t]
->             Just ts		-> ts
->         sub t			=  [fromToken t]
+>         (as, bs) | m <= n     =  (es ++ replicate (n - m) dummy, [])
+>                  | otherwise  =  splitAt n es
+>         n                     =  length lhs
+>         m                     =  length es
+>         binds                 =  zip lhs [ snd (eval'' b a []) | (b, a) <- zip opts as ]
+>         sub t@(Varid x)       =  case FM.lookup x (FM.fromList binds) of
+>             Nothing           -> [fromToken t]
+>             Just ts           -> ts
+>         sub t                 =  [fromToken t]
 
 Wenn ein Token ersetzt bzw.~entfernt wird, dann erbt das jeweils erste
 Token des Ersetzungstexts dessen Position.
 
 >   eval'' opt (Paren l e r) es
->       | optional		=  (Mandatory, set l s ++ args es)
->       | otherwise		=  (Optional False, [l] ++ s ++ [r] ++ args es)
->       where (flag, s)		=  eval e
->             optional		=  catCode l == Del '(' && not (mandatory e)
->				&& case flag of Mandatory -> False; Optional f -> opt || f
+>       | optional              =  (Mandatory, set l s ++ args es)
+>       | otherwise             =  (Optional False, [l] ++ s ++ [r] ++ args es)
+>       where (flag, s)         =  eval e
+>             optional          =  catCode l == Del '(' && not (mandatory e)
+>                               && case flag of Mandatory -> False; Optional f -> opt || f
 
 \NB Es ist keine gute Idee Klammern um Atome wegzulassen, dann werden
 auch bei @deriving (Eq)@ und @module M (a)@ die Klammern entfernt.
 
 >   args                        :: (CToken tok) => [Atom tok] -> [tok]
->   args es			=  concat [ sp ++ snd (eval'' False i []) | i <- es ] -- $\cong$ Applikation
+>   args es                     =  concat [ sp ++ snd (eval'' False i []) | i <- es ] -- $\cong$ Applikation
 >   sp                          :: (CToken tok) => [tok]
->   sp | auto			=  [fromToken (TeX sub'space)]
->      | otherwise		=  []
+>   sp | auto                   =  [fromToken (TeX sub'space)]
+>      | otherwise              =  []
 
 Um Makros der Form @%format Parser (a) = a@ besser zu unterst"utzen.
 
-> set				:: (CToken tok) => tok -> [tok] -> [tok]
-> set s []			=  []
-> set s (t : ts)		=  inherit s (token t) : ts
+> set                           :: (CToken tok) => tok -> [tok] -> [tok]
+> set s []                      =  []
+> set s (t : ts)                =  inherit s (token t) : ts
 >
-> mandatory			:: (CToken tok) => Chunk tok -> Bool
-> mandatory e			=  False
+> mandatory                     :: (CToken tok) => Chunk tok -> Bool
+> mandatory e                   =  False
 
 Code before:
 
-< mandatory e			=  null e		-- nullary tuple
-<				|| or [ isComma i | i <- e ] -- tuple
-<				|| isOp (head e)	-- left section
-<				|| isOp (last e)	-- right section
+< mandatory e                   =  null e               -- nullary tuple
+<                               || or [ isComma i | i <- e ] -- tuple
+<                               || isOp (head e)        -- left section
+<                               || isOp (last e)        -- right section
 
-> isComma, isOp			:: (CToken tok) => Item tok -> Bool
-> isComma (Delim t)		=  case token t of
->     Special c			-> c == ','
->     _				-> False
-> isComma _			=  False
+> isComma, isOp                 :: (CToken tok) => Item tok -> Bool
+> isComma (Delim t)             =  case token t of
+>     Special c                 -> c == ','
+>     _                         -> False
+> isComma _                     =  False
 >
-> isOp (Delim t)		=  case token t of
->     Special c			-> c == '`'	-- f"ur @` div `@
->     Consym _			-> True
->     Varsym s			-> s /= "\\"
->     Op _			-> True
->     _				-> False
-> isOp _			=  False
+> isOp (Delim t)                =  case token t of
+>     Special c                 -> c == '`'     -- f"ur @` div `@
+>     Consym _                  -> True
+>     Varsym s                  -> s /= "\\"
+>     Op _                      -> True
+>     _                         -> False
+> isOp _                        =  False
 
-> dummy				:: (CToken tok) => Atom tok
-> dummy				=  Atom (fromToken (Varid ""))
+> dummy                         :: (CToken tok) => Atom tok
+> dummy                         =  Atom (fromToken (Varid ""))
 
 \NB We cannot use embedded \TeX\ text here, because |TeX| is not a
 legal atom (|string| is applied to it).
@@ -300,7 +316,7 @@ legal atom (|string| is applied to it).
 \subsubsection{Internal alignment}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
-> data Line a			=  Blank
+> data Line a                   =  Blank
 >                               |  Poly  [((String,Int),a,Bool)]
 >
 > autoalign                     :: (Show tok,CToken tok) => Int              -- "Trennung"
@@ -325,7 +341,7 @@ legal atom (|string| is applied to it).
 >                               -> {- |trace ("found: " ++ show (col v')) $| -} col v' : findCols vs
 >         | otherwise           -> {- |trace ("found too short")|            -} findCols vs
 >
-> align				:: (CToken tok) => [(String,Int)]   -- alignment-info (Name, Spalte)
+> align                         :: (CToken tok) => [(String,Int)]   -- alignment-info (Name, Spalte)
 >                                               -> Int              -- "Trennung"
 >                                               -> Int              -- "Traegheit"
 >                                               -> [[Pos tok]]      -- positionierte tokens per Zeile
@@ -361,15 +377,15 @@ legal atom (|string| is applied to it).
 Die Funktion |isInternal| pr"uft, ob |v| ein spezielles Symbol wie
 @::@, @=@ etc~oder ein Operator wie @++@ ist.
 
-> isInternal			:: (CToken tok) => tok -> Bool
-> isInternal t			=  case token t of
->     Consym _			-> True
->     Varsym _			-> True
->     Special _			-> True
->     _				-> False
+> isInternal                    :: (CToken tok) => tok -> Bool
+> isInternal t                  =  case token t of
+>     Consym _                  -> True
+>     Varsym _                  -> True
+>     Special _                 -> True
+>     _                         -> False
 >
 > instance Functor Line where
->     fmap f Blank		=  Blank
+>     fmap f Blank              =  Blank
 >     fmap f (Poly ls)          =  Poly (map (\(x,y,z) -> (x,f y,z)) ls)
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
@@ -415,35 +431,35 @@ automata with three states: |before b| means before a keyword, |b|
 indicates whether to insert a space or not; |after| means immediately
 after a keyword (hence |before b| really means not immediately after).
 
-> addSpaces			:: (CToken tok) => [tok] -> [tok]
-> addSpaces ts			=  before False ts
+> addSpaces                     :: (CToken tok) => [tok] -> [tok]
+> addSpaces ts                  =  before False ts
 >     where
->     before b []		=  []
->     before b (t : ts)		=  case token t of
+>     before b []               =  []
+>     before b (t : ts)         =  case token t of
 >         u | not (isNotSpace u)-> t : before b ts
->           | selfSpacing u	-> t : before False ts
+>           | selfSpacing u     -> t : before False ts
 >         Special c
->           | c `elem` ",;([{"	-> t : before False ts
->         Keyword _		-> [ fromToken (TeX sub'space) | b ] ++ t : after ts
->         _			-> t : before True ts
+>           | c `elem` ",;([{"  -> t : before False ts
+>         Keyword _             -> [ fromToken (TeX sub'space) | b ] ++ t : after ts
+>         _                     -> t : before True ts
 > 
->     after []			=  []
->     after (t : ts)		=  case token t of
+>     after []                  =  []
+>     after (t : ts)            =  case token t of
 >         u | not (isNotSpace u)-> t : after ts
->           | selfSpacing u	-> t : before False ts
+>           | selfSpacing u     -> t : before False ts
 >         Special c
->           | c `elem` ",;([{"	-> fromToken (TeX sub'space) : t : before False ts
->         Keyword _		-> fromToken (TeX sub'space) : t : after ts
->         _			-> fromToken (TeX sub'space) : t : before True ts
+>           | c `elem` ",;([{"  -> fromToken (TeX sub'space) : t : before False ts
+>         Keyword _             -> fromToken (TeX sub'space) : t : after ts
+>         _                     -> fromToken (TeX sub'space) : t : before True ts
 
 Operators are `self spacing'.
 
-> selfSpacing			:: Token -> Bool
-> selfSpacing (Consym _)	=  True
-> selfSpacing (Varsym _)	=  True
-> selfSpacing (Op _)		=  True
+> selfSpacing                   :: Token -> Bool
+> selfSpacing (Consym _)        =  True
+> selfSpacing (Varsym _)        =  True
+> selfSpacing (Op _)            =  True
 > -- |selfSpacing (TeX _) =  True|
-> selfSpacing _			=  False
+> selfSpacing _                 =  False
 
 \NB It's not a good idea to regard inline \TeX\ as self spacing consider,
 for example, a macro like @%format mu = "\mu "@.
@@ -461,7 +477,7 @@ mit dem @poly@-style heraus habe ich den Eindruck, als muesste das
 weitgehend genuegen. Ansonsten kann man ja immer noch explizit die
 Einrueckung mit Annotationen formatieren.
 
-> type Stack			=  [(Col, Line [Pos Token])]
+> type Stack                    =  [(Col, Line [Pos Token])]
 
 Der Stack besteht also aus einer Liste von Paaren aus Spaltennummern
 und Token. Der Kopf der Liste hat die hoechste Spaltennummer, und die
@@ -488,13 +504,13 @@ Letztlich wird die augenblickliche Zeile auf den Stack gelegt.
 >                               -> [Line [Pos Token]]
 >                               -> (Doc, Stack)
 > leftIndent dict auto z stack
->				=  loop True stack
+>                               =  loop True stack
 >   where
->   copy d | auto		=  d
->          | otherwise		=  Empty
+>   copy d | auto               =  d
+>          | otherwise          =  Empty
 
 >   loop                        :: Bool -> Stack -> [Line [Pos Token]] -> (Doc, Stack)
->   loop first stack []	        =  (Empty, stack)  -- fertig
+>   loop first stack []         =  (Empty, stack)  -- fertig
 >   loop first stack (l:ls)     =  case l of
 >       Blank                   -> loop True stack ls -- Leerzeilen ignorieren
 >    {-| Poly x || trace (show x) False -> undefined |-}
@@ -541,9 +557,9 @@ Letztlich wird die augenblickliche Zeile auf den Stack gelegt.
 >                                    (pre,_)    -> let ((rn,rc),_,_) = last pre
 >                                                  in  (rn,rc)
 >
->   sep []			=  Empty
->   sep (Blank : _ )		=  sub'blankline
->   sep (_ : _)			=  sub'nl
+>   sep []                      =  Empty
+>   sep (Blank : _ )            =  sub'blankline
+>   sep (_ : _)                 =  sub'nl
 >
 >   indent                      :: (String,Int) -> (String,Int) -> Doc
 >   indent (n,c) (n',c')
@@ -560,5 +576,5 @@ where |a      =    where |Str c =    [    [    (    {
 
 F"ur inline-code.
 
-> latexs			:: (CToken tok) => Formats -> [tok] -> Doc
-> latexs dict			=  catenate . fmap (latex sub'space sub'space dict . token)
+> latexs                        :: (CToken tok) => Formats -> [tok] -> Doc
+> latexs dict                   =  catenate . fmap (latex sub'space sub'space dict . token)

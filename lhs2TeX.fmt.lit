@@ -189,6 +189,35 @@ etc~(for all lower and upper case greek letters).
 \end{code}
 
 %-------------------------------=  --------------------------------------------
+\subsection{New code style}
+%-------------------------------=  --------------------------------------------
+
+\begin{code}
+%elif style == newcode
+%subst comment a        = "-- " a
+%subst nested a         = "{- " a " -}"
+%subst code a           = a "'n"
+%subst newline          = "'n"
+%subst dummy            =
+%subst pragma a         = "{-# " a " #-}"
+%subst numeral a        = a
+%subst keyword a        = a
+%subst spaces a         = a
+%subst special a        = a
+%subst space            = " "
+%subst conid a          = a
+%subst varid a          = a
+%subst consym a         = a
+%subst varsym a         = a
+%subst char a           = "''" a "''"
+%subst string a         = "'d" a "'d"
+%format #               = "#"
+%format $               = "$"
+%format %               = "%"
+%format &               = "&"
+\end{code}
+
+%-------------------------------=  --------------------------------------------
 \subsection{Math and Poly style}
 %-------------------------------=  --------------------------------------------
 
@@ -209,7 +238,7 @@ in a conditional checking |anyMath|.
 %else
 %subst code a    	= "\begin{tabbing}'n\qquad\=\hspace{\lwidth}\=\hspace{\cwidth}\=\+\kill'n" a "'n\end{tabbing}"
 %subst column3 l c r	= "$" l "$ \> \makebox[\cwidth]{$" c "$} \> ${" r "}$"
-%subst column1 a	= "$" a "$"
+%subst column1 a	= "${" a "}$"
 %endif
 %subst newline   	= "\\'n"
 %subst blankline 	= "\\[1mm]'n"

@@ -4,7 +4,7 @@
 
 %if codeOnly || showModuleHeader
 
-> module Directives		(  Formats, parseFormat, Equation, Substs, Subst, parseSubst, Toggles, eval, define, value  )
+> module Directives		(  Formats, parseFormat, Equation, Substs, Subst, parseSubst, Toggles, eval, define, value, nrargs  )
 > where
 >
 > import Char			(  isSpace, isAlpha, isDigit  )
@@ -34,6 +34,12 @@ does the definition have surrounding parentheses, do the arguments
 have surrounding parentheses, what are the names of the arguments,
 and the tokens to replace the macro with.
 
+ks, 06.09.03: Adding the |nrargs| function that yields the number of
+arguments a formatting directive expects.
+
+> nrargs                        :: Equation -> Int
+> nrargs (_,_,args,_)           =  length args
+
 \NB Die Substution wird nicht als Funktion |[[Token]] -> [Token]|
 repr"asentiert, da math |Pos Token| verlangt.
 
@@ -41,7 +47,7 @@ repr"asentiert, da math |Pos Token| verlangt.
 > parseFormat 			:: String -> Either Exc (String, Equation)
 > parseFormat s			=  parse equation (convert s)
 
-Formatanweisungen. \NB @%format ( = "(\;"@ is legal.
+Format directives. \NB @%format ( = "(\;"@ is legal.
 
 > equation			:: Parser Token (String, Equation)
 > equation			=  do (opt, (f, opts, args)) <- optParen lhs
