@@ -4,7 +4,7 @@
 %
 % better code environment for poly style in lhs2TeX
 %
-% Andres Loeh, August 2004, ver 1.2
+% Andres Loeh, August 2004, ver 1.3
 %
 % TODO: split in fmt and sty
 %       use \[ \] in arrayhs (fleqn problem)
@@ -33,13 +33,22 @@
 % the spacing around displayed math formulas changes as well.
 % All code is indented using \leftskip.
 
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+\makeatletter
 \newenvironment{plainhscode}%
-  {\parskip=\abovedisplayskip\par\noindent
+  {\hsnewpar\abovedisplayskip
    \advance\leftskip\mathindent
+   \let\\=\@@normalcr
    \(\pboxed}%
   {\endpboxed\)%
-   \parskip=\belowdisplayskip\par\noindent
+   \hsnewpar\belowdisplayskip
    \ignorespacesafterend}
+\makeatother
 
 % The command \sethscode can be used to switch the code formatting
 % behaviour by mapping the hscode environment in the subst directive
@@ -58,11 +67,12 @@
 % parray environment which disallows page breaks in code blocks.
 
 \newenvironment{arrayhscode}%
-  {\parskip=\abovedisplayskip\par\noindent
+  {\hsnewpar\abovedisplayskip
    \advance\leftskip\mathindent
+   \let\\=\@@normalcr
    \(\parray}%
   {\endparray\)%
-   \parskip=\belowdisplayskip\par\noindent
+   \hsnewpar\belowdisplayskip
    \ignorespacesafterend}
 
 \newcommand{\arrayhs}{\sethscode{arrayhscode}}
@@ -75,5 +85,60 @@
   {\parray}{\endparray}
 
 \newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+
+\makeatletter
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \arrayrulewidth=\codeframewidth
+   \tabular{@@{}||p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}||@@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+\makeatother
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The joinhscode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\makeatletter
+\newenvironment{joinhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \begingroup
+   \ifx\hscode\framedhscode
+     \arrayrulewidth=\codeframewidth
+     \tabular{@@{}||p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}||@@{}}%
+     \hline\\[-1.5ex]%
+     \endtabular
+     \let\hline=\relax\let\framedhslinecorrect=\@@gobbletwo
+   \fi
+   \abovedisplayskip=0pt%
+   \parskip=0pt%
+   \lineskip=0pt%
+   \belowdisplayskip=0pt}%
+  {\endgroup
+   \ifx\hscode\framedhscode
+     \arrayrulewidth=\codeframewidth
+     %\hrule height \arrayrulewidth\relax%
+     \tabular{@@{}||p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}||@@{}}%
+     \\[-1.5ex]\hline
+     \endtabular
+   \fi
+   \parskip=\belowdisplayskip\par\noindent}
+\makeatother
 
 %endif

@@ -28,11 +28,11 @@
    \(\pboxed}%
   {\endpboxed\)%
    \endtabular
-   {\parskip=0pt\parindent=0pt\par\vskip\belowdisplayskip}%
+   {\parskip=0pt\parindent=0pt\par\vskip\belowdisplayskip\noindent}%
    \ignorespacesafterend}
 
 \newenvironment{barhscode}%
-  {{\parskip=0pt\parindent=0pt\par\vskip\abovedisplayskip\noindent}%
+  {\hsnewpar\abovedisplayskip
    \arrayrulecolor{codecolor}%
    \arrayrulewidth=\coderulewidth
    \tabular{||p{\linewidth-\arrayrulewidth-\tabcolsep}@@{}}%
@@ -40,7 +40,7 @@
    \(\pboxed}%
   {\endpboxed\)%
    \endtabular
-   {\parskip=0pt\parindent=0pt\par\vskip\belowdisplayskip}%
+   \hsnewpar\belowdisplayskip
    \ignorespacesafterend}
 \makeatother
 
@@ -49,39 +49,7 @@
 \newlength{\coderulewidth}
 \setlength{\coderulewidth}{3pt}
 
-\newenvironment{joincolorboxes}%
-  {\parskip=\abovedisplayskip\par\noindent
-   \begingroup
-   \abovedisplayskip=0pt%
-   \parskip=0pt%
-   \lineskip=0pt%
-   \belowdisplayskip=0pt}%
-  {\endgroup
-   \parskip=\belowdisplayskip\par\noindent}
-
-
 \newcommand{\colorhs}{\sethscode{colorhscode}}
 \newcommand{\barhs}{\sethscode{barhscode}}
-
-% The framed environment places code in a framed box.
-
-\def\codeframewidth{\arrayrulewidth}
-
-\makeatletter
-\newenvironment{framedhscode}%
-  {\parskip=\abovedisplayskip\par\noindent
-   \tabular{@@{}||p{\linewidth-2\arraycolsep-2\codeframewidth-2pt}||@@{}}%
-   \hline \\[-1.5ex]%
-   \let\endoflinesave=\\
-   \let\\=\@@normalcr
-   \(\pboxed}%
-  {\endpboxed\)%
-   \endoflinesave[.5ex]\hline
-   \endtabular
-   \parskip=\belowdisplayskip\par\noindent
-   \ignorespacesafterend}
-\makeatother
-
-\newcommand{\framedhs}{\sethscode{framedhscode}}
 
 %endif
