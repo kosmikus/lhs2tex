@@ -137,6 +137,7 @@
      \endtabular
      \let\hline=\relax\let\framedhslinecorrect=\@@gobbletwo
    \fi
+   \def\hsnewpar##1{\par}%
    \abovedisplayskip=0pt%
    \parskip=0pt%
    \lineskip=0pt%
