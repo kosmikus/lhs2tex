@@ -16,7 +16,7 @@ The |ent(integer)| denotes the number (i.e.~as displayed by the
 editor) of a column. Note that @lhs2TeX@ starts counting columns at 1.
 As |ent(columnspec)| one can use about the same strings that one
 can use to format a column in a @tabular@ environment using the
-\LaTeX\ @array@ (LINK!!) package. Table~\ref{columnspec} has a short 
+\LaTeX\ @array@~\cite{array} package. Table~\ref{columnspec} has a short 
 (and not necessarily complete) overview.
 \begin{table}
 \centering

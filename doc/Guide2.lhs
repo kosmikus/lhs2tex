@@ -347,7 +347,8 @@ packages\\ @polytable.sty@ and @lazylist.sty@ are required!
 \end{important}
 Both are included
 in the @lhs2TeX@ distribution (they are not part of standard
-\LaTeX\ distributions, although they are available from \CTAN),
+\LaTeX\ distributions, although they are available from 
+\CTAN~\cite{polytable,lazylist}),
 and are usually installed during the normal procedure. The
 @configure@ script will determine whether a suitably recent
 version of @polytable@ is installed on your system, and if
@@ -553,7 +554,9 @@ that makes use of the @polytable@ package, a package that has
 been specifically designed to fit the needs that arise while
 formatting Haskell code. (If you are interested in the package
 or think that it might be useful for other purposes, you are
-welcome to look at the documentation for @polytable@. LINK!!)
+welcome to look at the documentation for 
+@polytable@~\cite[also distributed with @lhs2TeX@ as 
+@polytable.pdf@ in the @polytable@ directory]{polytable}.)
 
 Beyond the advanced alignment options, \textbf{poly} style has
 all the functionality of \textbf{math} style. If \textbf{poly}
@@ -1388,7 +1391,8 @@ than an annotation using a formatting directive.
 \subsection{{\smaller AG} code example}
 
 Here is an example that shows how one can typeset code of the
-Utrecht University Attribute Grammar ({\smaller UUAG}) (LINK!!) system,
+Utrecht University Attribute Grammar ({\smaller UUAG}) 
+(\cite{uuag}) system,
 which is based on Haskell, but adds additional syntactic constructs.
 
 The input
@@ -1402,7 +1406,7 @@ produces the following output:
 \subsection{Generic Haskell example}\label{generichaskell}
 
 Another example of a Haskell variant that can be typeset using
-@lhs2TeX@ using some annotations is Generic Haskell (LINK!!).
+@lhs2TeX@ using some annotations is Generic Haskell~\cite{gh}.
 
 This is a possible input file, including the directives
 necessary to be able to process it in both \textbf{newcode}
@@ -1416,7 +1420,10 @@ Processed in \textbf{poly} style, the output looks as follows:
 
 \subsection{Calculation example}
 
-ADD THIS!!
+The following example shows a calculational proof. The input
+\input{CalcExampleIn}%
+produces
+\input{CalcExample}%
 
 
 %%%
@@ -1718,6 +1725,33 @@ If you start a \TeX\ group in one of your directives but do not
 close it, then this error arises. You should not write such unbalanced
 formatting directives unless you make sure that they do never span
 an aligned column. TODO: Write example.
+
+\begin{thebibliography}{99}
+
+\bibitem{polytable}
+  Andres L\"oh. \emph{The @polytable@ package.}
+  \url{http://ctan.org/tex-archive/macros/latex/contrib/polytable/}
+
+\bibitem{lazylist}
+  Alan Jeffrey. \emph{The @lazylist@ package.}
+  \url{http://ctan.org/tex-archive/macros/latex/contrib/lazylist/}
+
+\bibitem{uuag}
+  Arthur Baars, S.~Doaitse Swierstra, Andres L\"oh.
+  \emph{The UU AG System User Manual.}
+  \url{http://www.cs.uu.nl/~arthurb/data/AG/AGman.pdf}
+
+\bibitem{array}
+  Frank Mittelbach and David Carlisle.
+  \emph{The @array@ package.}
+  \url{http://www.ctan.org/tex-archive/macros/latex/required/tools/array.dtx}
+
+\bibitem{gh}
+  Andres L\"oh.
+  \emph{Exploring Generic Haskell.}
+  PhD Thesis, Utrecht University, 2004.
+
+\end{thebibliography}
 
 \end{document}
 
