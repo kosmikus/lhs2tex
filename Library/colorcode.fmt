@@ -4,9 +4,10 @@
 %
 % code in a colored box for poly style in lhs2TeX
 %
-% Andres Loeh, August 2004, ver 1.1
+% Andres Loeh, August 2004, ver 1.2
 %
 % TODO: split in fmt and sty
+%       add baselineskip hack to other environments
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %endif
 
@@ -21,23 +22,29 @@
 
 \makeatletter
 \newenvironment{colorhscode}%
-  {\parskip=\abovedisplayskip\par\noindent
+  {{\parskip=\abovedisplayskip\baselineskip=0pt\par\noindent}%
    \tabular{@@{}>{\columncolor{codecolor}}p{\linewidth}@@{}}%
    \let\\=\@@normalcr
    \(\pboxed}%
   {\endpboxed\)%
    \endtabular
-   \parskip=\belowdisplayskip\par\noindent
+   {\parskip=\belowdisplayskip\baselineskip=0pt\par\noindent}%
    \ignorespacesafterend}
 \makeatother
 
 \def\colorcode{\columncolor{codecolor}}
 \definecolor{codecolor}{rgb}{1,1,.667}
 
-\newcommand\joincolorboxes
-  {\vspace*{-\belowdisplayskip}%
-   \vspace*{-\lineskip}%
-   \vspace*{-\abovedisplayskip}}
+\newenvironment{joincolorboxes}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \begingroup
+   \abovedisplayskip=0pt%
+   \parskip=0pt%
+   \lineskip=0pt%
+   \belowdisplayskip=0pt}%
+  {\endgroup
+   \parskip=\belowdisplayskip\par\noindent}
+
 
 \newcommand{\colorhs}{\sethscode{colorhscode}}
 
