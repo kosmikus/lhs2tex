@@ -7,13 +7,14 @@ sources         := $(wildcard *.lhs)
 #-----------------------------------------------------------------------------
 # commands
 
-flags		:= -math -align 33
+lhs2tex         := lhs2TeX
+flags		:= --math --align=33
 
 #-----------------------------------------------------------------------------
 # pattern rules
 
 %.tex : %.lhs $(sources)
-	lhs2TeX $(flags) $< > $@
+	$(lhs2tex) $(flags) $< > $@
 
 %.ps : %.dvi
 	dvips -D600 -o $@ $<

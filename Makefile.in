@@ -12,7 +12,8 @@ sources		:= Main.lhs TeXCommands.lhs TeXParser.lhs \
 		   Typewriter.lhs Math.lhs MathPoly.lhs \
 		   Directives.lhs HsLexer.lhs FileNameUtils.lhs \
 		   Parser.lhs FiniteMap.lhs Auxiliaries.lhs \
-		   StateT.lhs Document.lhs Verbatim.lhs Value.lhs
+		   StateT.lhs Document.lhs Verbatim.lhs Value.lhs \
+		   Version.lhs
 snips		:= sorts.tt sorts.math id.math cata.math spec.math
 objects         := $(foreach file, $(sources:.lhs=.o), $(file))
 sections       	:= $(foreach file, $(sources:.lhs=.tex), $(file))

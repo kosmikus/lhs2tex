@@ -11,6 +11,7 @@
 > import System.IO ( hPutStr, hPutStrLn, stderr, stdout )
 > import System.Console.GetOpt
 > import System
+> import Version
 >
 > import Control.Monad
 >
@@ -450,13 +451,6 @@ This situation is unclear to me. It should be clarified.]
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{GPL-related program information}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
-
-> version                       :: String
-> version                       =  show major ++ "." ++ show minor
->   where major                 =  numversion `div` 100
->         minor                 =  numversion `mod` 100
-> numversion                    :: Int
-> numversion                    =  103
 
 > programInfo                   :: String
 > programInfo                   =

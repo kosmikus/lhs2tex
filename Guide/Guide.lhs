@@ -1,12 +1,15 @@
 \documentclass{article}
 
 \usepackage{moreverb}
+\usepackage{alltt}
 \usepackage{boxedminipage}
 
 %include ../lhs2TeX.sty
 %let meta                       =  True
 %let array                      =  True
+%let doc                        =  True
 %include ../lhs2TeX.fmt
+%include ../Version.lhs
 
 \title{A Quick Guide to @lhs2TeX@}
 \author{RALF HINZE
@@ -36,7 +39,20 @@ just Haskell) that combines some of the good features of @pphs@ and
 \section{Installing @lhs2TeX@}
 %-------------------------------=  --------------------------------------------
 
-Adjust @binpath@ in the Makefile and type @make all@. That's it!?
+Unpack the archive. Assume that has been unpacked into directory
+@/somewhere@. Then say
+\begin{alltt}
+    cd /somewhere/lhs2TeX-\ProgramVersion
+    ./configure
+    make
+    make install
+\end{alltt}
+You might need administrator permissions to perform the @make install@
+step. Alternatively, you can select your own installation location by
+passing the @--prefix@ argument to @configure@:
+\begin{verbatim}
+    ./configure --prefix=/my/local/programs
+\end{verbatim}
 
 %-------------------------------=  --------------------------------------------
 \section{A quick guide to @lhs2TeX@}
@@ -47,7 +63,7 @@ contains a small example (@Sort.lhs@). A \LaTeX-file is obtained
 via
 %
 \begin{verbatim}
-    lhs2TeX -math Sort.lhs > Sort.tex
+    lhs2TeX --math Sort.lhs > Sort.tex
 \end{verbatim}
 %
 @lhs2TeX@ converts among other things code sections (identified by Bird
@@ -87,7 +103,8 @@ one exception to this rule. Since @lhs2TeX@ recognizes
 type a single bar here: both @\verb|@@|@ and @\verb@@|@@@ will
 work.
 
-Typewriter text is written as follows \verb|@typewriter@|. The same
+Typewriter (verbatim) text is written as 
+follows: \verb|@typewriter@|. The same
 remarks apply here: to get one \verb|@| you must type two.
 
 @lhs2TeX@ also allows for inverse bird tracks (@<@) which mark
@@ -96,7 +113,10 @@ exactly the same way as program code. It only makes a difference to the
 Haskell compiler which recognizes |mergeSort| but not |splitAt|
 (Figure~\ref{fig:sorts}).  Specification code is normally used to give
 (non-) executable specifications of functions or to repeat the
-definition of predefined functions.
+definition of predefined functions. 
+
+@lhs2TeX@ can alsow process literate scripts where the code is
+enclosed by \LaTeX-style @\begin{code}@ and @\end{code}@ commands.
 
 @lhs2TeX@ can be instructed to typeset identifiers or symbols (in
 fact: every Haskell token) in a special way using format directives.
@@ -113,22 +133,22 @@ ns|.
 
 Format directives for Haskell variables and constructors are allowed to
 have arguments while directives for Haskell operators must not have
-any. This is because @lhs2TeX@ uses a very simple Haskell Parser which
+any. This is because @lhs2TeX@ uses a very simple Haskell parser which
 knows nothing of operator precedences or associativity.
 
-You sometimes need parenthesis in your code but not in the printed
+You sometimes need parentheses in your code but not in the printed
 output. For instance, the expression @|sqrt (a + b)|@ should
 result in $\sqrt{\Varid{a} + \Varid{b}}$ rather than |sqrt (a + b)|.
-Putting an argument in parenthesis means that it is safe to drop
-parenthesis around the expansion of this argument. The desired
+Putting an argument in parentheses means that it is safe to drop
+parentheses around the expansion of this argument. The desired
 behaviour is obtained via
 %
 {\small\verbatiminput{directives2.snip}}
 %include directives2.snip
 \noindent
 However, @|f (sqrt a)|@ still results in |f (sqrt a)|. To instruct
-@lhs2TeX@ that it is safe to drop parenthesis around the expanded
-macro you must put the left hand side in parenthesis.
+@lhs2TeX@ that it is safe to drop parentheses around the expanded
+macro you must put the left hand side in parentheses.
 %
 {\small\verbatiminput{directives3.snip}}
 %include directives3.snip

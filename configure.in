@@ -3,7 +3,12 @@ dnl Generic Haskell configure script
 dnl
 
 # Is it there?
-AC_INIT(lhs2tex,1.0)
+AC_INIT(lhs2tex,1.5)
+
+VERSION=1.5
+NUMVERSION=105
+AC_SUBST(VERSION)
+AC_SUBST(NUMVERSION)
 
 # check for Haskell compiler
 AC_PATH_PROG(GHC,ghc)
@@ -31,7 +36,8 @@ AC_PATH_PROG(XDVI,xdvi)
 AC_PATH_PROG(GV,gv)
 AC_PATH_PROG(DVIPS,dvips)
 
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES(Makefile Version.lhs)
+AC_OUTPUT
 
 echo "Configuration succesfully completed."
 echo "Say"

@@ -203,7 +203,12 @@ If |eval e| returns |Mandatory| then parenthesis around |e| must not be
 dropped; |Optional True| indicates that it can be dropped; |Optional
 False| indicates that the decision is up the caller.
 
-> substitute			:: (CToken tok) => Formats -> Bool -> Chunk tok -> [tok]
+ks, 23.07.2003: This substitute function does not work recursively.
+To change this is on my TODO list. Substitutions without arguments,
+hovewer, do work recursively because they are handled again at a later
+stage (by the call to latexs, for instance in leftIndent).
+
+> substitute			:: (CToken tok,Show tok) => Formats -> Bool -> Chunk tok -> [tok]
 > substitute d auto chunk	=  snd (eval chunk)
 >   where
 >   eval                        :: (CToken tok) => [Item tok] -> (Mode,[tok])

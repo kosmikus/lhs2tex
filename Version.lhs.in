@@ -1,0 +1,17 @@
+%if doc
+\newcommand\ProgramVersion{@VERSION@}
+%else
+% - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
+\subsubsection{Program version information}
+% - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
+
+> module Version where
+>
+> version                       :: String
+> version                       =  show major ++ "." ++ show minor
+>   where major                 =  numversion `div` 100
+>         minor                 =  numversion `mod` 100
+> numversion                    :: Int
+> numversion                    =  @NUMVERSION@
+
+%endif
