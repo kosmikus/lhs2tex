@@ -20,6 +20,7 @@ include lhs2TeX.d
 GHC		:= @GHC@
 GHCFLAGS	:= -Wall -O -recomp -package lang
 
+INSTALL         := @INSTALL@
 MV              := @MV@
 CP              := @CP@
 RM              := @RM@
