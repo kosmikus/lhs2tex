@@ -279,7 +279,14 @@ Remove trailing blank line.
 >                                     fromIO (when (verbose st) (hPutStrLn stderr $ ")"))
 >     where f			=  withoutSpaces arg
 > format (Directive Begin _)	=  update (\st -> st{stack = fmts st : stack st})
-> format (Directive End _)	=  update (\st@State{stack = d:ds} -> st{fmts = d, stack = ds})
+> format (Directive End _)	=  do st <- fetch
+>                                     when (null (stack st)) $
+>                                       do fromIO (hPutStrLn stderr $ "unbalanced %} in line " 
+>                                                                       ++ show (lineno st))
+>                                          update (\st -> st{stack = [fmts st]})
+>                                     update (\st@State{stack = d:ds} -> st{fmts = d, stack = ds})
+
+ks, 11.09.03: added exception handling for unbalanced grouping
 
 \Todo{|toggles| should be saved, as well.}
 
