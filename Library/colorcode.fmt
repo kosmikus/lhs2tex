@@ -4,10 +4,10 @@
 %
 % code in a colored box for poly style in lhs2TeX
 %
-% Andres Loeh, August 2004, ver 1.2
+% Andres Loeh, August 2004, ver 1.3
 %
 % TODO: split in fmt and sty
-%       add baselineskip hack to other environments
+%       fix spacing behaviour for other environments
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %endif
 
@@ -22,13 +22,13 @@
 
 \makeatletter
 \newenvironment{colorhscode}%
-  {{\parskip=\abovedisplayskip\baselineskip=0pt\par\noindent}%
+  {{\parskip=0pt\parindent=0pt\par\vskip\abovedisplayskip\noindent}%
    \tabular{@@{}>{\columncolor{codecolor}}p{\linewidth}@@{}}%
    \let\\=\@@normalcr
    \(\pboxed}%
   {\endpboxed\)%
    \endtabular
-   {\parskip=\belowdisplayskip\baselineskip=0pt\par\noindent}%
+   {\parskip=0pt\parindent=0pt\par\vskip\belowdisplayskip}%
    \ignorespacesafterend}
 \makeatother
 
