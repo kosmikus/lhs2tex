@@ -1,10 +1,10 @@
 
-bindir          := @bindir@
-datadir         := @datadir@
-stydir          := @datadir@/@PACKAGE_TARNAME@
-docdir          := @datadir@/doc/@PACKAGE_TARNAME@-@PACKAGE_VERSION@
-prefix          := @prefix@
-exec_prefix     := @exec_prefix@
+bindir          = @bindir@
+datadir         = @datadir@
+stydir          = @datadir@/@PACKAGE_TARNAME@
+docdir          = @datadir@/doc/@PACKAGE_TARNAME@-@PACKAGE_VERSION@
+prefix          = @prefix@
+exec_prefix     = @exec_prefix@
 
 binpath		:= $(HOME)/bin
 
