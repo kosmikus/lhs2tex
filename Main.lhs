@@ -281,12 +281,28 @@ Remove trailing blank line.
 >				      (str,f) <- fromIO (chaseFile sp (d ++ f))
 >                                     update (\st -> st { file = f })
 >                                     fromIO (when (verbose st) (hPutStr stderr $ "(" ++ f))
->				      formatStr str
+>				      formatStr (addEndNL str)
 >				      -- |fromIO (setCurrentDirectory d)|
 >				      update (\st'@State{files = (f, l) : fs} ->
 >				          st'{file = f, lineno = l, files = fs, path = d})
 >                                     fromIO (when (verbose st) (hPutStrLn stderr $ ")"))
 >     where f			=  withoutSpaces arg
+>           addEndNL            =  (++"\n") . unlines . lines
+
+ks, 25.01.2003: If added the above function at the suggestion of NAD, but
+I am not completely sure if this is the right thing to do. Maybe we should
+strip blank lines from the end of a file as well, maybe we should do nothing
+at all. Hard to say what people think is intuitive. Anyway, the reason why
+I added it is this: if an %include directive is immediately followed
+by another line and the included file does not end in a blank line, then
+there will not be a single space between the last character of the included
+file and the first character of the following line. It would be possible
+to split a TeX control sequence over two different files that way. Seems
+strange. So we add a newline, or even two if none has been there before, 
+to make sure that exactly one linebreak ends up in the output, but not
+more, as a double newline is interpreted as a \par by TeX, and that might 
+also not be desired.
+
 > format (Directive Begin _)	=  update (\st -> st{stack = fmts st : stack st})
 > format (Directive End _)	=  do st <- fetch
 >                                     when (null (stack st)) $
