@@ -215,6 +215,7 @@ in a conditional checking |mathCommon|.
 %subst column1 a	= "$" a "$"
 %endif
 %subst newline   	= "\\'n"
+%subst blankline 	= "\\[1mm]'n"
 %let mathCommon         = True
 %elif style == poly
 %let autoSpacing	= True
@@ -231,6 +232,7 @@ in a conditional checking |mathCommon|.
 %subst centered         = "@{}c@{\;}"
 %subst dummycol         = "@{}l@{}"
 %subst newline   	= "\nextline'n"
+%subst blankline        = "\nextline[1mm]'n"
 %let mathCommon         = True
 %endif
 %if mathCommon
@@ -244,7 +246,6 @@ in a conditional checking |mathCommon|.
 %subst spaces a		= a
 %subst special a	= a
 %subst space     	= "\;"
-%subst blankline 	= "\\[1mm]'n"
 %subst conid a   	= "\Conid{" a "}"
 %subst varid a   	= "\Varid{" a "}"
 %subst consym a  	= "\mathbin{" a "}"
