@@ -312,9 +312,13 @@ legal atom (|string| is applied to it).
 >                                               -> Int              -- "Traegheit"
 >                                               -> [[Pos tok]]      -- positionierte tokens per Zeile
 >                                               -> [Line [Pos tok]]
-> align cs sep lat toks         =  fmap (\t -> let res = splitn ("B",0) False cs t
->                                              in  if null toks || null res then Blank
->                                                                           else Poly res
+> align cs sep lat toks         =  fmap (\t -> {- trace (show (map token t) ++ "\n") $ -}
+>                                              let res = splitn ("B",0) False cs t
+>                                              in  if null [x | x <- t
+>                                                          , (row x /= 0 || col x /= 0) && isNotSpace (token x)]
+>                                                      || null res 
+>                                              then Blank
+>                                              else Poly res
 >                                       ) toks
 >   where
 >   splitn cc ind [] []         =  []
