@@ -1,0 +1,13 @@
+
+\ProvidesPackage{NoLineEnd}
+
+\def\PError{%
+  \PackageError{NoLineEnd}{Don't include this file, use \string\usepackage!}{}}
+%if False
+\let\PError\relax%
+%endif
+\PError
+
+
+\let\opboxed=\pboxed
+\def\pboxed{\let\\=\@normalcr\opboxed}%@

@@ -1,0 +1,76 @@
+%if False
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% polycode.fmt
+%
+% better code environment for poly style in lhs2TeX
+%
+% Andres Loeh, August 2004, ver 1.0
+%
+% TODO: split in fmt and sty
+%       use \[ \] in arrayhs (fleqn problem)
+%       think about penalties and better pagebreaks
+%         by using \allowdisplaybreaks
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%endif
+
+%if style /= newcode
+
+%if False
+% The follwing subst replaces the bad default from lhs2TeX.fmt.
+% The idea is to just provide the basic structure in the subst, and
+% let the rest be handled by a LaTeX environment.
+%endif
+
+%subst code a = "\begin{hscode}\SaveRestoreHook'n" a "\ColumnHook'n\end{hscode}\resethooks'n"
+
+
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+
+\newenvironment{plainhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \advance\leftskip\mathindent
+   \(\pboxed}%
+  {\endpboxed\)%
+   \parskip=\belowdisplayskip\par\noindent}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \advance\leftskip\mathindent
+   \(\parray}%
+  {\endparray\)%
+   \parskip=\belowdisplayskip\par\noindent}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
