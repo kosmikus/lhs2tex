@@ -269,7 +269,7 @@ in a conditional checking |mathCommon|.
 %format !!         = "\mathbin{!!}"
 %format ^          = "\mathbin{\uparrow}"
 %format ^^         = "\mathbin{\uparrow\uparrow}"
-%format **         = \mathbin{**}
+%format **         = "\mathbin{**}"
 %format /          = "\mathbin{/}"
 %format `quot`     = "\mathbin{\Varid{`quot`}}"
 %format `rem`      = "\mathbin{\Varid{`rem`}}"
