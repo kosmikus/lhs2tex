@@ -118,16 +118,17 @@ column specifiers. It only works for @poly@ style.
   {\g@@addto@@macro\ColumnHook{\column{#1}{#2}}}
 
 %if standardsymbols
-\newcommand{\@@onelinecommentchars}{\quad--- }
+\newcommand{\onelinecommentchars}{\quad--- }
 %else
-\newcommand{\@@onelinecommentchars}{\quad-{}- }
-\newcommand{\@@commentbeginchars}{\enskip\{-}
-\newcommand{\@@commentendchars}{-\}\enskip}
+\newcommand{\onelinecommentchars}{\quad-{}- }
+%fi
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
 
 \newcommand{\visiblecomments}{%
-  \let\onelinecomment=\@@onelinecommentchars
-  \let\commentbegin=\@@commentbeginchars
-  \let\commentend=\@@commentendchars}
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
 
 \newcommand{\invisiblecomments}{%
   \let\onelinecomment=\empty
