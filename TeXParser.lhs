@@ -24,7 +24,7 @@ environments.
 
 > maxChar, maxLine		:: Int
 > maxChar			=  1000
-> maxLine			=  80 * 100
+> maxLine			=  80 * 500
 
 A simple Pseudo-\TeX-Parser. \NB Pseudo-\TeX\ environments must not be
 nested:

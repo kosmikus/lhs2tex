@@ -22,3 +22,17 @@ Known bugs or problems
 
 *  the manual does not explain how ' is treated in TeX strings, such
    as occur in formatting statements.
+
+*  the manual and most of all INSTALL should mention the texmf-tree
+   location procedure and the --with-texmf as well as the
+   --disable-polytable flag ...
+
+*  there is some bad interaction between parametrized formatting
+   directives and directly connecting alignment columns; an example
+   is in Experiments/FormatAlign.lhs.
+
+*  there are hardcoded maximum sizes in TeX parser for commands and
+   environments; this should at least be mentioned, better be made
+   configurable, best be removed somehow
+
+*  improperly nested parentheses can still lead to non-displayed code

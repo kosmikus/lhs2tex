@@ -1,33 +1,21 @@
 
-                     lhs2TeX version 1.9
-                     ===================
+                     lhs2TeX version 1.10
+                     ====================
 
-We are pleased to announce the first official release of
-lhs2TeX, a preprocessor to generate LaTeX code from literate
-Haskell sources.
+We are pleased to announce a new release of lhs2TeX, 
+a preprocessor to generate LaTeX code from literate Haskell
+sources.
 
 lhs2TeX includes the following features:
 
-* Different styles to process your source file: for instance,
-  "tt" style uses a monospaced font for the code while still 
-  allowing you to highlight keywords etc, whereas
-  "poly" style uses proportional fonts for identifiers, handles
-  indentation nicely, is able to replace binary operators by
-  mathematical symbols and take care of complex horizontal
-  alignments.
+* Highly customized output.
 
-* Formatting directives, which let you customize the way certain
-  tokens in the source code should appear in the processed 
-  output.
+* Liberal parser -- no restriction to Haskell 98.
 
-* A liberal parser that can handle most of the language 
-  extensions; you don't have to restrict yourself to Haskell 98.
+* Generate multiple versions of a program or document from 
+  a single source.
 
-* Preprocessor-style conditionals that allow you to generate
-  different versions of a document from a single source file
-  (for instance, a paper and a presentation).
-
-* Active documents: you can use Haskell to generate parts of the 
+* Active documents: call Haskell to generate parts of the 
   document (useful for papers on Haskell).
 
 * A manual explaining all the important aspects of lhs2TeX.
@@ -35,19 +23,13 @@ lhs2TeX includes the following features:
 Changes
 -------
 
-Although development on lhs2TeX has begun as early as 1997,
-it has never been formally released before. This is a first
-release that should be mostly compatible to versions that
-have been inofficially distributed so far. It should compile
-with the latest GHC versions.
+This is a bugfix release, with only minor new features.
+The most notable changes are:
 
-Two completely new modes have been added compared to previous
-versions: "poly" mode is designed to replace the old math
-mode; the restriction of having only one alignment column 
-per code block is lifted and replaced by a generic mechanism
-that allows complex layouts; "newcode" is a replacement for
-the old "code" mode that can handle formatting directives
-and produces LINE pragmas in the generated code.
+* Specification code is now handled correctly (that is, ignored) 
+  in the "code" and "newcode" styles.
+
+* There are some new forms of implicit formatting directives.
 
 Requirements and Download
 -------------------------
@@ -58,9 +40,10 @@ environments is available from
   http://www.cs.uu.nl/~andres/lhs2tex/
 
 It has been verified to build on Linux and MacOSX.
+For some platforms, there are binaries available.
 
-You need a recent version of GHC (5.04.X or higher should do) 
-to build lhs2TeX, and, of course, you need a TeX distribution 
+You need a recent version of GHC (6.X is tested) to build 
+lhs2TeX, and, of course, you need a TeX distribution 
 to make use of lhs2TeX's output. The program includes a 
 configuration that is suitable for use with LaTeX. In theory, 
 there should be no problem to generate code for other TeX 
