@@ -1,12 +1,5 @@
 
-bindir          = @bindir@
-datadir         = @datadir@
-stydir          = @datadir@/@PACKAGE_TARNAME@
-docdir          = @datadir@/doc/@PACKAGE_TARNAME@-@PACKAGE_VERSION@
-prefix          = @prefix@
-exec_prefix     = @exec_prefix@
-
-binpath		:= $(HOME)/bin
+include config.mk
 
 sources		:= Main.lhs TeXCommands.lhs TeXParser.lhs \
 		   Typewriter.lhs Math.lhs MathPoly.lhs \
@@ -18,26 +11,6 @@ snips		:= sorts.tt sorts.math id.math cata.math spec.math
 objects         := $(foreach file, $(sources:.lhs=.o), $(file))
 sections       	:= $(foreach file, $(sources:.lhs=.tex), $(file))
 
-GHC		:= @GHC@
-GHCFLAGS	:= -Wall -O -recomp -package lang
-
-INSTALL         := @INSTALL@
-MV              := @MV@
-CP              := @CP@
-RM              := @RM@
-MKDIR           := @MKDIR@
-TOUCH           := @TOUCH@
-DIFF            := @DIFF@
-FIND            := @FIND@
-LN_S            := @LN_S@
-LATEX           := @LATEX@
-XDVI            := @XDVI@
-GV              := @GV@
-DVIPS           := @DVIPS@
-SED             := @SED@
-GREP            := @GREP@
-SORT            := @SORT@
-UNIQ            := @UNIQ@
 MKINSTDIR       := ./mkinstalldirs
 
 ###
@@ -129,8 +102,6 @@ $(objects) : %.o : %.lhs
 %.tex : %.lit lhs2TeX
 	./lhs2TeX --verb -ilhs2TeX.fmt $< > $@
 
-%.ps : %.dvi
-	$(DVIPS) -D600 -o $@ $<
 
 lhs2TeX.sty: lhs2TeX.sty.lit lhs2TeX
 	./lhs2TeX --code lhs2TeX.sty.lit > lhs2TeX.sty
@@ -144,9 +115,10 @@ depend:
 	$(GHC) -M -optdep-f -optdeplhs2TeX.d $(GHCFLAGS) $(sources)
 	$(RM) -f lhs2TeX.d.bak
 
-Lhs2TeX.dvi : Lhs2TeX.tex lhs2TeX.sty $(sections) $(snips) lhs2TeX.sty.tex lhs2TeX.fmt.tex Makefile.tex
-	$(LATEX) Lhs2TeX
-#	latex Lhs2TeX
+lhs2TeX-includes : lhs2TeX.sty $(sections) $(snips) lhs2TeX.sty.tex lhs2TeX.fmt.tex Makefile.tex
+
+Lhs2TeX.dvi : lhs2TeX-includes
+Lhs2TeX.pdf : lhs2TeX-includes
 
 xdvi : Lhs2TeX.dvi
 	$(XDVI) -s 3 Lhs2TeX.dvi &
@@ -180,3 +152,5 @@ clean :
 all:
 	$(MAKE) install
 	$(MAKE) Lhs2TeX.dvi
+
+include common.mk

@@ -1,3 +1,6 @@
+
+include ../config.mk
+
 #-----------------------------------------------------------------------------
 # directories and files
 
@@ -18,23 +21,24 @@ LHS2TEX = ../lhs2TeX
 	$(LHS2TEX) --verbose --math --align=33 -smeta -i../lhs2TeX.fmt $< > $@
 
 %.ps : %.dvi
-	dvips -D600 -o $@ $<
+	$(DVIPS) -D600 -o $@ $<
 
 #-----------------------------------------------------------------------------
 
 .PHONY: show view print clean
 
-Test.dvi : $(texs) Test.tex
-	latex Test
+Test.dvi : $(texs)
 
 show : Test.dvi
-	xdvi -s 3 Test.dvi &
+	$(XDVI) -s 3 Test.dvi &
 
 view : Test.ps
 	xe ghostview Test.ps &
 
 print : Test.dvi
-	dvips -D600 -f Test.dvi | lpr -Pa -Zl
+	$(DVIPS) -D600 -f Test.dvi | lpr -Pa -Zl
 
 clean :
 	rm -f Test.tex $(texs) *.dvi *.ps
+
+include ../common.mk

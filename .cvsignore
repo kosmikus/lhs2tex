@@ -3,3 +3,8 @@
 *.dd
 *.ld
 *.ldd
+*.dvi
+*.ps
+*.pdf
+*.aux
+*.log

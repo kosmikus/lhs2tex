@@ -1,3 +1,6 @@
+
+include ../config.mk
+
 #-----------------------------------------------------------------------------
 # directories and files
 
@@ -7,22 +10,20 @@ sources         := $(wildcard *.lhs)
 #-----------------------------------------------------------------------------
 # commands
 
-lhs2tex         := lhs2TeX
+LHS2TEX         := ../lhs2TeX
 flags		:= --math --align=33
 
 #-----------------------------------------------------------------------------
 # pattern rules
 
 %.tex : %.lhs $(sources)
-	$(lhs2tex) $(flags) $< > $@
+	$(LHS2TEX) $(flags) $< > $@
 
 %.ps : %.dvi
-	dvips -D600 -o $@ $<
+	$(DVIPS) -D600 -o $@ $<
 
 #-----------------------------------------------------------------------------
-# rules
+# common rules
 
-$(file).dvi : $(file).tex
-	latex $(file)
-	latex $(file)
-	latex $(file)
+include ../common.mk
+
