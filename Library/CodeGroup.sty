@@ -1,0 +1,21 @@
+
+\ProvidesPackage{CodeGroup}
+
+\def\PError{%
+  \PackageError{CodeGroup}{Don't include this file, use \string\usepackage!}{}}
+%if False
+\let\PError\relax%
+%endif
+\PError
+
+% This depends on colorcode.fmt atm.
+% It provides a command codegroup which automatically adds save-/restore-
+% column-commands.
+
+\newenvironment{codegroup}[1][default]%
+  {\let\groupresethooks=\resethooks
+   \def\resethooks
+     {\groupresethooks\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}%
+   \def\SaveRestoreHook{\savecolumns[#1]}%
+   \begin{joincolorboxes}\ignorespaces}
+  {\end{joincolorboxes}\ignorespacesafterend}
