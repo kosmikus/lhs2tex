@@ -55,9 +55,10 @@
 >     tex _ (Special c)		=  sub'special (replace Empty [c] (conv c))
 >     tex _ (Comment s)		=  sub'comment (Embedded s)
 >     tex _ (Nested s)		=  sub'nested (Embedded s)
+>     tex _ (Pragma s)          =  sub'pragma (Embedded s)
 >     tex _ (Keyword s)		=  replace Empty s (sub'keyword (convert s))
 >     tex _ (TeX d)		=  d
->     tex _ t@(Qual m t')	=  replace Empty (string t) (tex (tex Empty (Conid m) <> Text ".") t')
+>     tex _ t@(Qual ms t')	=  replace Empty (string t) (tex (catenate (map (\m -> tex Empty (Conid m) <> Text ".") ms)) t')
 >     tex _ t@(Op t')		=  replace Empty (string t) (cmd (conv '`' <> tex Empty t' <> conv '`'))
 >         where cmd | isConid t'=  sub'consym
 >                   | otherwise =  sub'varsym

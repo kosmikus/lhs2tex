@@ -17,6 +17,8 @@ flags		:= --math --align=33
 #-----------------------------------------------------------------------------
 # pattern rules
 
+.PHONY : default clean
+
 default : Guide.pdf
 
 %.math : %.snip
@@ -24,6 +26,9 @@ default : Guide.pdf
 
 %.tex : %.lhs $(sources) $(snips)
 	$(LHS2TEX) $(flags) $< > $@
+
+clean:
+	$(RM) -f *.log *.aux *.math Guide.tex
 
 #-----------------------------------------------------------------------------
 # common rules

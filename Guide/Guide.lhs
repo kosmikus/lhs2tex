@@ -15,7 +15,11 @@
 \author{RALF HINZE
 \\Institut f\"{u}r Informatik III, Universit\"{a}t Bonn
 \\R\"{o}merstra\ss e 164, 53117 Bonn, Germany
-\\@ralf@@informatik.uni-bonn.de@}
+\\@ralf@@informatik.uni-bonn.de@
+\\[2ex]ANDRES L\"{O}H
+\\Institute of Information and Computing Sciences
+\\Utrecht University, P.O.~Box 80.089\\3508\,TB Utrecht, The Netherlands
+\\@andres@@cs.uu.nl@}
 
 %-------------------------------=  --------------------------------------------
 %if False
@@ -39,7 +43,9 @@ just Haskell) that combines some of the good features of @pphs@ and
 \section{Installing @lhs2TeX@}
 %-------------------------------=  --------------------------------------------
 
-Unpack the archive. Assume that has been unpacked into directory
+These instructions apply to Unix-like environments:
+
+Unpack the archive. Assume that it has been unpacked into directory
 @/somewhere@. Then say
 \begin{alltt}
     cd /somewhere/lhs2TeX-\ProgramVersion
@@ -54,12 +60,50 @@ passing the @--prefix@ argument to @configure@:
     ./configure --prefix=/my/local/programs
 \end{verbatim}
 
+@lhs2TeX@ needs to find two configuration files,
+@lhs2TeX.sty@ and @lhs2TeX.fmt@ after installation. By default,
+@lhs2TeX@ looks in the following directories, in order:
+\begin{verbatim}
+    .
+    $HOME/lhs2TeX
+    $HOME/.lhs2TeX
+    $LHS2TEX
+    /usr/local/share/lhs2tex
+    /usr/local/share/lhs2TeX
+    /usr/local/lib/lhs2tex
+    /usr/local/lib/lhs2TeX
+    /usr/share/lhs2tex
+    /usr/share/lhs2TeX
+    /usr/lib/lhs2tex
+    /usr/lib/lhs2TeX
+\end{verbatim}
+If you want to install @lhs2TeX@ to a location where the
+configuration files cannot be found automatically, it is
+thus easies to set the environment variable @LHS2TEX@
+to point to the correct directory.
+
+If you desire to use the (not yet documented) @poly@ mode
+of @lhs2TeX@ (\emph{and only in this case!}), 
+you must manually install the files @polytable.sty@
+and @lazylist.sty@ (they are included in the distribution)
+in such a way that they will be found by your \TeX\ installation.
+Assuming that you have a @texmf@ tree at @/usr/local/share/texmf@,
+this can usually be achieved by placing the files in the
+directory @/usr/local/share/texmf/tex/latex/polytable@,
+and then running 
+\begin{verbatim}
+    mktexlsr
+\end{verbatim} 
+to update the \TeX\ filename database.
+
 %-------------------------------=  --------------------------------------------
 \section{A quick guide to @lhs2TeX@}
 %-------------------------------=  --------------------------------------------
 
+\subsection{Processing a file}
+
 Input is a \emph{legal} Haskell literate script; Figure~\ref{fig:sorts}
-contains a small example (@Sort.lhs@). A \LaTeX-file is obtained
+contains a small example (the file @Sort.lhs@). A \LaTeX-file is obtained
 via
 %
 \begin{verbatim}
@@ -70,16 +114,16 @@ via
 tracks) into \LaTeX-code. Figure~\ref{fig:sorts.math} displays the
 result.
 %
-\begin{figure}[p]
+\begin{figure}[htbp]
 \begin{center}
 \begin{boxedminipage}{\linewidth}
 \small\verbatiminput{sorts.snip}
 \end{boxedminipage}
 \end{center}
 \caption{\label{fig:sorts}Sample input}
-\end{figure}
-%
-\begin{figure}[p]
+%\end{figure}
+\bigskip
+%\begin{figure}[p]
 \begin{center}
 \begin{boxedminipage}{\linewidth}
 \small\input{sorts.math}
@@ -115,8 +159,37 @@ Haskell compiler which recognizes |mergeSort| but not |splitAt|
 (non-) executable specifications of functions or to repeat the
 definition of predefined functions. 
 
-@lhs2TeX@ can alsow process literate scripts where the code is
+@lhs2TeX@ can also process literate scripts where the code is
 enclosed by \LaTeX-style @\begin{code}@ and @\end{code}@ commands.
+
+\subsection{Including files}
+
+With @lhs2TeX@, one can include other source files
+by means of an
+@%include@ directive. All @lhs2TeX@ directives begin on
+a new line and start with a @%@ character, to make them
+appear as a \TeX\ comment. Directives may occur anywhere
+in the file except in code blocks. Include directives
+cause the specified file to be included literally at the
+position of the directive. The contents of the file will
+also be processed by @lhs2TeX@.
+
+To successfully use @lhs2TeX@, it is, in fact, \emph{necessary}
+to include at least two files, @lhs2TeX.fmt@ and @lhs2TeX.sty@,
+as with
+%
+{\small\verbatiminput{directives0.snip}}
+\noindent
+%
+These commands should be placed in the preamble of the document,
+i.e.~between the @\documentclass@ and the @\begin{document}@ commands.
+These files contain basic directives and \TeX\ commands that
+are required for the preprocessor to work correctly.
+
+Alternatively, one can use the @-i@ command line option of @lhs2TeX@
+to include these files.
+
+\subsection{Formatting directives}
 
 @lhs2TeX@ can be instructed to typeset identifiers or symbols (in
 fact: every Haskell token) in a special way using format directives.
@@ -159,16 +232,16 @@ shows that it is not always safe to drop parenthesis. If @a@ were in
 parenthesis as well, @power (a + b) 3@ would result in ${\Varid{a} +
 \Varid{b}}^{3}$.
 
-\begin{figure}[p]
+\begin{figure}[htbp]
 \begin{center}
 \begin{boxedminipage}{\linewidth}
 \small\verbatiminput{spec.snip}
 \end{boxedminipage}
 \end{center}
 \caption{\label{fig:spec}Meta Haskell (input)}
-\end{figure}
-%
-\begin{figure}[p]
+%\end{figure}
+\bigskip
+%\begin{figure}[p]
 \begin{center}
 \begin{boxedminipage}{\linewidth}
 \small\input{spec.math}
@@ -176,11 +249,6 @@ parenthesis as well, @power (a + b) 3@ would result in ${\Varid{a} +
 \end{center}
 \caption{\label{fig:spec.math}Meta Haskell (output)}
 \end{figure}
-
-@lhs2TeX@ automatically aligns code and specification sections. By
-default the alignment column is $33$. You can adjust to your needs
-using, for example, @%align 25@ (which again looks like a
-\TeX\ comment).
 
 Formatting directives usually affect everything that comes after
 them. However, a set of directives can be made local by enclosing
@@ -191,16 +259,14 @@ no other directives (@%align@, @%if@, @%subst@ or whatever).
 Figures~\ref{fig:block} and \ref{fig:block.math} show an example.
 Blocks can be nested.
 
-\begin{figure}[p]
+\begin{figure}[htbp]
 \begin{center}
 \begin{boxedminipage}{\linewidth}
 \small\verbatiminput{block.snip}
 \end{boxedminipage}
 \end{center}
 \caption{\label{fig:block}Block structure (input)}
-\end{figure}
-%
-\begin{figure}[p]
+\bigskip
 \begin{center}
 \begin{boxedminipage}{\linewidth}
 \small\input{block.math}
@@ -209,13 +275,40 @@ Blocks can be nested.
 \caption{\label{fig:block.math}Block structure (output)}
 \end{figure}
 
+As of now, the right hand sides of formatting directives consist
+of a space separated list that may contain snippets of \TeX\ code
+that are enclosed between double quotes, arguments, and other
+tokens. These other tokens may refer to formatting directives again,
+which will be applied, but \emph{only if they have no arguments}.
+%
+{\small\verbatiminput{directives4.snip}}
+%include directives4.snip
+\noindent
+After these directives, @|vecx|@ results in |vecx|, whereas
+@|vecy|@ results in |vecy| instead of |vec(y)|.
+
+\subsection{Alignment}
+
+@lhs2TeX@ automatically aligns code and specification sections. By
+default the alignment column is $33$. You can adjust to your needs
+using, for example, @%align 25@ (which again looks like a
+\TeX\ comment). This behaviour can be observed in 
+Figures~\ref{fig:sorts.math} and \ref{fig:spec.math}. In the input
+to the latter example, shown in Figure~\ref{fig:spec}, there
+is also an example of the alignment column being changed.
+
+
+\subsection{Conditional preprocessing}
+
 @lhs2TeX@ recognizes a numer of C-preprocessor-like directives: @%if@,
-@%then@, @%else@, @%elif@, @%fi@, @%let@, @%include@.
+@%then@, @%else@, @%elif@, @%fi@, @%let@.
 With @%let@, one can set boolean or integer toggles that can be tested
 in conditionals.
 Internally, @lhs2TeX@ uses toggles to support different behaviours.
 Also, some variables are predefined so that your documents can show
 different behaviour under different circumstances. 
+
+\subsection{Calling Hugs}
 
 You can also call @Hugs@ \ldots
 

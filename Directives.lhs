@@ -60,7 +60,10 @@ Formatanweisungen. \NB @%format ( = "(\;"@ is legal.
 >     where
 >     tex (Varid s)		=  subscript Varid s
 >     tex (Conid s)		=  subscript Conid s
->     tex (Qual m s)		=  Conid m : tex s
+>     tex (Qual [] s)           =  tex s
+>     tex (Qual (m:ms) s)	=  Conid m : tex (Qual ms s)
+>      -- ks, 03.09.2003: was "tex (Qual m s) = Conid m : tex s"; 
+>      -- seems strange though ...
 >     subscript f s		=  [f (reverse w), TeX (Text ("_{" ++ reverse v ++ "}" ++ reverse t))]
 >         where s'		=  reverse s
 >               (t, u)		=  span (== '\'') s'

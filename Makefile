@@ -43,9 +43,11 @@ DEPPOSTPROC = $(SED) -e 's/\#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 ### default targets
 ###
 
-.PHONY : default xdvi gv print install backup clean all depend
+.PHONY : default xdvi gv print install backup clean all depend doc
 
-default : lhs2TeX
+all : default
+
+default : lhs2TeX doc
 
 %.d : %.lhs
 	$(MKGHCDEPEND); \
@@ -111,6 +113,9 @@ lhs2TeX.fmt: lhs2TeX.fmt.lit lhs2TeX
 lhs2TeX : $(objects)
 	$(GHC) $(GHCFLAGS) -o lhs2TeX $(objects)
 
+doc : lhs2TeX lhs2TeX.sty lhs2TeX.fmt
+	cd Guide; $(MAKE) Guide.pdf
+
 depend:
 	$(GHC) -M -optdep-f -optdeplhs2TeX.d $(GHCFLAGS) $(sources)
 	$(RM) -f lhs2TeX.d.bak
@@ -136,7 +141,7 @@ install : lhs2TeX lhs2TeX.sty lhs2TeX.fmt
 	$(INSTALL) -m 644 lhs2TeX.sty lhs2TeX.fmt $(DESTDIR)$(stydir)
 
 backup:
-	$(CD) ..; \
+	cd ..; \
 	$(RM) -f Literate.tar Literate.tar.gz; \
 	tar -cf Literate.tar Literate; \
 	gzip Literate.tar; \
@@ -148,9 +153,10 @@ clean :
 	-$(RM) -f *.d *.dd *.ld *.ldd
 	$(RM) -f lhs2TeX.sty lhs2TeX.fmt
 	$(RM) -f Lhs2TeX.tex lhs2TeX.sty.tex lhs2TeX.fmt.tex Makefile.tex 
+	cd Guide; $(MAKE) clean
 
-all:
-	$(MAKE) install
-	$(MAKE) Lhs2TeX.dvi
+# all:
+# 	$(MAKE) install
+# 	$(MAKE) Lhs2TeX.dvi
 
 include common.mk

@@ -26,6 +26,7 @@ conditionals at work here.
 %subst code a    = "\begin{tabbing}\texfamily'n" a "'n\end{tabbing}'n"
 %subst comment a = "{\rmfamily-{}- " a "}"
 %subst nested a  = "{\rmfamily\enskip\{- " a " -\}\enskip}"
+%subst pragma a  = "{\rmfamily\enskip\{-\#" a " \#-\}\enskip}"
 %subst spaces a  = a
 %subst special a = a
 %subst space     = "~"
@@ -236,6 +237,7 @@ in a conditional checking |anyMath|.
 %subst dummy		= "\cdot "
 %subst inline a  	= "\ensuremath{" a "}"
 %subst hskip a	        = "\hskip" a "em\relax"
+%subst pragma a         = "\mbox{\enskip\{-\#" a " \#-\}\enskip}"
 %if latex209
 %subst numeral a 	= "{\mathrm " a "}"
 %subst keyword a 	= "{\mathbf " a "}"

@@ -9,13 +9,14 @@ First, the resulting list must be ordered.
 
 Second, the resulting list must be a rearrangement of the input.
 
-%format Bag.empty               =  "\emptyset "
-%format (Bag.single (a))        =  "\mathopen{\lbag}" a "\mathclose{\rbag}"
-%format `Bag.union`             =  "\uplus "
+%align 26
+%format Bag.empty        =  "\emptyset "
+%format (Bag.single (a)) =  "\mathopen{\lbag}" a "\mathclose{\rbag}"
+%format `Bag.union`      =  "\uplus "
 
-< bag                           :: [a] -> Bag a
-< bag []                        =  Bag.empty
-< bag (a : as)                  =  Bag.single(a) `Bag.union` bag as
+< bag                    :: [a] -> Bag a
+< bag []                 =  Bag.empty
+< bag (a : as)           =  Bag.single(a) `Bag.union` bag as
 
 Using |ordered| and |bag| we may specify sorting as follows.
 %

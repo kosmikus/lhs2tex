@@ -55,6 +55,7 @@ Substitution strings.
 > sub'string a			=  Sub "string" [a]
 > sub'comment a			=  Sub "comment" [a]
 > sub'nested a			=  Sub "nested" [a]
+> sub'pragma a                  =  Sub "pragma" [a]
 > sub'keyword a			=  Sub "keyword" [a]
 > sub'column1 a			=  Sub "column1" [a]
 > sub'hskip a			=  Sub "hskip" [a]

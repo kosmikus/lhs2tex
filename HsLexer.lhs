@@ -25,11 +25,16 @@ Ein Haskell-Lexer. Modifikation der Prelude-Funktion \hs{lex}.
 >				|  Special Char
 >				|  Comment String
 >				|  Nested String
+>                               |  Pragma String
 >				|  Keyword String
 >				|  TeX Doc 		-- for inline \TeX
->				|  Qual String Token
+>				|  Qual [String] Token
 >				|  Op Token
 >				   deriving (Eq, Show)
+
+ks, 03.09.2003: Modified the |Qual| case to contain a list
+of strings rather than a single string, to add support for
+hierarchical modules. Also added Pragma.
 
 > isVarid, isConid, isNotSpace	:: Token -> Bool
 > isVarid (Varid _)		=  True
@@ -55,6 +60,7 @@ Ein Haskell-Lexer. Modifikation der Prelude-Funktion \hs{lex}.
 > string (Special c)		=  [c]
 > string (Comment s)		=  "--" ++ s
 > string (Nested s)		=  "{-" ++ s ++ "-}"
+> string (Pragma s)             =  "{-#" ++ s ++ "#-}"
 > string (Keyword s)		=  s
 > string (TeX (Text s))		=  "{-\"" ++ s ++ "\"-}"
 
@@ -62,7 +68,7 @@ This change is by ks, 14.05.2003, to make the @poly@ formatter work.
 This should probably be either documented better or be removed again.
 
 > string (TeX _)		=  "" -- |impossible "string"|
-> string (Qual m s)		=  m ++ "." ++ string s
+> string (Qual m s)		=  concatMap (++".") m ++ string s
 > string (Op s)			=  "`" ++ string s ++ "`"
 
 > tokenize			:: [Char] -> Either Exc [Token]
@@ -94,6 +100,9 @@ This should probably be either documented better or be removed again.
 > lex' ('{' : '-' : '"' : s)	=  do let (t, u) = inlineTeX s
 >				      v <- match "\"-}" u
 >				      return (TeX (Text t), v)
+> lex' ('{' : '-' : '#' : s)    =  do let (t, u) = nested 0 s
+>                                     v <- match "#-}" u
+>                                     return (Pragma t, v)
 > lex' ('{' : '-' : s)		=  do let (t, u) = nested 0 s
 >				      v <- match "-}" u
 >				      return (Nested t, v)
@@ -148,10 +157,17 @@ This should probably be either documented better or be removed again.
 >
 > nested			:: Int -> String -> (String, String)
 > nested _     []		=  ([], [])
+> nested 0     ('#' : '-' : '}' : s)
+>                               =  ([], '#':'-':'}':s)
 > nested 0     ('-' : '}' : s)	=  ([], '-':'}':s)
 > nested (n+1) ('-' : '}' : s)	=  '-' <| '}' <| nested n s
 > nested n     ('{' : '-' : s)	=  '{' <| '-' <| nested (n + 1) s
 > nested n     (c : s)		=  c <| nested n s
+
+ks, 03.09.2003: The above definition of nested will actually
+incorrectly reject programs that contain comments like the
+following one: {- start normal, but close as pragma #-} ...
+I don't expect this to be a problem, though.
 
 \NB GHC meldet bei |nested| f"alschlicherweise "`incomplete
 patterns"'. [ks: This is no longer true (with GHC 5.04.3).]
@@ -199,17 +215,27 @@ ks, 27.06.2003: I have modified the fifth case of |qualify|
 to only match if the |Varsym| contains at least one symbol
 besides the dot. Otherwise the dot is an operator, not part
 of a qualified name.
+ks, 03.09.2003: Deal with hierarchical module names. This could
+be made more efficient if that seems necessary.
 
 > qualify			:: [Token] -> [Token]
 > qualify []			=  []
 > qualify (Conid m :  Varsym "." : t@(Conid _) : ts)
->				=  Qual m t : qualify ts
+>				=  qualify (Qual [m] t : ts)
 > qualify (Conid m :  Varsym "." : t@(Varid _) : ts)
->				=  Qual m t : qualify ts
+>				=  Qual [m] t : qualify ts
 > qualify (Conid m : Varsym ('.' : s@(':' : _)) : ts)
->				=  Qual m (Consym s) : qualify ts
+>				=  Qual [m] (Consym s) : qualify ts
 > qualify (Conid m : Varsym ('.' : s@(_ : _)) : ts)
->				=  Qual m (Varsym s) : qualify ts
+>				=  Qual [m] (Varsym s) : qualify ts
+> qualify (Qual m (Conid m') : Varsym "." : t@(Conid _) : ts)
+>                               =  qualify (Qual (m ++ [m']) t : qualify ts)
+> qualify (Qual m (Conid m') : Varsym "." : t@(Varid _) : ts)
+>                               =  Qual (m ++ [m']) t : qualify ts
+> qualify (Qual m (Conid m') : Varsym ('.' : s@(':' : _)) : ts)
+>                               =  Qual (m ++ [m']) (Consym s) : qualify ts
+> qualify (Qual m (Conid m') : Varsym ('.' : s@(_ : _)) : ts)
+>                               =  Qual (m ++ [m']) (Varsym s) : qualify ts
 > qualify (t : ts)		=  t : qualify ts
 
 Backquoted ids zusammenfassen, da @`Prelude.div`@ zul"assig ist,
@@ -292,6 +318,7 @@ they do not bracket expressions.
 
 >     catCode (Comment _)	=  White
 >     catCode (Nested _)	=  White
+>     catCode (Pragma _)        =  White
 >     catCode (Keyword _)	=  Sep
 >     catCode (TeX (Text _))	=  White
 
