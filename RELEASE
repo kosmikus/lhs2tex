@@ -8,10 +8,10 @@ Haskell sources.
 
 lhs2TeX includes the following features:
 
-* Different modes to process your source file: for instance,
-  "tt" mode uses non-proportional fonts for the code examples
+* Different styles to process your source file: for instance,
+  "tt" style uses a monospaced font for the code examples
   while still allowing you to highlight keywords etc, whereas
-  "poly" mode uses proportional fonts for identifiers, handles
+  "poly" style uses proportional fonts for identifiers, handles
   indentation nicely, and replaces binary operators by
   mathematical symbols, and can handle complex horizontal
   alignments in code blocks.
@@ -22,7 +22,7 @@ lhs2TeX includes the following features:
 
 * A liberal parser that can handle most of the language 
   extensions; you don't restrict yourself to Haskell 98 by
-  using lhs2TeX
+  using lhs2TeX.
 
 * Preprocessor-style conditionals that allow you to generate
   different versions of a document from a single source file
@@ -53,7 +53,7 @@ Requirements and Download
 A source distribution that should be suitable for Unix-based
 environments is available from
 
-  http://www.informatik.uni-bonn.de/~ralf/software.html#lhs2TeX
+  http://www.cs.uu.nl/~andres/lhs2tex/
 
 It has been verified to build on Linux and MacOSX.
 

@@ -17,9 +17,9 @@ passing the "--prefix" argument to @configure@:
 
 ./configure --prefix=/my/local/programs
 
-With @lhs2TeX@ come a couple of library files (containing basic
-@lhs2TeX@ formatting directives) that need to be found by the
-@lhs2TeX@ binary. The default search path is as follows:
+With lhs2TeX come a couple of library files (containing basic
+lhs2TeX formatting directives) that need to be found by the
+lhs2TeX binary. The default search path is as follows:
 
 .
 $HOME/lhs2TeX
