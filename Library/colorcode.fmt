@@ -4,7 +4,7 @@
 %
 % code in a colored box for poly style in lhs2TeX
 %
-% Andres Loeh, August 2004, ver 1.0
+% Andres Loeh, August 2004, ver 1.1
 %
 % TODO: split in fmt and sty
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -33,6 +33,11 @@
 
 \def\colorcode{\columncolor{codecolor}}
 \definecolor{codecolor}{rgb}{1,1,.667}
+
+\newcommand\joincolorboxes
+  {\vspace*{-\belowdisplayskip}%
+   \vspace*{-\lineskip}%
+   \vspace*{-\abovedisplayskip}}
 
 \newcommand{\colorhs}{\sethscode{colorhscode}}
 
