@@ -1,0 +1,28 @@
+%format map                     = "\textbf{map}"
+We start by defining a datatype for constructing fixed points of unary
+type constructors:
+%format Mu                      = "\mu "
+%format In                      = "\textbf{In}"
+
+> data Mu f                     =  In (f (Mu f))
+
+Ideally, we would like to view the |In| constructor as an isomorphism
+of |f (Mu f)| and |Mu f| with the inverse isomorphism given by:
+%format out     = "\textbf{out}"
+
+> out                           :: Mu f -> f (Mu f) 
+> out (In x)                    =  x
+
+%format (cata (x))              = "\llparenthesis " x "\rrparenthesis "
+%format (ana (x))               = "\llbracket " x "\rrbracket "
+%format phi                     = "\varphi "
+%format psi                     = "\psi "
+The general definitions of catamorphisms and anamorphisms denoted by
+|cata phi| and |ana psi| respectively, can be expressed directly in
+this framework:
+
+> cata                          :: (Functor m) => (m a -> a) -> (Mu m -> a)
+> cata phi                      =  phi . map (cata phi) . out
+>
+> ana                           :: (Functor m) => (a -> m a) -> (a -> Mu m)
+> ana psi                       =  In . map (ana  psi) . psi

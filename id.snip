@@ -1,0 +1,7 @@
+%format (MkId a) = a
+
+> newtype Id a                  =  MkId a
+> instance Monad Id where
+>     return a                  =  MkId a
+>     MkId a >>= f              =  f a {-""-}
+>     MkId a >>= f              =  f a

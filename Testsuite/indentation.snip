@@ -1,0 +1,12 @@
+> faculty  n
+>     | n == 0			=  1
+>     | otherwise		=  n * faculty n'
+>     where n'			=  n - 1
+>           unused		=  n'
+> weird a b
+>     where (c, d) | cond	=  (a, b)
+>                  | otherwise	=  (b, a)
+> list				=  [ i * i
+>				   | i <- [0 .. 99 ] ]
+> main				=  sequence [ print i
+>				            | i <- [0 .. 99] ]

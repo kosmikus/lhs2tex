@@ -1,0 +1,24 @@
+First, the resulting list must be ordered.
+%format a1                      =  "\Varid{a}_1"
+%format a2                      =  "\Varid{a}_2"
+
+> ordered                       :: (Ord a) => [a] -> Bool
+> ordered []                    =  True
+> ordered [a]                   =  True
+> ordered (a1 : a2 : as)        =  a1 <= a2 && ordered (a2 : as)
+
+Second, the resulting list must be a rearrangement of the input.
+
+%format Bag.empty               =  "\emptyset "
+%format (Bag.single (a))        =  "\mathopen{\lbag}" a "\mathclose{\rbag}"
+%format `Bag.union`             =  "\uplus "
+
+< bag                           :: [a] -> Bag a
+< bag []                        =  Bag.empty
+< bag (a : as)                  =  Bag.single(a) `Bag.union` bag as
+
+Using |ordered| and |bag| we may specify sorting as follows.
+%
+\begin{equation}
+    |ordered (sort M.x) = True /\ bag (sort M.x) = bag M.x| 
+\end{equation}

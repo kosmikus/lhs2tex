@@ -1,0 +1,19 @@
+First, the resulting list must be ordered.
+\begin{tabbing}
+\qquad\=\hspace{\lwidth}\=\hspace{\cwidth}\=\+\kill
+$\Varid{ordered}$ \> \makebox[\cwidth]{$\mathbin{::}$} \> ${(\Conid{Ord}\;\Varid{a})\Rightarrow [\mskip1.5mu \Varid{a}\mskip1.5mu]\to \Conid{Bool}}$\\
+$\Varid{ordered}\;[\mskip1.5mu \mskip1.5mu]$ \> \makebox[\cwidth]{$\mathrel{=}$} \> ${\Conid{True}}$\\
+$\Varid{ordered}\;[\mskip1.5mu \Varid{a}\mskip1.5mu]$ \> \makebox[\cwidth]{$\mathrel{=}$} \> ${\Conid{True}}$\\
+$\Varid{ordered}\;(\Varid{a}_1\mathbin{:}\Varid{a}_2\mathbin{:}\Varid{as})$ \> \makebox[\cwidth]{$\mathrel{=}$} \> ${\Varid{a}_1\leq \Varid{a}_2\mathrel{\wedge}\Varid{ordered}\;(\Varid{a}_2\mathbin{:}\Varid{as})}$
+\end{tabbing}Second, the resulting list must be a rearrangement of the input.
+
+\begin{tabbing}
+\qquad\=\hspace{\lwidth}\=\hspace{\cwidth}\=\+\kill
+$\Varid{bag}$ \> \makebox[\cwidth]{$\mathbin{::}$} \> ${[\mskip1.5mu \Varid{a}\mskip1.5mu]\to \Conid{Bag}\;\Varid{a}}$\\
+$\Varid{bag}\;[\mskip1.5mu \mskip1.5mu]$ \> \makebox[\cwidth]{$\mathrel{=}$} \> ${\emptyset }$\\
+$\Varid{bag}\;(\Varid{a}\mathbin{:}\Varid{as})$ \> \makebox[\cwidth]{$\mathrel{=}$} \> ${\mathopen{\lbag}\Varid{a}\mathclose{\rbag}\uplus \Varid{bag}\;\Varid{as}}$
+\end{tabbing}Using \ensuremath{\Varid{ordered}} and \ensuremath{\Varid{bag}} we may specify sorting as follows.
+%
+\begin{equation}
+    \ensuremath{\Varid{ordered}\;(\Varid{sort}\;x)\mathrel{=}\Conid{True}\enskip\mathrel{\wedge}\enskip \Varid{bag}\;(\Varid{sort}\;x)\mathrel{=}\Varid{bag}\;x} 
+\end{equation}

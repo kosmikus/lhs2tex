@@ -1,0 +1,22 @@
+%let showModuleHeader	= False
+% let times		= True
+% let euler		= True
+%let meta		= True
+%%
+%include lhs2TeX.fmt
+%%
+%if style == math
+%format CToken		= Token
+%format TeX		= "\text{\TeX}"
+%format lhs2TeX		= "\text{lhs2\TeX}"
+%format .>		= "\fatsemi "
+%format @@		= "\varocircle "
+%format @>		= "\varogreaterthan "
+%format ***		= "\varotimes "
+%format <|		= "\lhd "
+%format <>		= "\diamond  "
+%format :^:		= "\mathbin{\mathord{:}\mathord{\char94}\mathord{:}}"
+%format a1
+%format a2
+%format a3
+%endif

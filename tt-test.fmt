@@ -1,0 +1,30 @@
+%let autoSpacing	=  False
+%align
+
+%subst dummy 		= "\cdot "
+%subst inline a  	= "\ensuremath{" a "}"
+%subst comment a	= "\mbox{\qquad-{}- " a "}"
+%subst nested a	= "\mbox{\enskip\{- " a " -\}\enskip}"
+%subst hskip a	= "\hskip" a "em\relax"
+%subst phantom a	= "\phantom{" a "\mbox{}}"
+%subst code a    	= "\begin{tabbing}'n\qquad\=\hspace{\lwidth}\=\hspace{\cwidth}\=\+\kill'n" a "'n\end{tabbing}"
+%subst column3 l c r	= "$" l "$ \> \makebox[\cwidth]{$" c "$} \> ${" r "}$"
+%subst column1 a	= "$" a "$"
+
+%subst spaces a     	= "\tex{" a "}"
+%subst special a   	= "\tex{" a "}"
+%subst space     	= "~"
+%subst newline   	= "\\'n"
+%subst blankline 	= "\\[1mm]'n"
+%subst conid a   	= "\tex{" a "}"
+%subst varid a   	= "\tex{" a "}"
+%subst consym a  	= "\tex{" a "}"
+%subst varsym a  	= "\tex{" a "}"
+%subst numeral a 	= "\tex{" a "}"
+%subst char a    	= "\tex{" a "}"
+%subst string a  	= "\tex{" a "}"
+%subst keyword a 	= "\tex{\bfseries " a "}"
+
+%format ->         = "{\to}"
+%format <-         = "{\leftarrow}"
+%format =>         = "{\Rightarrow}"

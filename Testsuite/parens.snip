@@ -1,0 +1,31 @@
+%format (abs (a))   = "|" a "|"
+%format power a (b) = a "^{" b "}"
+%format (sqrt (a))  = "\sqrt{" a "}"
+%format (pair (a) (b)) = "\langle" a "," b "\rangle"
+|power (abs (a + b)) (1/2)|, |f (abs a)|, |p (_, _) = 1|,
+|let a' = abs a in sqrt (a' + a)|, |fun (gun a b^27) c ++ b^^(-8)|,
+|abs (a, b)|, |abs (+ a * b)|, |abs ()|, |abs (a * b +)|,
+|f (pair (a * b) (a / b))|, |map sqrt x|.
+
+Newtype.
+%format (MkSet (a)) = a
+
+> newtype Set a 		=  MkSet [a]
+> insert			:: a -> Set a -> Set a
+> insert a (MkSet [])		=  MkSet [a]
+> insert a (MkSet ((b : x)))
+>     | a <= b			=  MkSet (a : b : x) 
+>     | otherwise		=  MkSet (b : insert a x)
+
+%format (MkId (a)) = a
+
+> newtype Id a          	=  MkId a
+>
+> instance Monad Id where
+>     return a         		=  MkId a {-""-}
+>     MkId a >>= f        	=  f a
+
+Es werden niemals zwei Klammerpaare entfernt |((e))|.
+%format f (a) = "\Varid{f}\;" a
+%format (g a) = "\Varid{g}\;" a
+Ja: |f (g a)| und nein: |f ((g a))|.

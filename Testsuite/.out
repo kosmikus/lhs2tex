@@ -1,0 +1,19 @@
+      ___    ___   ___    ___   __________   __________                       
+     /  /   /  /  /  /   /  /  /  _______/  /  _______/         Hugs 1.4      
+    /  /___/  /  /  /   /  /  /  / _____   /  /______                         
+   /  ____   /  /  /   /  /  /  / /_   /  /______   /  The Nottingham and Yale
+  /  /   /  /  /  /___/  /  /  /___/  /  _______/  /    Haskell User's System 
+ /__/   /__/  /_________/  /_________/  /_________/         December 1997 
+
+   Copyright (c) The University of Nottingham and Yale University, 1994-1997.
+    Bug reports: hugs-bugs@haskell.org.   Web: http://www.haskell.org/hugs.
+
+Reading file "/home/III/a/ralf/FP/hugs/share/hugs/lib/Prelude.hs":
+Parsing       Dependency analysis                   Type checking             Compiling         Reading file "Test.lhs":
+Parsing       Dependency analysis                   Type checking             Compiling         
+Hugs session for:
+/home/III/a/ralf/FP/hugs/share/hugs/lib/Prelude.hs
+Test.lhs
+Type :? for help
+!@#$^&*twice twice :: (a -> a) -> a -> a
+!@#$^&*[Leaving Hugs]

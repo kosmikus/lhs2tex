@@ -1,0 +1,127 @@
+\documentclass{article}
+
+\font\tentex=cmtex10
+
+%\input{tex.math}
+
+\begin{document}
+
+$\mbox{}$
+
+$\mathsf{FM}.\mathit{lookup}$
+
+$\mathit{FM}.\mathit{lookup}$
+
+$\mathit{FM.lookup}$
+
+{\tentex\char'35\char'00\char'02\char'03\char'04}
+
+{\tt\begin{tabbing}
+32:  , \symbol{32}\\
+33: !, \symbol{33}\\
+34: ", \symbol{34}\\
+35: \#, \symbol{35}\\
+36: \$, \symbol{36}\\
+37: \%, \symbol{37}\\
+38: \&, \symbol{38}\\
+39: ', \symbol{39}\\
+40: (, \symbol{40}\\
+41: ), \symbol{41}\\
+42: *, \symbol{42}\\
+43: +, \symbol{43}\\
+44: ,, \symbol{44}\\
+45: -, \symbol{45}\\
+46: ., \symbol{46}\\
+47: /, \symbol{47}\\
+48: 0, \symbol{48}\\
+49: 1, \symbol{49}\\
+50: 2, \symbol{50}\\
+51: 3, \symbol{51}\\
+52: 4, \symbol{52}\\
+53: 5, \symbol{53}\\
+54: 6, \symbol{54}\\
+55: 7, \symbol{55}\\
+56: 8, \symbol{56}\\
+57: 9, \symbol{57}\\
+58: :, \symbol{58}\\
+59: ;, \symbol{59}\\
+60: <, \symbol{60}\\
+61: =, \symbol{61}\\
+62: >, \symbol{62}\\
+63: ?, \symbol{63}\\
+64: @, \symbol{64}\\
+65: A, \symbol{65}\\
+66: B, \symbol{66}\\
+67: C, \symbol{67}\\
+68: D, \symbol{68}\\
+69: E, \symbol{69}\\
+70: F, \symbol{70}\\
+71: G, \symbol{71}\\
+72: H, \symbol{72}\\
+73: I, \symbol{73}\\
+74: J, \symbol{74}\\
+75: K, \symbol{75}\\
+76: L, \symbol{76}\\
+77: M, \symbol{77}\\
+78: N, \symbol{78}\\
+79: O, \symbol{79}\\
+80: P, \symbol{80}\\
+81: Q, \symbol{81}\\
+82: R, \symbol{82}\\
+83: S, \symbol{83}\\
+84: T, \symbol{84}\\
+85: U, \symbol{85}\\
+86: V, \symbol{86}\\
+87: W, \symbol{87}\\
+88: X, \symbol{88}\\
+89: Y, \symbol{89}\\
+90: Z, \symbol{90}\\
+91: [, \symbol{91}\\
+92: \, \symbol{92}\\
+93: ], \symbol{93}\\
+94: \^, \symbol{94}\\
+95: \_, \symbol{95}\\
+96: `, \symbol{96}\\
+97: a, \symbol{97}\\
+98: b, \symbol{98}\\
+99: c, \symbol{99}\\
+100: d, \symbol{100}\\
+101: e, \symbol{101}\\
+102: f, \symbol{102}\\
+103: g, \symbol{103}\\
+104: h, \symbol{104}\\
+105: i, \symbol{105}\\
+106: j, \symbol{106}\\
+107: k, \symbol{107}\\
+108: l, \symbol{108}\\
+109: m, \symbol{109}\\
+110: n, \symbol{110}\\
+111: o, \symbol{111}\\
+112: p, \symbol{112}\\
+113: q, \symbol{113}\\
+114: r, \symbol{114}\\
+115: s, \symbol{115}\\
+116: t, \symbol{116}\\
+117: u, \symbol{117}\\
+118: v, \symbol{118}\\
+119: w, \symbol{119}\\
+120: x, \symbol{120}\\
+121: y, \symbol{121}\\
+122: z, \symbol{122}\\
+123: \{, \symbol{123}\\
+124: |, \symbol{124}\\
+125: \}, \symbol{125}\\
+126: ~, \symbol{126}
+\end{tabbing}}
+
+\newcommand{\Sep}{\+}
+\begin{tabbing}
+\qquad\=\hspace{\lwidht}\=\hspace{\cwidth}\=\+\kill
+$\Varid{faculty}\;\Varid{n}$\\
+$\qquad\mid \Varid{n}\equiv \Numeral{0}$ \Sep \makebox[\cwidth]{$\mathrel{=}$} \Sep ${\Numeral{1}}$\\
+$\qquad\mid \Varid{otherwise}$ \Sep \makebox[\cwidth]{$\mathrel{=}$} \Sep ${\Varid{n}\Varsym{*}\Varid{faculty}\;\Varid{n'}}$\\
+$\qquad\Keyword{where}\;\Varid{n'}$ \Sep \makebox[\cwidth]{$\mathrel{=}$} \Sep ${\Varid{n}\Varsym{-}\Numeral{1}\;}$
+\end{tabbing}
+
+
+\end{document}

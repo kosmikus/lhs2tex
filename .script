@@ -1,0 +1,6 @@
+hugs -p'!@#$^&*' <stdin> <<!
+
+product [1..10]
+
+
+:quit

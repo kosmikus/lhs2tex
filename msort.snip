@@ -1,0 +1,16 @@
+> quickSort			:: (Ord a) => [a] -> [a]
+> quickSort []			=  []
+> quickSort (a : as)		=  quickSort [ b | b <- as, b <= a ]
+>                               ++ a : quickSort [ b | b <- as, b > a ]
+>
+> mergeSort                     :: (Ord a) => [a] -> [a]
+> mergeSort []                  =  []
+> mergeSort [a]                 =  [a]
+> mergeSort as                  =  merge (mergeSort bs) (mergeSort cs)
+>     where (bs, cs)            =  splitAt (length as `div` 2) as
+
+The worst case execution time of |mergeSort| is $\Theta(n\log n)$.
+NB. |splitAt| is given by
+
+< splitAt                       :: Int -> [a] -> ([a], [a])
+< splitAt k as                  =  (take k as, drop k as)

@@ -1,0 +1,15 @@
+%format f a b = "\varphi\;" a b
+
+> bla = yuks (f a	-- works
+>               b)
+> bla = yuks (f a	-- does not work
+>          b)
+
+\NB Es ist wichtig bei der Ersetzung, da"s nur das erste Token des
+Ersetzungstextes die Position erbt; sonst wird |b| nicht richtig
+positioniert.
+
+%format a1
+%format a2
+
+> ordered (a1 : a2 : as)	=  a1 <= a2 && ordered (a2 : as)
