@@ -149,10 +149,15 @@ ks, 20.07.2003: The short option for @--align@ has been changed into @-A@. Other
 @-align@ would not trigger compatibility mode, but be interpreted as a valid option
 usage.
 
+ks, 24.03.2004: The long option @--verbose@ has been removed for now, 
+because with some versions of GHC it triggers ambiguity errors with
+@--verb@.
+
 > options                       :: [OptDescr (State -> State,[Class] -> [Class],[Style])]
 > options                       =
 >   [ Option ['h','?'] ["help"](NoArg (id, id, [Help]))                                 "get this help"
->   , Option ['v'] ["verbose"] (NoArg (\s -> s { verbose = True }, id, []))             "be verbose"
+>   , Option ['v'] [] {- ["verbose"] -}
+>                              (NoArg (\s -> s { verbose = True }, id, []))             "be verbose"
 >   , Option ['V'] ["version"] (NoArg (id, id, [Version]))                              "show version"
 >   , Option []    ["tt"]      (NoArg (id, id, [Typewriter]))                           "typewriter style"
 >   , Option []    ["math"]    (NoArg (id, id, [Math]))                                 "math style"
