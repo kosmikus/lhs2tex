@@ -211,17 +211,13 @@ etc~(for all lower and upper case greek letters).
 %subst varsym a         = a
 %subst char a           = "''" a "''"
 %subst string a         = "'d" a "'d"
-%format #               = "#"
-%format $               = "$"
-%format %               = "%"
-%format &               = "&"
 \end{code}
 
 %-------------------------------=  --------------------------------------------
 \subsection{Math and Poly style}
 %-------------------------------=  --------------------------------------------
 
-Some things modified due to introduction of @poly@ formattet by ks,
+Some things modified due to introduction of @poly@ formatter by ks,
 17.07.2003. Since both formatters share a lot of declarations, both
 declare |anyMath| to be true. The common parts are then declared
 in a conditional checking |anyMath|.

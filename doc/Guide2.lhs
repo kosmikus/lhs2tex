@@ -394,8 +394,8 @@ into different blocks:
       considered as a \defined{directive} and may cause @lhs2TeX@ to
       take special actions. Directives are described in detail later.
 \item Some constructs are treated specially, such as occurrences of
-      the \TeX\ commands |\eval|, |\perform|, |\verb| or of the \LaTeX\
-      environment |verbatim|.
+      the \TeX\ commands @\eval@, @\perform@, @\verb@ or of the \LaTeX\
+      environment @verbatim@.
 \item All the rest is classified as \defined{plain text}.
 \end{compactitem}
 Depending on the style in which it is called, @lhs2TeX@ will treat

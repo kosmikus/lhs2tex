@@ -175,8 +175,8 @@ srcdist : doc
 	$(INSTALL) -m 644 Testsuite/*.{lhs,snip} Makefile $(DISTDIR)/Testsuite
 	$(INSTALL) -m 644 Examples/*.lhs $(DISTDIR)/Examples
 	$(INSTALL) -m 755 Examples/lhs2TeXpre $(DISTDIR)/Examples
-	tar cvjf $(DISTDIR).tar.bzip2 $(DISTDIR)
-	chmod 644 $(DISTDIR).tar.bzip2
+	tar cvjf $(DISTDIR).tar.bz2 $(DISTDIR)
+	chmod 644 $(DISTDIR).tar.bz2
 
 backup:
 	cd ..; \
