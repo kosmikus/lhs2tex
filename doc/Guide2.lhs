@@ -1674,10 +1674,10 @@ Everytime at the end of processing a file, \LaTeX\ complains.
 This happens only when using the @\savecolumns@ feature.
 \end{problem}
 This is the result of a name clash between the @amsmath@ package 
-with the @lazylist@ package and will hopefully be fixed in a
-future release of the @lazylist@ package. Usually, a workaround
+with the @lazylist@ package. A workaround
 is to load @amsmath@ \emph{before} the @lhs2TeX.sty@ file
-is included.
+is included. The problem has been fixed in @polytable@ version
+0.7.2, so a better solution is to upgrade to this version.
 
 \begin{problem}
 When I try to use ``poly'' style, \LaTeX\ sometimes complains
@@ -1692,7 +1692,7 @@ column, but @lhs2TeX@ still won't align the code block.
 \end{problem}
 Did you set the alignment column correctly using the @%align@
 directive? Note also that @lhs2TeX@ starts counting columns
-begining with |1|, whereas some editors might start counting
+beginning with |1|, whereas some editors might start counting
 with |0|.
 
 \begin{problem}

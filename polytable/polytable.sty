@@ -8,8 +8,15 @@
 %% 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{polytable}%
-   [2003/12/26 v0.7.1 `polytable' package (Andres Loeh)]
+   [2004/02/27 v0.7.2 `polytable' package (Andres Loeh)]
+\let\PT@original@And\And
 \RequirePackage{lazylist}
+\let\PT@And\And
+\def\PT@prelazylist
+  {\let\And\PT@And}
+\def\PT@postlazylist
+  {\let\And\PT@original@And}
+\PT@postlazylist
 \RequirePackage{array}
 \DeclareOption{debug}{\AtEndOfPackage\PT@debug}
 \DeclareOption{silent}{\AtEndOfPackage\PT@silent}
@@ -19,7 +26,6 @@
 \newcount\PT@table
 \newif\ifPT@changed
 \def\PT@allcols{\Nil}
-\def\PT@allpubliccols{\Nil}
 \let\PT@infromto\empty
 \let\PT@currentwidths\empty
 \def\PT@false{0}
@@ -128,7 +134,9 @@
    \else
       % we are in first run, print extra info
       \PT@typeout@{Number of columns: \the\PT@cols}%
+      \PT@prelazylist
       \PT@typeout@{Column list: \Print\PT@allcols}%
+      \PT@postlazylist
    \fi
    \let\PT@firstrun@column\PT@otherrun@column
    \let\savecolumns\PT@gobbleoptional
@@ -151,12 +159,16 @@
       \xdef\PT@restorecounters{\cl@@ckpt}%
    \endgroup}
 \def\PT@sortcols
-  {\edef\PT@sortedlist
+  {\PT@prelazylist
+   \edef\PT@sortedlist
      {\Foldr{\noexpand\Cons}{\noexpand\Nil}%
         {\Insertsort\PT@ltmax\PT@allcols}}%
    \PT@typeout@{Sorted columns: \Print\PT@sortedlist}%
+   \PT@postlazylist
    \PT@cols=0\relax%
+   \PT@prelazylist
    \Execute{\Map\PT@numbercol\PT@sortedlist}%
+   \PT@postlazylist
    \PT@typeout@{Numbered successfully, last column is \StripColumn\PT@lastcol}%
       \ifx\PT@currentwidths\empty
       \else
@@ -166,7 +178,9 @@
    \PT@typeset}
 \def\PT@typeset
   {\PT@typeout@{Typesetting the table ...}%
+   \PT@prelazylist
    \edef\PT@temp{@{}\Execute{\Map\PT@preamble\PT@sortedlist}}%
+   \PT@postlazylist
    %\PT@typeout@{Preamble: \PT@temp}%
    \let\fromto\PT@multicolumn
    \PT@resetcolumn % we are at the beginning of a line
@@ -548,21 +562,25 @@
         % nullcolumn is not loaded, therefore:
         \expandafter\def\csname\PT@nullcol .width\endcsname{0pt}%
         % checking trust
+        \PT@prelazylist
         \All{\PT@trustedmax}{\PT@allcols}%
            {\PT@typeout@{All maximum widths can be trusted -- writing .max!}%
             \PT@save@table{.max}}%
            {\PT@typeout@{Untrustworthy maximums widths -- writing .width!}%
             \PT@rerun
             \PT@save@table{.width}}%
+        \PT@postlazylist
       \endgroup}%
    \PT@typeout@{Verification for #2 successful.}}
 \def\PT@save@table#1%
   {\PT@typeout@{Saving column width information.}%
    \if@filesw
-    {\immediate\write\@auxout{%
-       \gdef\expandafter\noexpand
-         \csname PT@restore@\romannumeral\PT@table\endcsname
-           {\Execute{\Map{\PT@write@column{#1}}\PT@allcols}}}}%
+     \PT@prelazylist
+     {\immediate\write\@auxout{%
+        \gdef\expandafter\noexpand
+          \csname PT@restore@\romannumeral\PT@table\endcsname
+            {\Execute{\Map{\PT@write@column{#1}}\PT@allcols}}}}%
+     \PT@postlazylist
    \fi}
 \def\PT@write@column #1#2%
   {\noexpand\maxcolumn^^J%

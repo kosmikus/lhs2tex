@@ -4,7 +4,7 @@ include ../config.mk
 LHS2TEX = ../lhs2TeX
 
 SNIPPETSGD  = $(shell $(GREP) "\\\\input{" Guide2.lhs | $(SED) "s/^.*input{\(.*\)}.*$$/\1.tex/")
-SNIPPETSSTC = $(shell $(GREP) "\\\\input{" STC.lhs | $(SED) "s/^.*input{\(.*\)}.*$$/\1.tex/")
+# SNIPPETSSTC = $(shell $(GREP) "\\\\input{" STC.lhs | $(SED) "s/^.*input{\(.*\)}.*$$/\1.tex/")
 
 # default target
 all : Guide2.pdf

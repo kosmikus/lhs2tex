@@ -2139,7 +2139,7 @@ echo $ECHO_N "checking whether polytable needs to be installed... $ECHO_C" >&6
   POLYTABLE_INSTALL=no
   if test -n $POLYTABLE; then
     if ( IFS=".";
-      a="$POLYTABLE_VERSION";  b="0.7.1";
+      a="$POLYTABLE_VERSION";  b="0.7.2";
       while test -n "$a$b"
       do
               set -- $a;  h1="$1";  shift 2>/dev/null;  a="$*"

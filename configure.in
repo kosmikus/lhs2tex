@@ -49,7 +49,7 @@ if test "z$POLYTABLE_INSTALL" = "zyes"; then
   AC_MSG_CHECKING([whether polytable needs to be installed])
   POLYTABLE_INSTALL=no
   if test -n $POLYTABLE; then
-    FPTOOLS_PROG_CHECK_VERSION([$POLYTABLE_VERSION],-lt,[0.7.1],
+    FPTOOLS_PROG_CHECK_VERSION([$POLYTABLE_VERSION],-lt,[0.7.2],
       [POLYTABLE_INSTALL=yes])
   else
     POLYTABLE_INSTALL=yes
