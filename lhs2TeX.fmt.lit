@@ -188,8 +188,13 @@ etc~(for all lower and upper case greek letters).
 \end{code}
 
 %-------------------------------=  --------------------------------------------
-\subsection{Math style}
+\subsection{Math and Poly style}
 %-------------------------------=  --------------------------------------------
+
+Some things modified due to introduction of @poly@ formattet by ks,
+14.05.2003. Since both formatters share a lot of declarations, both
+declare |mathCommon| to be true. The common parts are then declared
+in a conditional checking |mathCommon|.
 
 \begin{code}
 %elif style == math
@@ -208,6 +213,26 @@ etc~(for all lower and upper case greek letters).
 %subst code a    	= "\begin{tabbing}'n\qquad\=\hspace{\lwidth}\=\hspace{\cwidth}\=\+\kill'n" a "'n\end{tabbing}"
 %subst column3 l c r	= "$" l "$ \> \makebox[\cwidth]{$" c "$} \> ${" r "}$"
 %subst column1 a	= "$" a "$"
+%subst newline   	= "\\'n"
+%endif
+%let mathCommon         = True
+%elif style == poly
+%let autoSpacing	= True
+%subst dummy		= "\cdot "
+%subst inline a  	= "\ensuremath{" a "}"
+%subst comment a	= "\mbox{\quad--- " a "}"
+%subst nested a	= "\mbox{\enskip\{- " a " -\}\enskip}"
+%subst hskip a	= "\hskip" a "em\relax"
+%subst phantom a	= "\phantom{" a "\mbox{}}"
+%subst code a    	= "\['n\begin{parray}'n" a "\end{parray}'n\]'n"
+%subst column c a       = "\column{" c "}{@{}" a "@{\;}}'n"
+%subst fromto b e t     = "\fromto{" b "}{" e "}{" t "}'n"
+%subst left             = "l"
+%subst centered         = "c"
+%subst newline   	= "\nextline'n"
+%let mathCommon         = True
+%endif
+%if mathCommon
 %endif
 %if latex209
 %subst numeral a 	= "{\mathrm " a "}"
@@ -219,7 +244,6 @@ etc~(for all lower and upper case greek letters).
 %subst spaces a		= a
 %subst special a	= a
 %subst space     	= "\;"
-%subst newline   	= "\\'n"
 %subst blankline 	= "\\[1mm]'n"
 %subst conid a   	= "\Conid{" a "}"
 %subst varid a   	= "\Varid{" a "}"

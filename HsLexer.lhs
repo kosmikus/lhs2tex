@@ -57,7 +57,11 @@ Ein Haskell-Lexer. Modifikation der Prelude-Funktion \hs{lex}.
 > string (Nested s)		=  "{-" ++ s ++ "-}"
 > string (Keyword s)		=  s
 > string (TeX (Text s))		=  "{-\"" ++ s ++ "\"-}"
-> string (TeX _)		=  impossible "string"
+
+This change is by ks, 14.05.2003, to make the @poly@ formatter work.
+This should probably be either documented better or be removed again.
+
+> string (TeX _)		=  "" -- |impossible "string"|
 > string (Qual m s)		=  m ++ "." ++ string s
 > string (Op s)			=  "`" ++ string s ++ "`"
 
@@ -283,7 +287,11 @@ they do not bracket expressions.
 >     catCode (Nested _)	=  White
 >     catCode (Keyword _)	=  Sep
 >     catCode (TeX (Text s))	=  White
->     catCode (TeX _)		=  impossible "catCode"
+
+The following change is by ks, 14.05.2003.
+This is related to the change above in function |string|.
+
+>     catCode (TeX _)		=  NoSep -- |impossible "catCode"|
 >     catCode (Qual m t)	=  catCode t
 >     catCode (Op _)		=  Sep
 >     token			=  id

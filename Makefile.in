@@ -9,14 +9,14 @@ exec_prefix     := @exec_prefix@
 binpath		:= $(HOME)/bin
 
 sources		:= Main.lhs TeXCommands.lhs TeXParser.lhs \
-		   Typewriter.lhs Math.lhs\
-		   Directives.lhs HsLexer.lhs \
+		   Typewriter.lhs Math.lhs MathPoly.lhs \
+		   Directives.lhs HsLexer.lhs FileNameUtils.lhs \
 		   Parser.lhs FiniteMap.lhs Auxiliaries.lhs \
 		   StateT.lhs Document.lhs Verbatim.lhs Value.lhs
 snips		:= sorts.tt sorts.math id.math cata.math spec.math
 objects         := $(foreach file, $(sources:.lhs=.o), $(file))
 sections       	:= $(foreach file, $(sources:.lhs=.tex), $(file))
-include lhs2TeX.d
+
 GHC		:= @GHC@
 GHCFLAGS	:= -Wall -O -recomp -package lang
 
@@ -33,46 +33,108 @@ LATEX           := @LATEX@
 XDVI            := @XDVI@
 GV              := @GV@
 DVIPS           := @DVIPS@
+SED             := @SED@
+GREP            := @GREP@
+SORT            := @SORT@
+UNIQ            := @UNIQ@
 MKINSTDIR       := ./mkinstalldirs
+
+###
+### lhs dependencies (from %include lines)
+###
+
+MKLHSDEPEND = $(GREP) "^%include " $< \
+               | $(SED) -e 's,^%include ,$*.tex : ,' \
+               | $(SORT) | $(UNIQ) > $*.ld
+
+MKFMTDEPEND = $(GREP) "^%include " $< \
+               | $(SED) -e 's,^%include ,$*.fmt : ,' \
+               | $(SORT) | $(UNIQ) > $*.ld
+
+###
+### hs dependencies
+###
+
+
+MKGHCDEPEND = $(GHC) -M -optdep-f -optdep$*.d $(GHCFLAGS) $<
+
+###
+### dependency postprocessing
+###
+
+DEPPOSTPROC = $(SED) -e 's/\#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	         -e '/^$$/ d' -e 's/$$/ :/'
+
+###
+### default targets
+###
+
+.PHONY : default xdvi gv print install backup clean all depend
+
+default : lhs2TeX
+
+%.d : %.lhs
+	$(MKGHCDEPEND); \
+	$(CP) $*.d $*.dd; \
+	$(DEPPOSTPROC) < $*.dd >> $.d; \
+	$(RM) -f $*.dd
 
 $(objects) : %.o : %.lhs
 	$(GHC) -c $(GHCFLAGS) $< -o $@
 
-# I don't understand this, but I'll leave it for now ...
-%.hi : %.o
-	@if [ ! -f $@ ] ; then \
-	echo $(RM) $< ; \
-	$(RM) $< ; \
-	set +e ; \
-	echo $(MAKE) $(notdir $<) ; \
-	$(MAKE) $(notdir $<) ; \
-	if [ $$? -ne 0 ] ; then \
-	exit 1; \
-	fi ; \
-	fi
+-include $(sources:%.lhs=%.d)
 
-%.tex : %.lhs lhs2TeX Lhs2TeX.fmt
+# I don't understand this ... (ks)
+#
+# %.hi : %.o
+# 	@if [ ! -f $@ ] ; then \
+#	echo $(RM) $< ; \
+#	$(RM) $< ; \
+#	set +e ; \
+#	echo $(MAKE) $(notdir $<) ; \
+#	$(MAKE) $(notdir $<) ; \
+#	if [ $$? -ne 0 ] ; then \
+#	exit 1; \
+#	fi ; \
+#	fi
+
+%.hi : %.o
+	@:
+
+%.ld : %.lhs
+	$(MKLHSDEPEND); \
+	$(CP) $*.ld $*.ldd; \
+	$(DEPPOSTPROC) < $*.ldd >> $*.ld; \
+	$(RM) -f $*.ldd
+
+%.ld : %.fmt
+	$(MKFMTDEPEND); \
+	$(CP) $*.ld $*.ldd; \
+	$(DEPPOSTPROC) < $*.ldd >> $*.ld; \
+	$(RM) -f $*.ldd
+
+%.tex : %.lhs lhs2TeX Lhs2TeX.fmt lhs2TeX.fmt
 #	lhs2TeX -verb -iLhs2TeX.fmt $< > $@
-	./lhs2TeX -math -align 33 -iLhs2TeX.fmt $< > $@
+	./lhs2TeX --math --align 33 -iLhs2TeX.fmt $< > $@
+
+-include $(sources:%.lhs=%.ld)
 
 %.tt : %.snip lhs2TeX lhs2TeX.fmt
-	./lhs2TeX -tt -lmeta=True -ilhs2TeX.fmt $< > $@
+	./lhs2TeX --tt -lmeta=True -ilhs2TeX.fmt $< > $@
 
 %.math : %.snip lhs2TeX lhs2TeX.fmt
-	./lhs2TeX -math -align 33 -lmeta=True -ilhs2TeX.fmt $< > $@
+	./lhs2TeX --math --align 33 -lmeta=True -ilhs2TeX.fmt $< > $@
 
 %.tex : %.lit lhs2TeX
-	./lhs2TeX -verb -ilhs2TeX.fmt $< > $@
+	./lhs2TeX --verb -ilhs2TeX.fmt $< > $@
 
 %.ps : %.dvi
 	$(DVIPS) -D600 -o $@ $<
 
-.PHONY: depend xdvi gv print install backup clean
-
 lhs2TeX.sty: lhs2TeX.sty.lit
-	./lhs2TeX -code lhs2TeX.sty.lit > lhs2TeX.sty
+	./lhs2TeX --code lhs2TeX.sty.lit > lhs2TeX.sty
 lhs2TeX.fmt: lhs2TeX.fmt.lit
-	./lhs2TeX -code lhs2TeX.fmt.lit > lhs2TeX.fmt
+	./lhs2TeX --code lhs2TeX.fmt.lit > lhs2TeX.fmt
 
 lhs2TeX : $(objects)
 	$(GHC) $(GHCFLAGS) -o lhs2TeX $(objects)
@@ -110,13 +172,10 @@ backup:
 clean :
 #	clean
 	$(RM) -f lhs2TeX $(sections) $(snips) $(objects) *.hi *.dvi *.ps
-	$(RM) -rf lhs2TeX.sty lhs2TeX.fmt
-	$(RM) -rf Lhs2TeX.tex lhs2TeX.sty.tex lhs2TeX.fmt.tex Makefile.tex 
+	-$(RM) -f *.d *.dd *.ld *.ldd
+	$(RM) -f lhs2TeX.sty lhs2TeX.fmt
+	$(RM) -f Lhs2TeX.tex lhs2TeX.sty.tex lhs2TeX.fmt.tex Makefile.tex 
 
 all:
 	$(MAKE) install
 	$(MAKE) Lhs2TeX.dvi
-
-
-
-

@@ -1,3 +1,0 @@
-hugs -p'!@#$^&*' Test.lhs <<!
-:type twice twice
-:quit

@@ -61,3 +61,12 @@ Substitution strings.
 > sub'phantom a			=  Sub "phantom" [a]
 >
 > sub'column3 a1 a2 a3		=  Sub "column3" [a1, a2, a3]
+
+Additional substitutions for the new @poly@ formatter.
+Added by ks, 14.05.2003.
+
+> sub'fromto b e a              =  Sub "fromto" [Text b,Text e,a]
+> sub'column n a                =  Sub "column" [Text n,a]
+> sub'centered                  =  Sub "centered" []
+> sub'left                      =  Sub "left" []
+

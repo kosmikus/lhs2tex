@@ -82,7 +82,7 @@ Conversion of strings and characters.
 >       | c `elem` "\"\\^_{}~"	=  Text (char c)
 >       | otherwise		=  Text [c]
 >
->     conv' ' '			=  Text "~" -- NEW: instead of |Text (char ' ')	-- for character and string literals
+>     conv' ' '			=  Text "~" -- NEW: instead of |Text (char ' ')| -- for character and string literals
 >     conv' c			=  conv c
 
 \NB The character @"@ is not copied verbatim, to be able to use

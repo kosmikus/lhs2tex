@@ -4,11 +4,11 @@
 
 %if codeOnly || showModuleHeader
 
-> module Math			(  module Math  )
+> module MathPoly		(  module MathPoly  )
 > where
 >
 > import Prelude hiding ( lines )
-> import List ( partition )
+> import List ( partition, nub, insert, sort, transpose )
 > import Numeric ( showFFloat )
 > import Monad ( MonadPlus(..) )
 >
@@ -20,6 +20,7 @@
 > import Parser
 > import qualified FiniteMap as FM
 > import Auxiliaries
+> -- |import IOExts ( trace )|
 
 %endif
 
@@ -41,22 +42,33 @@
 >				@> lift (latexs fmts)
 >				@> lift sub'inline
 
-> display			:: Formats -> Bool -> (Stack, Stack) -> Maybe Int
->				-> String -> Either Exc (Doc, (Stack,Stack))
-> display fmts auto sts col	=  lift trim
+> display			:: Formats -> Bool -> Int -> Int -> [Int] -> [(String,Int)]
+>				-> String -> Either Exc (Doc, [Int], [(String,Int)])
+> display fmts auto sep lat known rel
+>                               =  lift trim
 >				@> lift (expand 0)
 >				@> tokenize
 >				@> lift (number 1 1)
->				@> when auto (lift (filter (isNotSpace . token)))
+>	--			@> when auto (lift (filter (isNotSpace . token)))
 >				@> lift (partition (\t -> catCode t /= White))
+>                               @> return *** return
 >				@> exprParse *** return
 >				@> lift (substitute fmts auto) *** return
 >				@> lift (uncurry merge)
 >				@> lift lines
->				@> lift (align col)
->				@> when auto (lift (fmap (fmap addSpaces)))
->				@> lift (leftIndent fmts auto sts)
->				@> lift sub'code *** return
+>                               @> lift (\ts -> (autoalign sep ts,ts))
+>				@> lift (\(cs,ts) -> let ats = align cs sep lat ts
+>                                                        cs' = [("B",0)] ++ cs 
+>                                                                ++ [("E",error "E column")]
+>                                                    in  (autocols cs' ats,ats)
+>                                       )
+>				@> return *** when auto (lift (fmap (fmap (addSpaces . filter (isNotSpace . token)))))
+>				@> return *** lift (leftIndent fmts auto known rel)
+>				@> lift (\(cs,(d,k,r)) -> (sub'code (columns cs <> d),k,r))
+>
+> columns                       :: [(String,Doc)] -> Doc
+> columns                       =  foldr (<>) Empty 
+>                               .  map (uncurry sub'column)
 
 > when True f			=  f
 > when False f			=  return
@@ -258,20 +270,55 @@ Position von |=| oder |::| heranzuziehen ist gef"ahrlich; wenn z.B.
 |let x = e| in einem |do|-Ausdruck vorkommt.}
 
 > data Line a			=  Blank
->				|  Three a a a
->				|  Multi a
+>                               |  Poly  [((String,Int),a,Bool)]
 >
-> align				:: (CToken tok) => Maybe Int -> [[Pos tok]] -> [Line [Pos tok]]
-> align c			=  fmap (maybe Multi split3 c)
+> autoalign                     :: (Show tok,CToken tok) => Int              -- "Trennung"
+>                                               -> [[Pos tok]]      -- positionierte tokens per Zeile
+>                                               -> [(String,Int)]   -- alignment-info (Name, Spalte)
+> autoalign sep toks            =  map (\x -> (show x,x))
+>                               .  nub
+>                               .  sort
+>                               .  concat 
+>                               .  fmap findCols 
+>                               $  toks
 >   where
->   split3 i ts			=  case span (\t -> col t < i) ts of
->       ([], [])		-> Blank
->       ((_ : _), [])		-> Multi ts
->       (us, v : vs)
->           | col v == i && isInternal v
->				-> Three us [v] vs
->           | null us		-> Three [] [] (v : vs)
->           | otherwise		-> Multi ts
+>   findCols                    :: (CToken tok,Show tok) => [Pos tok] -> [Int]
+>   findCols ts                 =  case {- |trace (show ts)| -} 
+>                                       (break (\t -> not . isNotSpace . token $ t) ts) of
+>       (_, [])                 -> []   -- done
+>       (_, [v])                -> []   -- last token is whitespace, doesn't matter
+>       (_, v:v':vs)    
+>         | length (string (token v)) >= sep
+>                               -> {- |trace ("found: " ++ show (col v')) $| -} col v' : findCols vs
+>         | otherwise           -> {- |trace ("found too short")|            -} findCols vs
+>
+> align				:: (CToken tok) => [(String,Int)]   -- alignment-info (Name, Spalte)
+>                                               -> Int              -- "Trennung"
+>                                               -> Int              -- "Traegheit"
+>                                               -> [[Pos tok]]      -- positionierte tokens per Zeile
+>                                               -> [Line [Pos tok]]
+> align cs sep lat toks         =  fmap (\t -> let res = splitn ("B",0) False cs t
+>                                              in  if null toks || null res then Blank
+>                                                                           else Poly res
+>                                       ) toks
+>   where
+>   splitn cc ind [] []         =  []
+>   splitn cc ind [] ts         =  [(cc,ts,ind)]
+>   splitn cc ind ((n,i):oas) ts=  
+>     case span (\t -> col t < i) ts of
+>       ([], vs)                -> splitn cc ind oas vs
+>       (us, [])                -> [(cc,us,ind)]
+>       (us, (v:vs))            -> 
+>         let lu = last us 
+>             llu = length (string (token lu))
+>         in case () of
+>             _ | (lat /= 0 && isNotSpace (token lu)) || llu < lat || col v /= i
+>                                  -- no alignment for this column
+>                               -> splitn cc ind oas (us ++ (v:vs))
+>               | not (isNotSpace (token lu)) && llu >= sep
+>                               -> (cc,us,ind) : splitn (n,i) True oas (v:vs)
+>               | otherwise
+>                               -> (cc,us,ind) : splitn (n,i) False oas (v:vs)
 >
 >
 > isInternal			:: (CToken tok) => tok -> Bool
@@ -283,8 +330,36 @@ Position von |=| oder |::| heranzuziehen ist gef"ahrlich; wenn z.B.
 >
 > instance Functor Line where
 >     fmap f Blank		=  Blank
->     fmap f (Three l c r)	=  Three (f l) (f c) (f r)
->     fmap f (Multi a)		=  Multi (f a)
+>     fmap f (Poly ls)          =  Poly (map (\(x,y,z) -> (x,f y,z)) ls)
+
+% - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
+\subsubsection{Automatically determining centered columns}
+% - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
+
+We use a simple heuristic: a column that contains only single tokens and
+at least one "internal" token is centered.
+
+> autocols                      :: (CToken tok, Show tok) => [(String,Int)]   -- column info
+>                                               -> [Line [Pos tok]] -- aligned tokens
+>                                               -> [(String,Doc)] -- cols+alignment
+> autocols cs ats               = zipWith3 (\(cn,_) ml ai -> 
+>                                              if ml <= 2 && ai then (cn,sub'centered)
+>                                                               else (cn,sub'left)
+>                                          ) cs maxlengths anyinternals
+>                                 -- length 2, because space tokens are always there
+>     where
+>     cts                       = transpose (concatMap (deline cs) ats)
+>     maxlengths                = {- |trace (show cts) $ |-} map (maximum . map length) cts
+>     anyinternals              = map (or . map (any isInternal)) cts
+>
+>     -- deline                    :: [(String,Int)] -> Line [a] -> [[[a]]]
+>     deline cs Blank           = []
+>     deline cs (Poly ls)       = [decol cs ls]
+>
+>     decol cs []               = replicate (length cs) []
+>     decol ((cn,_):cs) r@(((cn',_),ts,_):rs)
+>       | cn' == cn             = ts : decol cs rs
+>       | otherwise             = [] : decol cs r
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Adding spaces}
@@ -334,8 +409,13 @@ Auch wenn |auto = False| wird der Stack auf dem laufenden gehalten.
 
 > type Stack			=  [(Col, Doc, [Pos Token])]
 >
-> leftIndent dict auto (lst, rst)
->				=  loop lst rst
+> leftIndent                    :: Formats -> Bool 
+>                               -> [Int]        -- bekannte alignment-Spalten
+>                               -> [(String,Int)] -- relevante alignment-Spalten
+>                               -> [Line [Pos Token]]
+>                               -> (Doc, [Int], [(String,Int)])
+> leftIndent dict auto known rel
+>				=  loop known rel
 >   where
 >   copy d | auto		=  d
 >          | otherwise		=  Empty
@@ -343,41 +423,66 @@ Auch wenn |auto = False| wird der Stack auf dem laufenden gehalten.
 Die Funktion |isInternal| pr"uft, ob |v| ein spezielles Symbol wie
 @::@, @=@ etc~oder ein Operator wie @++@ ist.
 
->   loop lst rst []		=  (Empty, (lst, rst))
->   loop lst rst (l : ls)	=  case l of
->       Blank			-> loop lst rst ls
->       Three l c r		-> (sub'column3 (copy lskip <> latexs dict l)
->				                (latexs dict c)
->				                (copy rskip <> latexs dict r) <> sep ls <> rest, st')
->           where (lskip, lst')	=  indent l lst
->                 (rskip, rst') =  indent r rst
->                 (rest, st') 	=  loop lst' rst' ls -- does not work: |if null l && null c then rst' else []|
->       Multi m			-> (sub'column1 (copy lskip <> latexs dict m) <> sep ls <> rest, st')
->           where (lskip, lst')	=  indent m lst
->                 (rest, st')	=  loop lst' [] ls
+>   loop known rel []		=  (Empty, known, rel)
+>   loop known rel (l : ls)     =  case l of
+>       Blank                   -> loop known rel ls
+>    {- Poly x | trace (show x) False -> undefined -}
+>       Poly []                 -> loop known rel ls
+>       Poly [((n,c),ts,ind)]   -> mkFromTo known rel n "E" c ts ind [] ls
+>       Poly (((n,c),ts,ind):rs@(((nn,_),_,_):_))
+>                               -> mkFromTo known rel n nn  c ts ind rs ls 
+>
+>   mkFromTo known rel bn en c ts ind rs ls
+>     | not ind                 =  (sub'fromto bn en (latexs dict ts)
+>                                     <> (if null rs then sep ls else Empty) <> rest
+>                                  ,known',rel'
+>                                  )
+>     | otherwise               =  (let nc = findrel c rel
+>                                   in  indent nc (bn,c) <> sub'fromto bn en (latexs dict ts)
+>                                     <> (if null rs then sep ls else Empty) <> rest
+>                                  ,known',rel'
+>                                  )
+>     where
+>       (rest,known',rel')      =  loop (addknown c known)
+>                                       (addrel (bn,c) ts rel)
+>                                       (Poly rs : ls)
+>
+>
+>   addknown                    :: Int -> [Int] -> [Int]
+>   addknown c cs | c `elem` cs =  cs
+>                 | otherwise   =  insert c cs
+>
+>   addrel                      :: (String,Int) -> [Pos Token] -> [(String,Int)] -> [(String,Int)]
+>   addrel (n,c) ts []          =  [(n,c)]
+>   addrel _ [] rel             =  rel
+>   addrel (n,c) ts ((n',c'):rel)
+>     | c' < c                  =  (n',c') : addrel (n,c) ts rel
+>     | otherwise               =  let lts = last ts
+>                                  in  if not (isNotSpace (token lts)) then
+>                                         (n,c) : updrel (col lts) ((n',c'):rel)
+>                                      else
+>                                         (n,c) : updrel (col lts + length (string (token lts)))
+>                                                        ((n',c'):rel) -- probably wrong!
+>  
+>   updrel                      :: Int -> [(String,Int)] -> [(String,Int)]
+>   updrel c []                 =  []
+>   updrel c ((n,c'):rel)
+>     | c' < c                  =  updrel c rel
+>     | otherwise               =  (n,c):rel
+>
+>   findrel                     :: Int -> [(String,Int)] -> (String,Int)
+>   findrel c rel               =  case break (\(n,c') -> c >= c') rel of
+>                                    (_,[])     -> ("B",0)
+>                                    (_,nc:xs)  -> nc
 >
 >   sep []			=  Empty
 >   sep (Blank : _ )		=  sub'blankline
 >   sep (_ : _)			=  sub'nl
 >
->   indent			:: [Pos Token] -> Stack -> (Doc, Stack)
->   indent [] stack		=  (Empty, stack)
->   indent ts@(t : _) []	=  (Empty, [(col t, Empty, ts)])
->   indent ts@(t : _) (top@(c, skip, line) : stack)
->				=  case compare (col t) c of
->       LT			-> indent ts stack
->       EQ			-> (skip, (c, skip, ts) : stack)
->       GT			-> (skip', (col t, skip', ts) : top : stack)
->           where
->           skip'		=  case span (\u -> col u < col t) line of
->               (us, v : vs) | col v == col t
->				-> skip <> sub'phantom (latexs dict us)
->               -- does not work: |(us, _) -> skip ++ [Phantom (fmap token us), Skip (col t - last (c : fmap col us))]|
->               _		-> skip <> sub'hskip (Text em)
->                   where em	=  showFFloat (Just 2) (0.5 * fromIntegral (col t - c) :: Double) ""
-
-< fromInt			:: Num a => Int -> a
-< fromInt i			=  fromInteger (toInteger i)
+>   indent                      :: (String,Int) -> (String,Int) -> Doc
+>   indent _ _                  =  Empty  -- does not work
+>   indent (n,c) (n',c')        =  sub'fromto n n' (sub'hskip (Text em))
+>     where em                  =  showFFloat (Just 2) (0.5 * fromIntegral (c' - c) :: Double) ""
 
 M"ussen |v| und |t| zueinander passen?
 %

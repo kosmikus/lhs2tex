@@ -341,8 +341,9 @@ Fit f"ur \LaTeX~2.09 machen @%if latex209@
 \input{Main}
 
 \newpage
-\input{lhs2TeXsty.tex}
-\input{lhs2TeXfmt.tex}
+\input{lhs2TeX.sty.tex}
+\input{lhs2TeX.fmt.tex}
+TODO: Create a literate version of the Makefile again.
 \input{Makefile}
 
 \newpage

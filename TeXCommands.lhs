@@ -14,8 +14,8 @@
 
 %endif
 
-> data Style			=  CodeOnly | Verb | Typewriter | Math
->				   deriving (Eq, Show, Enum)
+> data Style			=  Version | Help | Copying | Warranty | CodeOnly | Verb | Typewriter | Poly | Math
+>				   deriving (Eq, Show, Enum, Bounded)
 
 \Todo{Better name for |Class|.}
 
@@ -38,7 +38,7 @@
 
 >
 > data Directive		=  Format | Include | Let | File | Options
->				| Align | Begin | End | Subst
+>				|  Align | Separation | Latency | Begin | End | Subst
 >				|  If | Elif | Else | Endif
 >				   deriving (Eq, Show)
 
@@ -62,8 +62,9 @@ Encoding and decoding of commands, environments, and directives.
 > class Representation a where
 >     representation		:: [(String, a)]
 > instance Representation Style where
->     representation		=  [ ("tt", Typewriter), ("math", Math),
->				     ("verb", Verb), ("code", CodeOnly) ]
+>     representation		=  [ ("tt", Typewriter), ("math", Math), ("poly", Poly),
+>				     ("verb", Verb), ("code", CodeOnly), ("version", Version),
+>                                    ("copying", Copying), ("warranty", Warranty), ("help", Help) ]
 > instance Representation Command where
 >     representation		=  [ ("hs", Hs), ("eval", Eval),
 >				     ("perform", Perform), ("verb*", Vrb True),
@@ -79,6 +80,7 @@ Encoding and decoding of commands, environments, and directives.
 >				     ("else", Else), ("endif", Endif),
 >				     ("let", Let), ("file", File),
 >				     ("options", Options), ("align", Align),
+>                                    ("separation", Separation), ("latency", Latency),
 >				     ("{", Begin), ("}", End), ("subst", Subst) ]
 >
 > encode			:: (Representation a) => String -> Maybe a

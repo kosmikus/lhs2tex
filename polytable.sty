@@ -1,0 +1,229 @@
+%%
+%% This is file `polytable.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% polytable.dtx  (with options: `package')
+%% 
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{polytable}
+\RequirePackage{lambda}
+\RequirePackage{array}
+\newdimen\PT@colwidth
+\newdimen\PT@delta
+\newcount\PT@cols
+\newif\ifPT@changed
+\def\PT@allcols{\Nil}
+\PT@delta\hfuzz
+\def\PT@typeout{\PackageWarningNoLine{polytable}}
+\def\PT@typeout@ #1{\typeout{(polytable) #1}}
+\def\PT@consmacro #1#2% cons #2 to the list #1
+  {\def\PT@temp{\Cons{#2}}%
+   \expandafter\expandafter\expandafter
+     \def\expandafter\expandafter\expandafter
+     #1\expandafter\expandafter\expandafter
+     {\expandafter\PT@temp\expandafter{#1}}}
+\def\PT@enamedef #1#2% sets name #1 to the expansion of #2
+  {\def\PT@temp{\@namedef{#1}}%
+   \expandafter\PT@temp\expandafter{#2}}
+\newcommand{\beginpolytable}%
+  {\edef\PT@environment{\@currenvir}%
+   \begingroup
+   \toks@{}% initialise token register
+   \PT@scantoend}
+\long\def\PT@scantoend #1\end #2%
+  {\toks@\expandafter{\the\toks@ #1}%
+   \def\PT@temp{#2}%
+   \ifx\PT@temp\PT@environment
+     \expandafter\PT@getwidths
+   \else
+     \toks@\expandafter{\the\toks@\end{#2}}%
+     \expandafter\PT@scantoend
+   \fi}
+\def\PT@getwidths
+  {\let\column\PT@firstrun@column
+   \column{0}{l}%
+   \PT@cols=0%
+   \let\fromto\PT@fromto
+   \let\nextline\PT@resetcolumn
+   \PT@changedfalse % nothing has changed so far
+   \PT@resetcolumn % we are at the beginning of a line
+   \the\toks@
+   \ifx\column\PT@otherrun@column
+   \else
+      % we are in first run, print extra info
+      \PT@typeout{Number of columns: \the\PT@cols}%
+      \PT@typeout@{Column list: \Print\PT@allcols}%
+   \fi
+   \let\PT@firstrun@column\PT@otherrun@column
+   \ifPT@changed
+      % we need to rerun if something has changed
+      \expandafter\PT@getwidths
+   \else
+      % we are done and can do the sorting
+      \PT@typeout@{Reached fixpoint.}%
+      \expandafter\PT@sortcols
+   \fi}
+\def\PT@sortcols
+  {\edef\PT@sortedlist
+     {\Foldr{\noexpand\Cons}{\noexpand\Nil}%
+        {\Insertsort\PT@ltwidth\PT@allcols}}%
+   \PT@typeout@{Sorted columns: \Print\PT@sortedlist}%
+   \PT@cols=0%
+   \Execute{\Map\PT@numbercol\PT@sortedlist}%
+   \PT@typeout@{Numbered successfully.}%
+   \PT@typeset}
+\def\PT@typeset
+  {\edef\PT@temp{\Execute{\Map\PT@preamble\PT@sortedlist}}%
+   \PT@typeout@{Preamble: \PT@temp}%
+   \let\fromto\PT@multicolumn
+   \PT@resetcolumn % we are at the beginning of a line
+   \let\nextline=\PT@resetandcr
+   \expandafter\PT@begin\expandafter{\PT@temp}
+   \the\toks@
+   \PT@end
+   \endgroup
+   \expandafter\end\expandafter{\PT@environment}}
+\def\PT@firstrun@column #1#2%
+  {\@namedef{PT@col@#1.type}{#2}%
+   \@namedef{PT@col@#1.width}{0pt}% initialize the width of the column
+   % add the new column to the (sortable) list of all columns
+   \PT@consmacro\PT@allcols{PT@col@#1}%
+   \advance\PT@cols by 1\relax%
+   \ignorespaces}
+\def\PT@otherrun@column
+  {\expandafter\ignorespaces\@gobbletwo}
+\def\PT@fromto #1#2#3%
+  {\global\PT@colwidth=\expandafter\@nameuse\expandafter
+                         {\PT@currentcol.width}\relax
+   \ifdim\PT@colwidth>\csname PT@col@#1.width\endcsname\relax
+     % we need to change the width
+     \PT@typeout@{s #1: old=\@nameuse{PT@col@#1.width} new=\the\PT@colwidth}%
+     \PT@changedtrue
+     \PT@enamedef{PT@col@#1.width}{\the\PT@colwidth}%
+   \fi
+   \begingroup
+   \global\PT@colwidth=\@nameuse{PT@col@#1.width}%
+   \ifmmode
+     \let\PT@mathorrelax=$
+   \else
+     \let\PT@mathorrelax=\relax
+   \fi
+   \setbox0=\hbox{%
+     \PT@mathorrelax
+     \begingroup
+     \expandafter\expandafter\expandafter\PT@begin
+       \expandafter\expandafter\expandafter
+         {\csname PT@col@#1.type\endcsname}%
+     #3%
+     \PT@end
+     \endgroup
+     \PT@mathorrelax}%
+   \global\advance\PT@colwidth by \wd0\relax%
+   \endgroup
+   \ifdim\PT@colwidth>\csname PT@col@#2.width\endcsname\relax
+     % we need to change the width
+     \PT@typeout@{c #2:
+                  old=\@nameuse{PT@col@#2.width}
+                  new=\the\PT@colwidth}%
+     \PT@changedtrue
+     \PT@enamedef{PT@col@#2.width}{\the\PT@colwidth}%
+   \fi
+   \def\PT@currentcol{PT@col@#2}%
+   \ignorespaces}%
+\def\PT@resetcolumn
+  {\let\PT@currentcol\PT@nullcol}
+\def\PT@nullcol
+  {PT@col@0}
+\def\Execute{\Foldr\Sequence\empty}
+\def\Sequence #1#2{#1#2}
+\def\ShowColumn #1%
+  {\ShowColumn@#1\ShowColumn@}
+\def\ShowColumn@ PT@col@#1\ShowColumn@
+  {#1 }
+\def\Print#1{\Execute{\Map\ShowColumn#1}}
+\def\PT@TeXif #1%
+  {\expandafter\@gobble#1\relax
+     \PT@gobblefalse
+   \else\relax
+     \gobbletrue
+   \fi}
+\def\PT@gobblefalse\else\relax\gobbletrue\fi #1#2%
+  {\fi #1}
+\def\PT@ltwidth #1#2%
+  {\PT@TeXif{\ifdim\csname #1.width\endcsname<\csname #2.width\endcsname}}
+\def\PT@numbercol #1%
+  {\PT@enamedef{#1.num}{\the\PT@cols}%
+   \advance\PT@cols by 1}
+\def\PT@preamble #1%
+   {l}
+\def\PT@resetandcr
+  {\PT@typeout@{Next line ...}%
+   \PT@resetcolumn\\}
+\def\PT@multicolumn #1#2#3%
+  {% skip to current position
+   \global\PT@cols=\@nameuse{PT@col@#1.num}%
+   \global\advance\PT@cols
+     by -\expandafter\csname\PT@currentcol.num\endcsname\relax
+   \ifx\PT@currentcol\PT@nullcol
+     \global\advance\PT@cols by -1%
+   \fi
+   \PT@typeout@{skipping ...}%
+   \PT@typeout@{nf=\expandafter\ShowColumn
+                     \expandafter{\PT@currentcol}nt=#1 %
+                from=\expandafter
+                       \csname\PT@currentcol.num\endcsname\space
+                to=\@nameuse{PT@col@#1.num}}%
+   \ifnum\PT@cols>0\relax
+     \ifnum\PT@cols>1\relax
+       \global\advance\PT@cols by -1\relax
+       \PT@typeout@{after next &, multicolumn \the\PT@cols\space blank}%
+       \PT@NextCol
+       \multicolumn{\the\PT@cols}{@{}l@{}}{}%
+     \fi
+     \PT@NextCol
+   \fi
+   \global\PT@cols=\@nameuse{PT@col@#2.num}%
+   \global\advance\PT@cols by -\@nameuse{PT@col@#1.num}\relax%
+   %\ifnum\PT@cols>1\relax
+      % we always skip one column
+      \PT@typeout@{after next &,
+                   putting text in \the\PT@cols\space multicol}%
+      \PT@typeout@{nf=#1 nt=#2 %
+                   from=\@nameuse{PT@col@#1.num}
+                   to=\@nameuse{PT@col@#2.num}}%
+      \expandafter\global\expandafter\let\expandafter\PT@temp
+        \csname PT@col@#1.type\endcsname%
+      \PT@NextCol
+      % use multicolumn
+      \expandafter\multicolumn
+        \expandafter{\expandafter\the\expandafter\PT@cols
+        \expandafter}\expandafter{\PT@temp}{#3}%
+      %\PT@typeout@{!!!!}%
+   %\else
+   %   \PT@NextCol
+   %   #3%
+   %\fi
+   % set current column
+   \def\PT@currentcol{PT@col@#2}%
+   \ignorespaces}%
+\def\PT@NextCol
+  {\PT@typeout@{ & }%
+   &}%
+\def\ptabular{%
+   \let\PT@begin\tabular
+   \let\PT@end\endtabular
+   \beginpolytable}
+
+\let\endptabular\endpolytable
+
+\def\parray{%
+   \let\PT@begin\array
+   \let\PT@end\endarray
+   \beginpolytable}
+
+\let\endparray\endpolytable
+\endinput
+%%
+%% End of file `polytable.sty'.
