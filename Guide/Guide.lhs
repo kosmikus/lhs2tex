@@ -3,6 +3,7 @@
 \usepackage{moreverb}
 \usepackage{alltt}
 \usepackage{boxedminipage}
+\newcommand*{\defined}{\textbf}
 
 %include ../lhs2TeX.sty
 %let meta                       =  True
@@ -327,9 +328,38 @@ Note that @`@ (backquote) is a meta character in @%format@ directives.
 
 \item
 (Haskell) expressions must be properly bracketed.
+ks: This should no longer be necessary.
 
 \item
 Don't forget to @%include@ both @lhs2TeX.fmt@ and @lhs2TeX.sty@.
 \end{itemize}
+
+%-------------------------------=  --------------------------------------------
+\section{The @poly@ mode}
+%-------------------------------=  --------------------------------------------
+
+To understand how @poly@ mode works, a few clarifications are in order.
+
+Each code block consists of a number of \defined{lines}.
+Each line is separated in \defined{tokens} by @lhs2TeX@'s lexer. 
+Each token starts
+on a specific \defined{column} and has zero or more preceding
+spaces, which we will refer to as the \defined{prespace} of a
+token. 
+
+Alignment in @poly@-mode is governed by two settings, \defined{latency}
+and \defined{separation}. By default, both are set to |2|. There
+are two directives available to change the settings. For instance,
+one can say
+\begin{verbatim}
+%latency 2
+%separation 3
+\end{verbatim}
+
+The rule is as follows:
+All tokens that start at the same column and have a prespace
+of at least |latency| will be aligned if and only if at least
+one of these tokens has a prespace of more than |separation|.
+
 
 \end{document}

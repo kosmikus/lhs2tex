@@ -14,6 +14,7 @@
 > import Version
 >
 > import Control.Monad
+> import Data.List ( isPrefixOf )
 >
 > -- import IOExts
 > import TeXCommands
@@ -423,15 +424,21 @@ conditions of the current @%if@-chain.
 A simple here-script is used to call @hugs@. \NB @.script@ and @.out@
 are used as intermediate files.
 
+ks, 23.10.2003: extended to work with @ghci@, too.
+
 > hugs				:: FilePath -> String -> String -> IO String
-> hugs file opts expr		=  do writeFile ".script" script
+> hugs file opts expr		=  do writeFile ".script" (if ghcimode then ghciscript else hugsscript)
 >				      system ("chmod u+x .script")
 >				      system ("./.script > .out")
 >				      result <- readFile ".out"
 >				      return (extract result)
->     where script		=  (if null opts then "hugs " else opts) ++ " -p'" ++ magic ++ "' " ++ file ++ " <<!\n" -- |file| instead of |nondir file|
+>     where ghcimode            =  "ghci" `isPrefixOf` opts
+>           ghciscript          =  opts ++ " -ignore-dot-ghci " ++ file ++ " <<!\n"
+>                               ++ "putStrLn " ++ show magic ++ "\n"
+>                               ++ expr ++ "\n"
+>                               ++ "putStrLn " ++ show magic ++ "\n"
+>           hugsscript          =  (if null opts then "hugs " else opts) ++ " -p'" ++ magic ++ "' " ++ file ++ " <<!\n" -- |file| instead of |nondir file|
 >				++ expr ++ "\n"
->				++ ":quit\n"
 
 To extract hugs' answer we use a simple technique which should work in
 most cases. The hugs prompt is set to the string |magic|; Hugs's

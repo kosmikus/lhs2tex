@@ -249,7 +249,7 @@ in a conditional checking |anyMath|.
 %if array
 %subst code a    	= "\['n\begin{parray}\SaveRestoreHook'n" a "\ColumnHook'n\end{parray}'n\]\resethooks'n"
 %else
-%subst code a    	= "\begingroup\par\advance\leftskip\mathindent\('n\begin{pboxed}\SaveRestoreHook'n" a "\ColumnHook'n\end{pboxed}'n\)\par\endgroup\resethooks'n"
+%subst code a    	= "\begingroup\par\noindent\advance\leftskip\mathindent\('n\begin{pboxed}\SaveRestoreHook'n" a "\ColumnHook'n\end{pboxed}'n\)\par\noindent\endgroup\resethooks'n"
 %endif
 %subst column c a       = "\column{" c "}{" a "}'n"
 %subst fromto b e t     = "\fromto{" b "}{" e "}{{}" t "{}}'n"

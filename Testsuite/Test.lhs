@@ -136,4 +136,29 @@ bass  sdakh asd asd
 \eval{:type twice} und \eval{:type twice twice} haben den gleichen
 Typ.
 
+%-------------------------------=  --------------------------------------------
+\section{Active commands with @ghci@}
+%-------------------------------=  --------------------------------------------
+
+%options ghci -fglasgow-exts -fno-monomorphism-restriction
+|product [1..20]| yields \eval{product [1..20]}.
+%if False
+
+> main = undefined
+
+%endif
+|product [1..200]| yields
+\[
+\begin{array}{rl}
+    \perform{out (product [1..200])}
+\end{array}
+\]
+
+< twice f a			=  f (f a)
+
+%format forall = "\forall "
+%format .      = "."
+\eval{:type twice} und \eval{:type twice twice} haben den gleichen
+Typ.
+
 \end{document}

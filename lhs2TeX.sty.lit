@@ -109,6 +109,13 @@ column specifiers. It only works for @poly@ style.
 
 \begin{code}
 %if style == poly
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
 \def\resethooks{%
   \global\let\SaveRestoreHook\empty
   \global\let\ColumnHook\empty}
