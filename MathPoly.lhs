@@ -55,13 +55,14 @@
 >				@> lift (substitute fmts auto) *** return
 >				@> lift (uncurry merge)
 >				@> lift lines
+>                               @> when auto (lift (fmap addSpaces))
 >                               @> lift (\ts -> (autoalign sep ts,ts))
 >				@> lift (\(cs,ts) -> let ats = align cs sep lat ts
 >                                                        cs' = [("B",0)] ++ cs 
->                                                                ++ [("E",error "E column")]
+>                                                           ++ [("E",error "E column")]
 >                                                    in  (autocols cs' ats,ats)
 >                                       )
->				@> return *** when auto (lift (fmap (fmap (addSpaces . filter (isNotSpace . token)))))
+>       --                      @> return *** when auto (lift (fmap (fmap (addSpaces . filter (isNotSpace . token)))))
 >                               @> lift (\((cs,z),ats) -> (cs,(z,ats)))
 >				@> return *** lift (\(z,ats) -> leftIndent fmts auto z known rel ats)
 >				@> lift (\(cs,(d,k,r)) -> (sub'code (columns cs <> d),k,r))
@@ -128,6 +129,21 @@ Tokenliste in Zeilen auftrennen.
 \subsubsection{A very simple Haskell Parser}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
+ks, 27.06.2003: I'll add some explanation which reflects the way I understand
+things. Since I don't know Smugweb and I haven't written the code below, it is
+possible that the explanation is not adequate:
+
+A |Chunk| is a sequence of \emph{delimiters} or \emph{applications}. Delimiters
+are keywords or operators. Applications are everything else. 
+
+An |application| is a sequence of atoms that are forming a Haskell 
+function application. The list must never be empty, but can contain
+a single element (for instance, in normal infix expressions such as |2 + 3|
+this will occur frequently).
+
+An |atom| is a single identifier (not an operator, though -- those are
+delimiters), or a chunk in parentheses.
+
 > type Chunk a			=  [Item a]
 >
 > data Item a			=  Delim a
@@ -140,7 +156,7 @@ Tokenliste in Zeilen auftrennen.
 
 The parser is based on the Smugweb parser.
 
-> exprParse			:: (CToken tok, Show tok) => [Pos tok] -> Either Exc [Item (Pos tok)]
+> exprParse			:: (CToken tok, Show tok) => [Pos tok] -> Either Exc (Chunk (Pos tok))
 > exprParse s			=  case run chunk s of
 >     Nothing			-> Left ("syntax error", show s) -- HACK: |show s|
 >     Just e			-> Right e
@@ -184,7 +200,7 @@ If |eval e| returns |Mandatory| then parenthesis around |e| must not be
 dropped; |Optional True| indicates that it can be dropped; |Optional
 False| indicates that the decision is up the caller.
 
-> substitute			:: (CToken tok) => Formats -> Bool -> [Item tok] -> [tok]
+> substitute			:: (CToken tok) => Formats -> Bool -> Chunk tok -> [tok]
 > substitute d auto chunk	=  snd (eval chunk)
 >   where
 >   eval [e]			=  eval' e
@@ -265,10 +281,6 @@ legal atom (|string| is applied to it).
 \subsubsection{Internal alignment}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
-\Todo{Internal alignment Spalte automatisch bestimmen. Vorsicht: die
-Position von |=| oder |::| heranzuziehen ist gef"ahrlich; wenn z.B.
-|let x = e| in einem |do|-Ausdruck vorkommt.}
-
 > data Line a			=  Blank
 >                               |  Poly  [((String,Int),a,Bool)]
 >
@@ -287,7 +299,9 @@ Position von |=| oder |::| heranzuziehen ist gef"ahrlich; wenn z.B.
 >                                       (break (\t -> not . isNotSpace . token $ t) ts) of
 >       (_, [])                 -> []   -- done
 >       (_, [v])                -> []   -- last token is whitespace, doesn't matter
->       (_, v:v':vs)    
+>       (_, v:v':vs)
+>         | row v' == 0 && col v' == 0
+>                               -> findCols (v:vs)  -- skip internal tokens (automatically added spaces)
 >         | length (string (token v)) >= sep
 >                               -> {- |trace ("found: " ++ show (col v')) $| -} col v' : findCols vs
 >         | otherwise           -> {- |trace ("found too short")|            -} findCols vs
@@ -309,7 +323,8 @@ Position von |=| oder |::| heranzuziehen ist gef"ahrlich; wenn z.B.
 >       ([], vs)                -> splitn cc ind oas vs
 >       (us, [])                -> [(cc,us,ind)]
 >       (us, (v:vs))            -> 
->         let lu = last us 
+>         let lu = head [ u | u <- reverse us, col u /= 0 || row u /= 0 ]
+>                                  -- again, we skip automatically added spaces
 >             llu = length (string (token lu))
 >         in case () of
 >             _ | (lat /= 0 && isNotSpace (token lu)) || llu < lat || col v /= i
@@ -337,8 +352,8 @@ Position von |=| oder |::| heranzuziehen ist gef"ahrlich; wenn z.B.
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
 We use a simple heuristic: a column that contains only single tokens and
-at least one "internal" token is centered. For centered columns, we create
-an additional "end" column to make sure that all entries are centered on the
+at least one ``internal'' token is centered. For centered columns, we create
+an additional ``end'' column to make sure that all entries are centered on the
 same amount of space.
 
 > autocols                      :: (CToken tok, Show tok) => [(String,Int)]   -- column info

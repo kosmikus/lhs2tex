@@ -36,7 +36,7 @@ Ein Haskell-Lexer. Modifikation der Prelude-Funktion \hs{lex}.
 > isVarid (Qual _ t)		=  isVarid t
 > isVarid _			=  False
 >
-> isConid (Conid s)		=  True
+> isConid (Conid _)		=  True
 > isConid (Qual _ t)		=  isConid t
 > isConid _			=  False
 >
@@ -154,7 +154,7 @@ This should probably be either documented better or be removed again.
 > nested n     (c : s)		=  c <| nested n s
 
 \NB GHC meldet bei |nested| f"alschlicherweise "`incomplete
-patterns"'.
+patterns"'. [ks: This is no longer true (with GHC 5.04.3).]
 
 > lexLitChar, lexLitStr		:: String -> (String, String)
 > lexLitChar []			=  ([], [])
@@ -195,22 +195,27 @@ Schl"usselw"orter.
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
 Zusammenf"ugen von qualifizierten Namen.
+ks, 27.06.2003: I have modified the fifth case of |qualify|
+to only match if the |Varsym| contains at least one symbol
+besides the dot. Otherwise the dot is an operator, not part
+of a qualified name.
 
 > qualify			:: [Token] -> [Token]
 > qualify []			=  []
-> qualify (Conid m :  Varsym "." : t@(Conid i) : ts)
+> qualify (Conid m :  Varsym "." : t@(Conid _) : ts)
 >				=  Qual m t : qualify ts
-> qualify (Conid m :  Varsym "." : t@(Varid i) : ts)
+> qualify (Conid m :  Varsym "." : t@(Varid _) : ts)
 >				=  Qual m t : qualify ts
 > qualify (Conid m : Varsym ('.' : s@(':' : _)) : ts)
 >				=  Qual m (Consym s) : qualify ts
-> qualify (Conid m : Varsym ('.' : s) : ts)
+> qualify (Conid m : Varsym ('.' : s@(_ : _)) : ts)
 >				=  Qual m (Varsym s) : qualify ts
 > qualify (t : ts)		=  t : qualify ts
 
 Backquoted ids zusammenfassen, da @`Prelude.div`@ zul"assig ist,
 erst nach |qualify|.
 
+> tidyup                        :: [Token] -> [Token]
 > tidyup []			=  []
 > tidyup (Special '`' : t@(Varid _) : Special '`' : ts)
 >				=  Op t : tidyup ts
@@ -229,6 +234,7 @@ eventuelle Formatanweisung @%format `div` = ...@ ignoriert.
 
 Breaking a string into string items.
 
+> strItems                      :: String -> [Token]
 > strItems []			=  impossible "strItems"
 > strItems (c : s)		=  case breaks isGap s of
 >     (item, '\\' : s')		-> String (c : item ++ "\\") : Space white : strItems rest
@@ -236,9 +242,10 @@ Breaking a string into string items.
 >     _				-> [String (c : s)]
 >
 > isGap				:: String -> Bool
-> isGap ('\\' : c : s)		=  isSpace c
+> isGap ('\\' : c : _)		=  isSpace c
 > isGap _			=  False
 
+> splitSpace                    :: String -> [Token]
 > splitSpace []			=  []
 > splitSpace s			=  Space t : splitSpace u
 >     where (t, u)		=  breakAfter (== '\n') s
@@ -286,13 +293,13 @@ they do not bracket expressions.
 >     catCode (Comment _)	=  White
 >     catCode (Nested _)	=  White
 >     catCode (Keyword _)	=  Sep
->     catCode (TeX (Text s))	=  White
+>     catCode (TeX (Text _))	=  White
 
 The following change is by ks, 14.05.2003.
 This is related to the change above in function |string|.
 
 >     catCode (TeX _)		=  NoSep -- |impossible "catCode"|
->     catCode (Qual m t)	=  catCode t
+>     catCode (Qual _ t)        =  catCode t
 >     catCode (Op _)		=  Sep
 >     token			=  id
 >     inherit _ t		=  t
