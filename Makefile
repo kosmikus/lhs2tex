@@ -183,6 +183,42 @@ srcdist : doc
 	tar cvjf $(DISTDIR).tar.bz2 $(DISTDIR)
 	chmod 644 $(DISTDIR).tar.bz2
 
+ifdef DISTTYPE
+
+bindist: lhs2TeX lhs2TeX.fmt lhs2TeX.sty doc
+	if test -d $(DISTDIR); then $(RM) -rf $(DISTDIR); fi
+	$(MKINSTDIR) $(DISTDIR)
+	$(MKINSTDIR) $(DISTDIR)/doc
+	$(MKINSTDIR) $(DISTDIR)/polytable
+	$(MKINSTDIR) $(DISTDIR)/Testsuite
+	$(MKINSTDIR) $(DISTDIR)/Examples
+	$(MKINSTDIR) $(DISTDIR)/Library
+	$(INSTALL) -m 755 lhs2TeX $(DISTDIR)
+	$(INSTALL) -m 644 lhs2TeX.fmt lhs2TeX.sty $(DISTDIR)
+	$(INSTALL) -m 644 $(psources) Version.lhs.in $(snipssrc) $(DISTDIR)
+	$(INSTALL) -m 644 lhs2TeX.fmt.lit lhs2TeX.sty.lit $(DISTDIR)
+	$(INSTALL) -m 644 Makefile common.mk config.mk.in $(DISTDIR)
+	$(INSTALL) -m 755 configure mkinstalldirs install-sh $(DISTDIR)
+	$(INSTALL) -m 644 TODO LICENSE RELEASE $(DISTDIR)
+	cat INSTALL | sed -e "s/@ProgramVersion@/$(PACKAGE_VERSION)/" \
+		> $(DISTDIR)/INSTALL
+	chmod 644 $(DISTDIR)/INSTALL
+	cd doc; $(MAKE) srcdist
+	$(INSTALL) -m 644 polytable/*.{sty,pdf} $(DISTDIR)/polytable
+	$(INSTALL) -m 644 Testsuite/*.{lhs,snip} Makefile $(DISTDIR)/Testsuite
+	$(INSTALL) -m 644 Examples/*.lhs $(DISTDIR)/Examples
+	$(INSTALL) -m 755 Examples/lhs2TeXpre $(DISTDIR)/Examples
+	$(INSTALL) -m 644 Library/*.{fmt,sty} $(DISTDIR)/Library
+	tar cvjf $(DISTDIR)-$(DISTTYPE).tar.bz2 $(DISTDIR)
+	chmod 644 $(DISTDIR)-$(DISTTYPE).tar.bz2
+
+else
+
+bindist:
+	@echo "You must define DISTTYPE."
+
+endif
+
 backup:
 	cd ..; \
 	$(RM) -f Literate.tar Literate.tar.gz; \
