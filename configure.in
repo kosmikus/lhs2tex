@@ -1,0 +1,36 @@
+dnl
+dnl Generic Haskell configure script
+dnl
+
+# Is it there?
+AC_INIT(lhs2tex,1.0)
+
+# check for Haskell compiler
+AC_PATH_PROG(GHC,ghc)
+
+# install command
+AC_PROG_INSTALL
+
+# symbolic links
+AC_PROG_LN_S()
+
+# other programs
+AC_PATH_PROG(MV,mv)
+AC_PATH_PROG(CP,cp)
+AC_PATH_PROG(RM,rm)
+AC_PATH_PROG(MKDIR,mkdir)
+AC_PATH_PROG(TOUCH,touch)
+AC_PATH_PROG(DIFF,diff)
+AC_PATH_PROG(FIND,find)
+AC_PATH_PROG(LATEX,latex)
+AC_PATH_PROG(XDVI,xdvi)
+AC_PATH_PROG(GV,gv)
+AC_PATH_PROG(DVIPS,dvips)
+
+AC_OUTPUT(Makefile)
+
+echo "Configuration succesfully completed."
+echo "Say"
+echo "     make               to just compile"
+echo "     make install       to compile and install"
+

@@ -1,3 +1,11 @@
+
+bindir          := @bindir@
+datadir         := @datadir@
+stydir          := @datadir@/@PACKAGE_TARNAME@
+docdir          := @datadir@/doc/@PACKAGE_TARNAME@-@PACKAGE_VERSION@
+prefix          := @prefix@
+exec_prefix     := @exec_prefix@
+
 binpath		:= $(HOME)/bin
 
 sources		:= Main.lhs TeXCommands.lhs TeXParser.lhs \
@@ -9,11 +17,26 @@ snips		:= sorts.tt sorts.math id.math cata.math spec.math
 objects         := $(foreach file, $(sources:.lhs=.o), $(file))
 sections       	:= $(foreach file, $(sources:.lhs=.tex), $(file))
 include lhs2TeX.d
-ghc		:= ghc
-ghcflags	:= -Wall -O -recomp -package lang
-$(objects) : %.o : %.lhs
-	$(ghc) -c $(ghcflags) $< -o $@
+GHC		:= @GHC@
+GHCFLAGS	:= -Wall -O -recomp -package lang
 
+MV              := @MV@
+CP              := @CP@
+RM              := @RM@
+MKDIR           := @MKDIR@
+TOUCH           := @TOUCH@
+DIFF            := @DIFF@
+FIND            := @FIND@
+LN_S            := @LN_S@
+LATEX           := @LATEX@
+XDVI            := @XDVI@
+GV              := @GV@
+DVIPS           := @DVIPS@
+
+$(objects) : %.o : %.lhs
+	$(GHC) -c $(GHCFLAGS) $< -o $@
+
+# I don't understand this, but I'll leave it for now ...
 %.hi : %.o
 	@if [ ! -f $@ ] ; then \
 	echo $(RM) $< ; \
@@ -40,7 +63,7 @@ $(objects) : %.o : %.lhs
 	./lhs2TeX -verb -ilhs2TeX.fmt $< > $@
 
 %.ps : %.dvi
-	dvips -D600 -o $@ $<
+	$(DVIPS) -D600 -o $@ $<
 
 .PHONY: depend xdvi gv print install backup clean
 
@@ -50,47 +73,47 @@ lhs2TeX.fmt: lhs2TeX.fmt.lit
 	./lhs2TeX -code lhs2TeX.fmt.lit > lhs2TeX.fmt
 
 lhs2TeX : $(objects)
-	$(ghc) $(ghcflags) -o lhs2TeX $(objects)
+	$(GHC) $(GHCFLAGS) -o lhs2TeX $(objects)
 
 depend:
-	mkdependHS -f lhs2TeX.d -- $(ghcflags) -- $(sources)
-	rm -f lhs2TeX.d.bak
+	$(GHC) -M -optdep-f -optdeplhs2TeX.d $(GHCFLAGS) $(sources)
+	$(RM) -f lhs2TeX.d.bak
 
 Lhs2TeX.dvi : Lhs2TeX.tex lhs2TeX.sty $(sections) $(snips) lhs2TeX.sty.tex lhs2TeX.fmt.tex Makefile.tex
-	latex Lhs2TeX
+	$(LATEX) Lhs2TeX
 #	latex Lhs2TeX
 
 xdvi : Lhs2TeX.dvi
-	xdvi -s 3 Lhs2TeX.dvi &
+	$(XDVI) -s 3 Lhs2TeX.dvi &
 
 gv : Lhs2TeX.ps
-	gv Lhs2TeX.ps &
+	$(GV) Lhs2TeX.ps &
 
 print : Lhs2TeX.dvi
-	dvips -D600 -f Lhs2TeX.dvi | lpr -Pa -Zl
+	$(DVIPS) -D600 -f Lhs2TeX.dvi | lpr -Pa -Zl
 
 install : lhs2TeX lhs2TeX.sty lhs2TeX.fmt
-	mv lhs2TeX $(binpath)
+	$(MKINSTDIR) $(DESTDIR)$(bindir)
+	$(INSTALL) -m 755 lhs2TeX $(DESTDIR)$(bindir)
+	$(MKINSTDIR) $(DESTDIR)$(stydir)
+	$(INSTALL) -m 644 lhs2TeX.sty lhs2TeX.fmt $(DESTDIR)$(stydir)
 
 backup:
-	cd ..; \
-	rm -f Literate.tar Literate.tar.gz; \
+	$(CD) ..; \
+	$(RM) -f Literate.tar Literate.tar.gz; \
 	tar -cf Literate.tar Literate; \
 	gzip Literate.tar; \
 	chmod a+r Literate.tar.gz
 
 clean :
-	clean
-	rm -f lhs2TeX $(sections) $(snips) $(objects) *.hi *.dvi *.ps
-	rm -rf lhs2TeX.sty lhs2TeX.fmt
-	rm -rf Lhs2TeX.tex lhs2TeX.sty.tex lhs2TeX.fmt.tex Makefile.tex 
+#	clean
+	$(RM) -f lhs2TeX $(sections) $(snips) $(objects) *.hi *.dvi *.ps
+	$(RM) -rf lhs2TeX.sty lhs2TeX.fmt
+	$(RM) -rf Lhs2TeX.tex lhs2TeX.sty.tex lhs2TeX.fmt.tex Makefile.tex 
 
 all:
 	$(MAKE) install
 	$(MAKE) Lhs2TeX.dvi
-
-
-
 
 
 
