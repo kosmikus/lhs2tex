@@ -6,6 +6,7 @@ include ../config.mk
 
 file		:= Guide
 sources         := $(wildcard *.lhs)
+snips           := sorts.math spec.math block.math
 
 #-----------------------------------------------------------------------------
 # commands
@@ -16,11 +17,13 @@ flags		:= --math --align=33
 #-----------------------------------------------------------------------------
 # pattern rules
 
-%.tex : %.lhs $(sources)
-	$(LHS2TEX) $(flags) $< > $@
+default : Guide.pdf
 
-%.ps : %.dvi
-	$(DVIPS) -D600 -o $@ $<
+%.math : %.snip
+	$(LHS2TEX) $(flags) -smeta -ilhs2TeX.fmt $< > $@
+
+%.tex : %.lhs $(sources) $(snips)
+	$(LHS2TEX) $(flags) $< > $@
 
 #-----------------------------------------------------------------------------
 # common rules

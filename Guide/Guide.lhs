@@ -20,7 +20,7 @@
 %-------------------------------=  --------------------------------------------
 %if False
 
-Private remarks or uninteresting code segments com here.
+Private remarks or uninteresting code segments go here.
 
 %endif
 %-------------------------------=  --------------------------------------------
@@ -177,15 +177,45 @@ parenthesis as well, @power (a + b) 3@ would result in ${\Varid{a} +
 \caption{\label{fig:spec.math}Meta Haskell (output)}
 \end{figure}
 
-Block structure with @%{@ and @%}@ \ldots
-
 @lhs2TeX@ automatically aligns code and specification sections. By
 default the alignment column is $33$. You can adjust to your needs
 using, for example, @%align 25@ (which again looks like a
 \TeX\ comment).
 
+Formatting directives usually affect everything that comes after
+them. However, a set of directives can be made local by enclosing
+it in a block with @%{@ and @%}@. A local directive has no effect
+after the current block ends. The blocks of @lhs2TeX@ do \emph{only}
+group formatting directives, nothing else: no \LaTeX\ commands,
+no other directives (@%align@, @%if@, @%subst@ or whatever).
+Figures~\ref{fig:block} and \ref{fig:block.math} show an example.
+Blocks can be nested.
+
+\begin{figure}[p]
+\begin{center}
+\begin{boxedminipage}{\linewidth}
+\small\verbatiminput{block.snip}
+\end{boxedminipage}
+\end{center}
+\caption{\label{fig:block}Block structure (input)}
+\end{figure}
+%
+\begin{figure}[p]
+\begin{center}
+\begin{boxedminipage}{\linewidth}
+\small\input{block.math}
+\end{boxedminipage}
+\end{center}
+\caption{\label{fig:block.math}Block structure (output)}
+\end{figure}
+
 @lhs2TeX@ recognizes a numer of C-preprocessor-like directives: @%if@,
 @%then@, @%else@, @%elif@, @%fi@, @%let@, @%include@.
+With @%let@, one can set boolean or integer toggles that can be tested
+in conditionals.
+Internally, @lhs2TeX@ uses toggles to support different behaviours.
+Also, some variables are predefined so that your documents can show
+different behaviour under different circumstances. 
 
 You can also call @Hugs@ \ldots
 
