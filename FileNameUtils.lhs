@@ -15,7 +15,7 @@
 %% License along with this library; if not, write to the Free Software
 %% Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 %%
-%% $Id: FileNameUtils.lhs,v 1.1 2003/05/16 09:22:17 cvs-4 Exp $
+%% $Id: FileNameUtils.lhs,v 1.2 2003/06/11 08:35:51 cvs-4 Exp $
 %% 
 %% author: Jan de Wit (jwit@cs.uu.nl), Andres Loeh (andres@cs.uu.nl)
 
@@ -168,7 +168,7 @@ more than one directory separator, all subpaths are added ...
 >                               -> FileName -> IO (String,FileName)
 > chaseFile p fn | isAbsolute fn=  t fn
 >                | p == []      =  chaseFile ["."] fn
->                | otherwise    =  s $ map (\d -> t (md d ++ fn)) p'
+>                | otherwise    =  s $ map (\d -> t (md d ++ fn)) p
 >   where
 >   md cs | last cs `elem` directorySeparators
 >                               =  cs
@@ -178,7 +178,5 @@ more than one directory separator, all subpaths are added ...
 >   s []                        =  ioError 
 >                               $  userError $ "File `" ++ fn ++ "' not found in search path:\n" ++ showpath
 >   s (x:xs)                    =  catch x (\_ -> s xs)
->   p' | "." `elem` p           = p
->      | otherwise              = "." : p
 >   showpath                    =  concatMap (\x -> "   " ++ x ++ "\n") p
 

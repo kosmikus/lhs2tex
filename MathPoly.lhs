@@ -51,7 +51,6 @@
 >				@> lift (number 1 1)
 >	--			@> when auto (lift (filter (isNotSpace . token)))
 >				@> lift (partition (\t -> catCode t /= White))
->                               @> return *** return
 >				@> exprParse *** return
 >				@> lift (substitute fmts auto) *** return
 >				@> lift (uncurry merge)
