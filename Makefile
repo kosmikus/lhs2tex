@@ -53,7 +53,7 @@ default : lhs2TeX doc
 %.d : %.lhs
 	$(MKGHCDEPEND); \
 	$(CP) $*.d $*.dd; \
-	$(DEPPOSTPROC) < $*.dd >> $.d; \
+	$(DEPPOSTPROC) < $*.dd >> $*.d; \
 	$(RM) -f $*.dd
 
 $(objects) : %.o : %.lhs
