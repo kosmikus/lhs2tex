@@ -69,4 +69,4 @@ Added by ks, 14.05.2003.
 > sub'column n a                =  Sub "column" [Text n,a]
 > sub'centered                  =  Sub "centered" []
 > sub'left                      =  Sub "left" []
-
+> sub'dummycol                  =  Sub "dummycol" []

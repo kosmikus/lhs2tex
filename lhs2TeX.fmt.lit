@@ -225,10 +225,11 @@ in a conditional checking |mathCommon|.
 %subst hskip a	= "\hskip" a "em\relax"
 %subst phantom a	= "\phantom{" a "\mbox{}}"
 %subst code a    	= "\['n\begin{parray}'n" a "\end{parray}'n\]'n"
-%subst column c a       = "\column{" c "}{@{}" a "@{\;}}'n"
-%subst fromto b e t     = "\fromto{" b "}{" e "}{" t "}'n"
-%subst left             = "l"
-%subst centered         = "c"
+%subst column c a       = "\column{" c "}{" a "}'n"
+%subst fromto b e t     = "\fromto{" b "}{" e "}{{}" t "{}}'n"
+%subst left             = "@{}l@{\;}"
+%subst centered         = "@{}c@{\;}"
+%subst dummycol         = "@{}l@{}"
 %subst newline   	= "\nextline'n"
 %let mathCommon         = True
 %endif

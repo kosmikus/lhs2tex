@@ -20,7 +20,7 @@
 > import Parser
 > import qualified FiniteMap as FM
 > import Auxiliaries
-> -- |import IOExts ( trace )|
+> import IOExts ( trace )
 
 %endif
 
@@ -63,7 +63,8 @@
 >                                                    in  (autocols cs' ats,ats)
 >                                       )
 >				@> return *** when auto (lift (fmap (fmap (addSpaces . filter (isNotSpace . token)))))
->				@> return *** lift (leftIndent fmts auto known rel)
+>                               @> lift (\((cs,z),ats) -> (cs,(z,ats)))
+>				@> return *** lift (\(z,ats) -> leftIndent fmts auto z known rel ats)
 >				@> lift (\(cs,(d,k,r)) -> (sub'code (columns cs <> d),k,r))
 >
 > columns                       :: [(String,Doc)] -> Doc
@@ -337,14 +338,19 @@ Position von |=| oder |::| heranzuziehen ist gef"ahrlich; wenn z.B.
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
 We use a simple heuristic: a column that contains only single tokens and
-at least one "internal" token is centered.
+at least one "internal" token is centered. For centered columns, we create
+an additional "end" column to make sure that all entries are centered on the
+same amount of space.
 
 > autocols                      :: (CToken tok, Show tok) => [(String,Int)]   -- column info
 >                                               -> [Line [Pos tok]] -- aligned tokens
->                                               -> [(String,Doc)] -- cols+alignment
-> autocols cs ats               = zipWith3 (\(cn,_) ml ai -> 
->                                              if ml <= 2 && ai then (cn,sub'centered)
->                                                               else (cn,sub'left)
+>                                               -> ([(String,Doc)],[Int]) -- cols+alignment, plus centered columns
+> autocols cs ats               = (\(x,y) -> (concat x,concat y)) $ unzip 
+>                               $ zipWith3 (\(cn,n) ml ai -> 
+>                                              if ml <= 2 && ai then ([(cn,sub'centered)
+>                                                                     ,(cn ++ "E",sub'dummycol)
+>                                                                     ],[n])
+>                                                               else ([(cn,sub'left)],[])
 >                                          ) cs maxlengths anyinternals
 >                                 -- length 2, because space tokens are always there
 >     where
@@ -410,11 +416,12 @@ Auch wenn |auto = False| wird der Stack auf dem laufenden gehalten.
 > type Stack			=  [(Col, Doc, [Pos Token])]
 >
 > leftIndent                    :: Formats -> Bool 
+>                               -> [Int]        -- zentrierte Spalten
 >                               -> [Int]        -- bekannte alignment-Spalten
 >                               -> [(String,Int)] -- relevante alignment-Spalten
 >                               -> [Line [Pos Token]]
 >                               -> (Doc, [Int], [(String,Int)])
-> leftIndent dict auto known rel
+> leftIndent dict auto z known rel
 >				=  loop known rel
 >   where
 >   copy d | auto		=  d
@@ -428,6 +435,8 @@ Die Funktion |isInternal| pr"uft, ob |v| ein spezielles Symbol wie
 >       Blank                   -> loop known rel ls
 >    {- Poly x | trace (show x) False -> undefined -}
 >       Poly []                 -> loop known rel ls
+>       Poly (((n,c),ts,ind):rs)
+>         | c `elem` z          -> mkFromTo known rel n (n ++ "E") c ts ind rs ls
 >       Poly [((n,c),ts,ind)]   -> mkFromTo known rel n "E" c ts ind [] ls
 >       Poly (((n,c),ts,ind):rs@(((nn,_),_,_):_))
 >                               -> mkFromTo known rel n nn  c ts ind rs ls 
