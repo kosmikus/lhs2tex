@@ -27,7 +27,7 @@ are subtle differences, and they will grow over time \dots
 > import Parser
 > import qualified FiniteMap as FM
 > import Auxiliaries
-> import IOExts ( trace )
+> -- import Debug.Trace ( trace )
 
 %endif
 

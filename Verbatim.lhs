@@ -46,7 +46,10 @@ The Boolean flag indicates whether a space should be typeset as \verb*| | (|True
 >     latex c
 >         | c `elem` " \t\n"	=  Text "~"
 >         | isAlphaNum c	=  Text [c]
->         | otherwise		=  Text ("\\char" ++ show (fromEnum c) ++ " ")
+>         | otherwise		=  Text ("\\char" ++ show (fromEnum c) ++ "{}")
+
+ks, 11.01.2005: I've added {} after @\char@ to prevent ligatures like
+@--@ from applying.
 
 \NB Comments are \emph{not} typeset in \TeX, hence the name of the
 style. This is really a feature since the enclosed code need not be
