@@ -12,7 +12,7 @@ snips           := sorts.math spec.math block.math
 # commands
 
 LHS2TEX         := ../lhs2TeX
-flags		:= --math --align=33
+flags		:= --math --align=33 --verbose
 
 #-----------------------------------------------------------------------------
 # pattern rules
@@ -22,10 +22,10 @@ flags		:= --math --align=33
 default : Guide.pdf
 
 %.math : %.snip
-	$(LHS2TEX) $(flags) -smeta -ilhs2TeX.fmt $< > $@
+	$(LHS2TEX) $(flags) -smeta -P.. -ilhs2TeX.fmt $< > $@
 
 %.tex : %.lhs $(sources) $(snips)
-	$(LHS2TEX) $(flags) $< > $@
+	$(LHS2TEX) $(flags) -P.:.. $< > $@
 
 clean:
 	$(RM) -f *.log *.aux *.math Guide.tex

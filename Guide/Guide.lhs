@@ -5,12 +5,12 @@
 \usepackage{boxedminipage}
 \newcommand*{\defined}{\textbf}
 
-%include ../lhs2TeX.sty
+%include lhs2TeX.sty
 %let meta                       =  True
 %let array                      =  True
 %let doc                        =  True
-%include ../lhs2TeX.fmt
-%include ../Version.lhs
+%include lhs2TeX.fmt
+%include Version.lhs
 
 \title{A Quick Guide to @lhs2TeX@}
 \author{RALF HINZE

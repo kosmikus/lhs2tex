@@ -7,16 +7,19 @@
 %% polytable.dtx  (with options: `package')
 %% 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{polytable}
+\ProvidesPackage{polytable}%
+   [2003/11/20 v0.7 `polytable' package (Andres Loeh)]
 \RequirePackage{lazylist}
 \RequirePackage{array}
 \DeclareOption{debug}{\AtEndOfPackage\PT@debug}
+\DeclareOption{silent}{\AtEndOfPackage\PT@silent}
 \ProcessOptions
 \newdimen\PT@colwidth
 \newcount\PT@cols
 \newcount\PT@table
 \newif\ifPT@changed
 \def\PT@allcols{\Nil}
+\def\PT@allpubliccols{\Nil}
 \let\PT@infromto\empty
 \let\PT@currentwidths\empty
 \def\PT@false{0}
@@ -25,6 +28,9 @@
 \def\PT@debug
   {\def\PT@typeout@ ##1{\typeout{(polytable) ##1}}}
 \let\PT@typeout@\@gobble
+\def\PT@warning{\PackageWarning{polytable}}%
+\def\PT@silent
+  {\let\PT@typeout@\@gobble\let\PT@warning\@gobble}
 \def\PT@rerun
   {\PT@typeout@{We have to rerun LaTeX ...}%
    \AtEndDocument
@@ -93,6 +99,8 @@
 \newcommand{\beginpolytable}%
   {\edef\PT@environment{\@currenvir}%
    \begingroup
+   % new in v0.7: save counters
+   \PT@savecounters
    \toks@{}% initialise token register
    \PT@scantoend}
 \let\endpolytable=\relax
@@ -129,12 +137,20 @@
    \let\PT@restorewidths\PT@gobbleoptional
    \ifPT@changed
       % we need to rerun if something has changed
+      % new in v0.7: restore counters before that
+      \PT@restorecounters
       \expandafter\PT@getwidths
    \else
       % we are done and can do the sorting
       \PT@typeout@{Reached fixpoint.}%
       \expandafter\PT@sortcols
    \fi}
+\def\PT@savecounters
+  {\begingroup
+      \def\@elt ##1%
+        {\global\csname c@##1\endcsname\the\csname c@##1\endcsname}%
+      \xdef\PT@restorecounters{\cl@@ckpt}%
+   \endgroup}
 \def\PT@sortcols
   {\edef\PT@sortedlist
      {\Foldr{\noexpand\Cons}{\noexpand\Nil}%
@@ -150,7 +166,8 @@
       \fi
    \PT@typeset}
 \def\PT@typeset
-  {\edef\PT@temp{@{}\Execute{\Map\PT@preamble\PT@sortedlist}}%
+  {\PT@typeout@{Typesetting the table ...}%
+   \edef\PT@temp{@{}\Execute{\Map\PT@preamble\PT@sortedlist}}%
    %\PT@typeout@{Preamble: \PT@temp}%
    \let\fromto\PT@multicolumn
    \PT@resetcolumn % we are at the beginning of a line
@@ -159,6 +176,7 @@
    \the\toks@
    \PT@end
    \endgroup
+   \PT@typeout@{Finished.}%
    \expandafter\end\expandafter{\PT@environment}}%
 \newcommand\PT@firstrun@column[3][0pt]%
   {\@ifundefined{PT@col@#2.type}%
@@ -171,7 +189,7 @@
       {\expandafter\ifx\csname PT@col@#2.type\endcsname\empty
          \relax % will be defined in a later table of the same set
        \else
-         \PackageWarning{polytable}{Redefining column #2}%
+         \PT@warning{Redefining column #2}%
        \fi
        \@namedef{PT@col@#2.type}{#3}%
        \expandafter\ifdim#1>0pt\relax
@@ -185,10 +203,15 @@
    \ignorespaces}
 \newcommand\PT@otherrun@column[3][]%
   {\ignorespaces}
+\def\PT@checkcoldefined #1%
+  {\@ifundefined{PT@col@#1.type}%
+      {\PackageError{polytable}{Undefined column #1}{}}{}}%
 \def\PT@fromto #1#2#3%
   {\PT@infromto
    \def\PT@infromto{%
-     \PackageError{polytable}{Nested fromto.}}%
+     \PackageError{polytable}{Nested fromto}{}}%
+   \PT@checkcoldefined{#1}%
+   \PT@checkcoldefined{#2}%
    \def\PT@temp{PT@col@#1}%
    \ifx\PT@currentcol\PT@temp
      \PT@typeout@{No need to skip columns.}%
@@ -390,11 +413,12 @@
    \PT@colwidth=\@nameuse{PT@col@#2.max}%
    \advance\PT@colwidth by -\@nameuse{PT@col@#1.max}\relax%
    \ifmmode
-     \PT@typeout@{YES, WE ARE IN MATH MODE!}%
+     \PT@typeout@{*math mode*}%
      \let\d@llarbegin=$%$
      \let\d@llarend=$%$
      \let\col@sep=\arraycolsep
    \else
+     \PT@typeout@{*text mode*}%
      \let\d@llarbegin=\begingroup
      \let\d@llarend=\endgroup
      \let\col@sep=\tabcolsep
