@@ -191,7 +191,7 @@ clean :
 	-$(RM) -f *.d *.dd *.ld *.ldd
 	$(RM) -f lhs2TeX.sty lhs2TeX.fmt
 	$(RM) -f Lhs2TeX.tex lhs2TeX.sty.tex lhs2TeX.fmt.tex Makefile.tex 
-	cd Guide; $(MAKE) clean
+	cd doc; $(MAKE) clean
 
 # all:
 # 	$(MAKE) install
