@@ -131,9 +131,9 @@ $(objects) : %.o : %.lhs
 %.ps : %.dvi
 	$(DVIPS) -D600 -o $@ $<
 
-lhs2TeX.sty: lhs2TeX.sty.lit
+lhs2TeX.sty: lhs2TeX.sty.lit lhs2TeX
 	./lhs2TeX --code lhs2TeX.sty.lit > lhs2TeX.sty
-lhs2TeX.fmt: lhs2TeX.fmt.lit
+lhs2TeX.fmt: lhs2TeX.fmt.lit lhs2TeX
 	./lhs2TeX --code lhs2TeX.fmt.lit > lhs2TeX.fmt
 
 lhs2TeX : $(objects)

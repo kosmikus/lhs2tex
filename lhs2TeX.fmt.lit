@@ -233,7 +233,6 @@ in a conditional checking |mathCommon|.
 %let mathCommon         = True
 %endif
 %if mathCommon
-%endif
 %if latex209
 %subst numeral a 	= "{\mathrm " a "}"
 %subst keyword a 	= "{\mathbf " a "}"
