@@ -4,7 +4,7 @@
 %
 % better code environment for poly style in lhs2TeX
 %
-% Andres Loeh, August 2004, ver 1.1
+% Andres Loeh, August 2004, ver 1.2
 %
 % TODO: split in fmt and sty
 %       use \[ \] in arrayhs (fleqn problem)
@@ -76,3 +76,4 @@
 
 \newcommand{\mathhs}{\sethscode{mathhscode}}
 
+%endif

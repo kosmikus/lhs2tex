@@ -4,7 +4,7 @@
 %
 % code in a colored box for poly style in lhs2TeX
 %
-% Andres Loeh, August 2004, ver 1.3
+% Andres Loeh, August 2004, ver 1.4
 %
 % TODO: split in fmt and sty
 %       fix spacing behaviour for other environments
@@ -30,10 +30,24 @@
    \endtabular
    {\parskip=0pt\parindent=0pt\par\vskip\belowdisplayskip}%
    \ignorespacesafterend}
+
+\newenvironment{barhscode}%
+  {{\parskip=0pt\parindent=0pt\par\vskip\abovedisplayskip\noindent}%
+   \arrayrulecolor{codecolor}%
+   \arrayrulewidth=\coderulewidth
+   \tabular{||p{\linewidth-\arrayrulewidth-\tabcolsep}@@{}}%
+   \let\\=\@@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \endtabular
+   {\parskip=0pt\parindent=0pt\par\vskip\belowdisplayskip}%
+   \ignorespacesafterend}
 \makeatother
 
 \def\colorcode{\columncolor{codecolor}}
 \definecolor{codecolor}{rgb}{1,1,.667}
+\newlength{\coderulewidth}
+\setlength{\coderulewidth}{3pt}
 
 \newenvironment{joincolorboxes}%
   {\parskip=\abovedisplayskip\par\noindent
@@ -47,6 +61,7 @@
 
 
 \newcommand{\colorhs}{\sethscode{colorhscode}}
+\newcommand{\barhs}{\sethscode{barhscode}}
 
 % The framed environment places code in a framed box.
 
