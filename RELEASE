@@ -1,5 +1,5 @@
 
-                     lhs2TeX version 1.5
+                     lhs2TeX version 1.9
                      ===================
 
 We are pleased to announce the first official release of
@@ -8,24 +8,27 @@ Haskell sources.
 
 lhs2TeX includes the following features:
 
-* different modes to process your source file: for instance,
+* Different modes to process your source file: for instance,
   "tt" mode uses non-proportional fonts for the code examples
   while still allowing you to highlight keywords etc, whereas
-  "math" mode uses proportional fonts for identifiers, handles
+  "poly" mode uses proportional fonts for identifiers, handles
   indentation nicely, and replaces binary operators by
-  mathematical symbols.
+  mathematical symbols, and can handle complex horizontal
+  alignments in code blocks.
 
-* formatting directives which let you customize the way certain
+* Formatting directives which let you customize the way certain
   tokens in the source code should appear in the processed 
-  output
+  output.
 
-* a liberal parser that can handle most of the language 
+* A liberal parser that can handle most of the language 
   extensions; you don't restrict yourself to Haskell 98 by
   using lhs2TeX
 
-* preprocessor-style conditionals that allow you to generate
+* Preprocessor-style conditionals that allow you to generate
   different versions of a document from a single source file
   (for instance, a paper and a presentation).
+
+* A manual explaining all the important aspects of lhs2TeX.
 
 Changes
 -------
@@ -34,13 +37,15 @@ Although development on lhs2TeX has begun as early as 1997,
 it has never been formally released before. This is a first
 release that should be mostly compatible to versions that
 have been inofficially distributed so far. It should compile
-with the latest GHC versions. 
+with the latest GHC versions.
 
-The purpose of this release is also to set a stable base
-for future development which has already started: a yet
-undocumented new "poly" mode is being designed to replace
-"math" mode in the long term. With "poly" mode, one can build
-complex layouts in code blocks with multiple alignments.
+Two completely new modes have been added compared to previous
+versions: "poly" mode is designed to replace the old math
+mode; the restriction of having only one alignment column 
+per code block is lifted and replaced by a generic mechanism
+that allows complex layouts; "newcode" is a replacement for
+the old "code" mode that can handle formatting directives
+and produces LINE pragmas in the generated code.
 
 Requirements and Download
 -------------------------
@@ -52,12 +57,12 @@ environments is available from
 
 It has been verified to build on Linux and MacOSX.
 
-You need a recent version of GHC (5.04.X or 6.0) to build
-lhs2TeX, and, of course, you need a TeX distribution to make
-use of lhs2TeX's output. The program includes a configuration
-that is suitable for use with LaTeX. In theory, there should
-be no problem to generate code for other TeX flavors, such as
-plainTeX or ConTeXt.
+You need a recent version of GHC (5.04.X or higher should do) 
+to build lhs2TeX, and, of course, you need a TeX distribution 
+to make use of lhs2TeX's output. The program includes a 
+configuration that is suitable for use with LaTeX. In theory, 
+there should be no problem to generate code for other TeX 
+flavors, such as plainTeX or ConTeXt.
 
 
   Happy lhs2TeXing,

@@ -1,16 +1,17 @@
 
 include config.mk
 
-sources		:= Main.lhs TeXCommands.lhs TeXParser.lhs \
+psources        := Main.lhs TeXCommands.lhs TeXParser.lhs \
 		   Typewriter.lhs Math.lhs MathPoly.lhs \
                    NewCode.lhs \
 		   Directives.lhs HsLexer.lhs FileNameUtils.lhs \
 		   Parser.lhs FiniteMap.lhs Auxiliaries.lhs \
-		   StateT.lhs Document.lhs Verbatim.lhs Value.lhs \
-		   Version.lhs
-snips		:= sorts.tt sorts.math id.math cata.math spec.math
-objects         := $(foreach file, $(sources:.lhs=.o), $(file))
-sections       	:= $(foreach file, $(sources:.lhs=.tex), $(file))
+		   StateT.lhs Document.lhs Verbatim.lhs Value.lhs
+sources         := $(psources) Version.lhs
+snipssrc        := sorts.snip id.snip cata.snip spec.snip
+snips	        := sorts.tt sorts.math id.math cata.math spec.math
+objects         := $(sources:.lhs=.o)
+sections       	:= $(sources:.lhs=.tex)
 
 MKINSTDIR       := ./mkinstalldirs
 
@@ -44,11 +45,12 @@ DEPPOSTPROC = $(SED) -e 's/\#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 ### default targets
 ###
 
-.PHONY : default xdvi gv print install backup clean all depend doc
+.PHONY : default xdvi gv print install backup clean all depend bin doc srcdist
 
 all : default
 
-default : lhs2TeX doc
+default : bin doc
+bin : lhs2TeX lhs2TeX.fmt lhs2TeX.sty
 
 %.d : %.lhs
 	$(MKGHCDEPEND); \
@@ -114,8 +116,9 @@ lhs2TeX.fmt: lhs2TeX.fmt.lit lhs2TeX
 lhs2TeX : $(objects)
 	$(GHC) $(GHCFLAGS) -o lhs2TeX $(objects)
 
-doc : lhs2TeX lhs2TeX.sty lhs2TeX.fmt
-	cd Guide; $(MAKE) Guide.pdf
+doc : bin
+	cd doc; $(MAKE)
+#	cd Guide; $(MAKE) Guide.pdf
 
 depend:
 	$(GHC) -M -optdep-f -optdeplhs2TeX.d $(GHCFLAGS) $(sources)
@@ -135,11 +138,45 @@ gv : Lhs2TeX.ps
 print : Lhs2TeX.dvi
 	$(DVIPS) -D600 -f Lhs2TeX.dvi | lpr -Pa -Zl
 
-install : lhs2TeX lhs2TeX.sty lhs2TeX.fmt
+install : bin
 	$(MKINSTDIR) $(DESTDIR)$(bindir)
 	$(INSTALL) -m 755 lhs2TeX $(DESTDIR)$(bindir)
 	$(MKINSTDIR) $(DESTDIR)$(stydir)
 	$(INSTALL) -m 644 lhs2TeX.sty lhs2TeX.fmt $(DESTDIR)$(stydir)
+# TODO: install documentation
+ifeq ($(INSTALL_POLYTABLE),yes)
+# install polytable package
+	$(MKINSTDIR) $(DESTDIR)$(polydir)
+	$(INSTALL) -m 644 polytable/*.sty $(DESTDIR)$(polydir)
+ifndef DESTDIR
+	$(MKTEXLSR)
+else
+	echo "Please update the TeX filename database."
+endif
+endif
+
+srcdist : doc
+	if test -d $(DISTDIR); then $(RM) -rf $(DISTDIR); fi
+	$(MKINSTDIR) $(DISTDIR)
+	$(MKINSTDIR) $(DISTDIR)/doc
+	$(MKINSTDIR) $(DISTDIR)/polytable
+	$(MKINSTDIR) $(DISTDIR)/Testsuite
+	$(MKINSTDIR) $(DISTDIR)/Examples
+	$(INSTALL) -m 644 $(psources) Version.lhs.in $(snipssrc) $(DISTDIR)
+	$(INSTALL) -m 644 lhs2TeX.fmt.lit lhs2TeX.sty.lit $(DISTDIR)
+	$(INSTALL) -m 644 Makefile common.mk config.mk.in $(DISTDIR)
+	$(INSTALL) -m 755 configure mkinstalldirs install-sh $(DISTDIR)
+	$(INSTALL) -m 644 TODO LICENSE RELEASE $(DISTDIR)
+	cat INSTALL | sed -e "s/@ProgramVersion@/$(PACKAGE_VERSION)/" \
+		> $(DISTDIR)/INSTALL
+	chmod 644 $(DISTDIR)/INSTALL
+	cd doc; $(MAKE) srcdist
+	$(INSTALL) -m 644 polytable/* $(DISTDIR)/polytable
+	$(INSTALL) -m 644 Testsuite/*.{lhs,snip} Makefile $(DISTDIR)/Testsuite
+	$(INSTALL) -m 644 Examples/*.lhs $(DISTDIR)/Examples
+	$(INSTALL) -m 755 Examples/lhs2TeXpre $(DISTDIR)/Examples
+	tar cvjf $(DISTDIR).tar.bzip2 $(DISTDIR)
+	chmod 644 $(DISTDIR).tar.bzip2
 
 backup:
 	cd ..; \

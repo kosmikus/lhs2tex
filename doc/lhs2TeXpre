@@ -1,0 +1,18 @@
+#! /bin/sh
+
+# wrapper for use with GHC/GHCi
+# -pgmF lhs2TeXpre -F
+
+LHSHOME=..
+
+if [ "$1" == "$2" ]; then
+  cp "$2" "$3"
+else
+  if grep -q "^%include" "$1"; then
+    TARGET=$3
+    # echo Calling with TARGET=${TARGET}
+    ${LHSHOME}/lhs2TeX --newcode -P${LHSHOME}: $1 > ${TARGET}
+  else
+    cp "$2" "$3"
+  fi
+fi

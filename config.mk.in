@@ -1,4 +1,8 @@
 
+PACKAGE_TARNAME := @PACKAGE_TARNAME@
+PACKAGE_VERSION := @PACKAGE_VERSION@
+DISTDIR         := $(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
+
 bindir          = @bindir@
 datadir         = @datadir@
 stydir          = @datadir@/@PACKAGE_TARNAME@
@@ -6,27 +10,32 @@ docdir          = @datadir@/doc/@PACKAGE_TARNAME@-@PACKAGE_VERSION@
 prefix          = @prefix@
 exec_prefix     = @exec_prefix@
 
-binpath		:= $(HOME)/bin
+# binpath	:= $(HOME)/bin
 
-GHC		:= @GHC@
+GHC		= @GHC@
 # GHCFLAGS	:= -Wall -O -recomp -package lang
-GHCFLAGS        := -O -package lang
+GHCFLAGS        = -O -package lang
 
-INSTALL         := @INSTALL@
-MV              := @MV@
-CP              := @CP@
-RM              := @RM@
-MKDIR           := @MKDIR@
-TOUCH           := @TOUCH@
-DIFF            := @DIFF@
-FIND            := @FIND@
-LN_S            := @LN_S@
-LATEX           := @LATEX@
-PDFLATEX        := @PDFLATEX@
-XDVI            := @XDVI@
-GV              := @GV@
-DVIPS           := @DVIPS@
-SED             := @SED@
-GREP            := @GREP@
-SORT            := @SORT@
-UNIQ            := @UNIQ@
+INSTALL         = @INSTALL@
+MV              = @MV@
+CP              = @CP@
+RM              = @RM@
+MKDIR           = @MKDIR@
+TOUCH           = @TOUCH@
+DIFF            = @DIFF@
+FIND            = @FIND@
+LN_S            = @LN_S@
+LATEX           = @LATEX@
+PDFLATEX        = @PDFLATEX@
+XDVI            = @XDVI@
+GV              = @GV@
+DVIPS           = @DVIPS@
+SED             = @SED@
+GREP            = @GREP@
+SORT            = @SORT@
+UNIQ            = @UNIQ@
+
+polydir         = @texmf@/tex/latex/polytable
+INSTALL_POLYTABLE = @POLYTABLE_INSTALL@
+MKTEXLSR        = @MKTEXLSR@
+

@@ -109,7 +109,11 @@ Initial state.
 >				           stacks     = ([], []),
 >                                          separation = 2,
 >                                          latency    = 2,
->                                          pstack     = []
+>                                          pstack     = [],
+>                                          -- ks, 03.01.04: added to prevent warnings during compilation
+>                                          style      = error "uninitialized style",
+>                                          file       = error "uninitialized filename",
+>                                          toggles    = error "uninitialized toggles"
 >                                        }
 
 > initState			:: Style -> FilePath -> [FilePath] -> State -> State
@@ -142,7 +146,7 @@ Converting command line options into directives.
 > uheader                       =  "lhs2TeX [ options ] files\n\nAvailable options:\n"
 
 ks, 20.07.2003: The short option for @--align@ has been changed into @-A@. Otherwise
-@-align@ would not trigger comptaibility mode, but be interpreted as a valid option
+@-align@ would not trigger compatibility mode, but be interpreted as a valid option
 usage.
 
 > options                       :: [OptDescr (State -> State,[Class] -> [Class],[Style])]
@@ -150,11 +154,11 @@ usage.
 >   [ Option ['h','?'] ["help"](NoArg (id, id, [Help]))                                 "get this help"
 >   , Option ['v'] ["verbose"] (NoArg (\s -> s { verbose = True }, id, []))             "be verbose"
 >   , Option ['V'] ["version"] (NoArg (id, id, [Version]))                              "show version"
->   , Option []    ["tt"]      (NoArg (id, id, [Typewriter]))                           "typewriter mode"
->   , Option []    ["math"]    (NoArg (id, id, [Math]))                                 "math mode"
->   , Option []    ["poly"]    (NoArg (id, id, [Poly]))                                 "poly mode"
->   , Option []    ["code"]    (NoArg (id, id, [CodeOnly]))                             "code mode"
->   , Option []    ["newcode"] (NoArg (id, id, [NewCode]))                              "new code mode"
+>   , Option []    ["tt"]      (NoArg (id, id, [Typewriter]))                           "typewriter style"
+>   , Option []    ["math"]    (NoArg (id, id, [Math]))                                 "math style"
+>   , Option []    ["poly"]    (NoArg (id, id, [Poly]))                                 "poly style"
+>   , Option []    ["code"]    (NoArg (id, id, [CodeOnly]))                             "code style"
+>   , Option []    ["newcode"] (NoArg (id, id, [NewCode]))                              "new code style"
 >   , Option []    ["verb"]    (NoArg (id, id, [Verb]))                                 "verbatim"
 >   , Option ['A'] ["align"]   (ReqArg (\c -> (id, (Directive Align c:), [])) "col")    "align at <col>"
 >   , Option ['i'] ["include"] (ReqArg (\f -> (id, (Directive Include f:), [])) "file") "include <file>"
@@ -226,15 +230,17 @@ We abort immediately if an error has occured.
 > format (Command Hs s)		=  inline s
 > format (Command (Vrb b) s)	=  out (Verbatim.inline b s)
 > format (Command Eval s)	=  do st <- fetch
->                                     fromIO $ when (verbose st) $ 
->                                        hPutStrLn stderr "Calling external command."
->				      result <- fromIO (hugs (file st) (opts st) (map unNL s))
->				      inline result
+>                                     when (not (style st `elem` [CodeOnly,NewCode])) $
+>                                       do fromIO $ when (verbose st) $ 
+>                                             hPutStrLn stderr "Calling external command."
+>				           result <- fromIO (hugs (file st) (opts st) (map unNL s))
+>				           inline result
 > format (Command Perform s)	=  do st <- fetch
->                                     fromIO $ when (verbose st) $ 
->                                        hPutStrLn stderr "Calling external command."
->				      result <- fromIO (hugs (file st) (opts st) s)
->				      out (Text (trim result))
+>                                     when (not (style st `elem` [CodeOnly,NewCode])) $
+>                                       do fromIO $ when (verbose st) $ 
+>                                             hPutStrLn stderr "Calling external command."
+>				           result <- fromIO (hugs (file st) (opts st) s)
+>				           out (Text (trim result))
 >     where
 
 Remove trailing blank line.
@@ -425,6 +431,8 @@ A simple here-script is used to call @hugs@. \NB @.script@ and @.out@
 are used as intermediate files.
 
 ks, 23.10.2003: extended to work with @ghci@, too.
+ks, 03.01.2004: fixed to work with @ghci-6.2@, hopefully without breaking
+@hugs@ or old @ghci@ compatibility.
 
 > hugs				:: FilePath -> String -> String -> IO String
 > hugs file opts expr		=  do writeFile ".script" (if ghcimode then ghciscript else hugsscript)
@@ -450,9 +458,15 @@ response then lies between the first two occurences of |magic|.
 > extract			:: String -> String
 > extract s			=  v
 >     where (t, u)		=  breaks (isPrefix magic) s
+>           -- t contains everything up to magic, u starts with magic
 >           -- |u'			=  tail (dropWhile (/='\n') u)|
->           u'			=  drop (length magic) u
->           (v, _)		=  breaks (isPrefix magic) u'
+>           pre                 =  reverse . takeWhile (/='\n') . reverse $ t
+>           prelength           =  if null pre then 0 else length pre + 1
+>           -- pre contains the prefix of magic on the same line
+>           u'			=  drop (length magic + prelength) u
+>           -- we drop the magic string, plus the newline, plus the prefix
+>           (v, _)		=  breaks (isPrefix (pre ++ magic)) u'
+>           -- we look for the next occurrence of prefix plus magic
 
 \NB It is important that hugs does \emph{not} use the @readline@ library.
 Added |tail (dropWhile (/='\n') u)| to cope with this! [ks, 15.05.2003:
@@ -476,7 +490,7 @@ This situation is unclear to me. It should be clarified.]
 
 > programInfo                   :: String
 > programInfo                   =
->     "lhs2TeX " ++ version ++ ", Copyright (C) 1997-2003 Ralf Hinze, Andres Loeh\n\n\
+>     "lhs2TeX " ++ version ++ ", Copyright (C) 1997-2004 Ralf Hinze, Andres Loeh\n\n\
 >     \lhs2TeX comes with ABSOLUTELY NO WARRANTY; for details type `lhs2TeX --warranty'.\n\
 >     \This is free software, and you are welcome to redistribute it\n\
 >     \under certain conditions; type `lhs2TeX --copying' for details."
