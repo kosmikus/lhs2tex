@@ -65,7 +65,9 @@
 >                               @> return *** when auto (lift (fmap (fmap (filter (isNotSpace . token)))))
 >       --                      @> return *** when auto (lift (fmap (fmap (addSpaces . filter (isNotSpace . token)))))
 >                               @> lift (\((cs,z),ats) -> (cs,(z,ats)))
->                               @> return *** lift (\(z,ats) -> leftIndent fmts auto z stack ats)
+>                               @> return *** lift (\(z,ats) -> leftIndent fmts auto z [] ats)
+>       -- ks, 17.07.2003: i've changed "stack" into "[]" and thereby disabled
+>       -- the global stack for now as it leads to unexepected behaviour
 >				@> lift (\(cs,(d,stack)) -> (sub'code (columns cs <> d),stack))
 >
 > columns                       :: [(String,Doc)] -> Doc

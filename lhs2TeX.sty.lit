@@ -77,10 +77,10 @@ included for math or poly mode.
 \SetMathAlphabet{\mathit}{normal}{OT1}{ptm}{m}{it}
 %endif
 
+%if style == math
 \newlength{\lwidth}\setlength{\lwidth}{4.5cm}
 \newlength{\cwidth}\setlength{\cwidth}{8mm} % 3mm
-
-\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+%endif
 
 %if latex209
 \newcommand{\Conid}[1]{{\mathit #1}}
@@ -117,6 +117,8 @@ column specifiers. It only works for @poly@ style.
 \newcommand*{\aligncolumn}[2]%
   {\g@@addto@@macro\ColumnHook{\column{#1}{#2}}}
 
+\resethooks
+
 %if standardsymbols
 \newcommand{\onelinecommentchars}{\quad--- }
 %else
@@ -136,6 +138,8 @@ column specifiers. It only works for @poly@ style.
   \let\commentend=\empty}
 
 \visiblecomments
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
 %endif
 \end{code}
 
