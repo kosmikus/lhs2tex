@@ -12,3 +12,11 @@ Known bugs or problems
 
 *  operator sections involving `infix` operators don't render nicely
 
+*  "default" style, i.e. if no style is selected, seems to be --tt;
+   this isn't a good choice -- should there be a default style at all?
+
+*  in --tt mode, the <- is formatted as the \in-symbol of the tt
+   symbol font, where the \leftarrow would seem more appropriate;
+   maybe the default should be changed to \char''30 for <-, but
+   compatibility is also worth a thing.
+
