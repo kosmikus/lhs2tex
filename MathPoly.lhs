@@ -443,7 +443,9 @@ Auch wenn |auto = False| wird der Stack auf dem laufenden gehalten.
 >                               -> [Line [Pos Token]]
 >                               -> (Doc, [Int], [(String,Int)])
 > leftIndent dict auto z known rel
->				=  loop known rel
+>				=  loop False known rel 
+>   -- set all loop calls to loop False because indentation does not
+>   -- work correctly; with False, it should be disabled ...
 >   where
 >   copy d | auto		=  d
 >          | otherwise		=  Empty
@@ -451,16 +453,16 @@ Auch wenn |auto = False| wird der Stack auf dem laufenden gehalten.
 Die Funktion |isInternal| pr"uft, ob |v| ein spezielles Symbol wie
 @::@, @=@ etc~oder ein Operator wie @++@ ist.
 
->   loop known rel []		=  (Empty, known, rel)
->   loop known rel (l : ls)     =  case l of
->       Blank                   -> loop known rel ls
+>   loop first known rel []	=  (Empty, known, rel)
+>   loop first known rel (l:ls) =  case l of
+>       Blank                   -> loop False known rel ls
 >    {- Poly x | trace (show x) False -> undefined -}
->       Poly []                 -> loop known rel ls
+>       Poly []                 -> loop False known rel ls
 >       Poly (((n,c),ts,ind):rs)
->         | c `elem` z          -> mkFromTo known rel n (n ++ "E") c ts ind rs ls
->       Poly [((n,c),ts,ind)]   -> mkFromTo known rel n "E" c ts ind [] ls
+>         | c `elem` z          -> mkFromTo known rel n (n ++ "E") c ts first rs ls
+>       Poly [((n,c),ts,ind)]   -> mkFromTo known rel n "E" c ts first [] ls
 >       Poly (((n,c),ts,ind):rs@(((nn,_),_,_):_))
->                               -> mkFromTo known rel n nn  c ts ind rs ls 
+>                               -> mkFromTo known rel n nn  c ts first rs ls 
 >
 >   mkFromTo known rel bn en c ts ind rs ls
 >     | not ind                 =  (sub'fromto bn en (latexs dict ts)
@@ -473,7 +475,9 @@ Die Funktion |isInternal| pr"uft, ob |v| ein spezielles Symbol wie
 >                                  ,known',rel'
 >                                  )
 >     where
->       (rest,known',rel')      =  loop (addknown c known)
+>       (rest,known',rel')      =  loop False  -- not first of a line;
+>                                              -- primitive indentation hack
+>                                       (addknown c known)
 >                                       (addrel (bn,c) ts rel)
 >                                       (Poly rs : ls)
 >
@@ -510,9 +514,14 @@ Die Funktion |isInternal| pr"uft, ob |v| ein spezielles Symbol wie
 >   sep (_ : _)			=  sub'nl
 >
 >   indent                      :: (String,Int) -> (String,Int) -> Doc
+>   indent (n,c) (n',c')
+>     | c /= c'                 =  sub'fromto n n' (sub'hskip (Text "1.0"))
+>     | otherwise               =  Empty
+>   {-
 >   indent _ _                  =  Empty  -- does not work
 >   indent (n,c) (n',c')        =  sub'fromto n n' (sub'hskip (Text em))
 >     where em                  =  showFFloat (Just 2) (0.5 * fromIntegral (c' - c) :: Double) ""
+>   -}
 
 M"ussen |v| und |t| zueinander passen?
 %

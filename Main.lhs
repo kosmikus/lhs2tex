@@ -116,6 +116,7 @@ Initial state.
 >                                    }
 >     where toggles0		=  --[(decode CodeOnly, Bool (sty == CodeOnly))]
 >				   [("style", Int (fromEnum sty))]
+>                               ++ [("version", Int numversion)]
 >				++ [ (decode s, Int (fromEnum s)) | s <- [(minBound :: Style) .. maxBound] ]
 >				-- |++ [ (s, Bool False) || s <- ["underlineKeywords", "spacePreserving", "meta", "array", "latex209", "times", "euler" ] ]|
 
@@ -422,7 +423,11 @@ This situation is unclear to me. It should be clarified.]
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
 > version                       :: String
-> version                       =  "1.1"
+> version                       =  show major ++ "." ++ show minor
+>   where major                 =  numversion `div` 100
+>         minor                 =  numversion `mod` 100
+> numversion                    :: Int
+> numversion                    =  102
 
 > programInfo                   :: String
 > programInfo                   =

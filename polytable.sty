@@ -10,28 +10,92 @@
 \ProvidesPackage{polytable}
 \RequirePackage{lambda}
 \RequirePackage{array}
+\DeclareOption{debug}{\AtEndOfPackage\PT@debug}
+\ProcessOptions
 \newdimen\PT@colwidth
-\newdimen\PT@delta
 \newcount\PT@cols
+\newcount\PT@table
 \newif\ifPT@changed
 \def\PT@allcols{\Nil}
-\PT@delta\hfuzz
-\def\PT@typeout{\PackageWarningNoLine{polytable}}
-\def\PT@typeout@ #1{\typeout{(polytable) #1}}
-\def\PT@consmacro #1#2% cons #2 to the list #1
-  {\def\PT@temp{\Cons{#2}}%
+\let\PT@infromto\empty
+\let\PT@currentwidths\empty
+\def\PT@false{0}
+\def\PT@true{1}
+\let\PT@inrestore\PT@false
+\def\PT@debug
+  {\def\PT@typeout@ ##1{\typeout{(polytable) ##1}}}
+\let\PT@typeout@\@gobble
+\def\PT@rerun
+  {\PT@typeout@{We have to rerun LaTeX ...}%
+   \AtEndDocument
+     {\PackageWarning{polytable}%
+        {Column widths have changed. Rerun LaTeX.\@gobbletwo}}%
+   \global\let\PT@rerun\relax}
+\def\PT@listopmacro #1#2#3% #1 #3 to the list #2
+  {\def\PT@temp{#1{#3}}%
+   \expandafter\expandafter\expandafter
+     \def\expandafter\expandafter\expandafter
+     #2\expandafter\expandafter\expandafter
+     {\expandafter\PT@temp\expandafter{#2}}}
+
+\def\PT@consmacro{\PT@listopmacro\Cons}
+\def\PT@appendmacro{\PT@listopmacro\Cat}
+\def\PT@addbeginmacro #1#2% add #2 to the beginning of #1
+  {\def\PT@temp{#2}%
    \expandafter\expandafter\expandafter
      \def\expandafter\expandafter\expandafter
      #1\expandafter\expandafter\expandafter
-     {\expandafter\PT@temp\expandafter{#1}}}
+     {\expandafter\PT@temp #1}}
+
+\def\PT@gaddendmacro #1#2% add #2 to the end of #1
+  {\expandafter\gdef\expandafter #1\expandafter{#1#2}}
 \def\PT@enamedef #1#2% sets name #1 to the expansion of #2
-  {\def\PT@temp{\@namedef{#1}}%
-   \expandafter\PT@temp\expandafter{#2}}
+  {\expandafter\Twiddle\expandafter\@namedef\expandafter{#2}{#1}}
+\def\PT@adddeftomacroas#1#2#3%
+  {\expandafter\expandafter\expandafter
+     \def\expandafter\expandafter\expandafter\PT@temp
+       \expandafter\expandafter\expandafter
+         {\expandafter\expandafter\expandafter\def
+            \expandafter\expandafter\csname #2\endcsname
+            \expandafter{#3}}%
+   \expandafter\expandafter\expandafter\PT@gaddendmacro
+     \expandafter\expandafter\expandafter
+       {\expandafter\expandafter\csname #1\endcsname
+        \expandafter}\expandafter{\PT@temp}}
+\def\PT@adddeftomacro#1#2%
+  {\def\PT@temp{\PT@adddeftomacroas{#1}{#2}}%
+   \expandafter\PT@temp\csname #2\endcsname}
+\def\PT@addoptargtomacro
+  {\PT@add@argtomacro\PT@makeoptarg}
+\def\PT@addargtomacro
+  {\PT@add@argtomacro\PT@makearg}
+
+\def\PT@add@argtomacro#1#2#3%
+  {\expandafter\expandafter\expandafter\def
+     \expandafter\expandafter\expandafter\PT@temp
+       \expandafter\expandafter\expandafter{\csname #3\endcsname}%
+   #1%
+   \expandafter\PT@gaddendmacro\expandafter
+     {\expandafter#2\expandafter}\expandafter{\PT@temp}}
+
+\def\PT@makeoptarg%
+  {\expandafter\def\expandafter\PT@temp\expandafter
+     {\expandafter[\PT@temp]}}
+\def\PT@makearg%
+  {\expandafter\def\expandafter\PT@temp\expandafter
+     {\expandafter{\PT@temp}}}
+
+\newcommand*{\PT@gobbleoptional}[1][]{\ignorespaces}
+\let\PT@origomit\omit
+\def\PT@disableomitonce
+  {\def\omit
+     {\let\omit\PT@origomit}}
 \newcommand{\beginpolytable}%
   {\edef\PT@environment{\@currenvir}%
    \begingroup
    \toks@{}% initialise token register
    \PT@scantoend}
+\let\endpolytable=\relax
 \long\def\PT@scantoend #1\end #2%
   {\toks@\expandafter{\the\toks@ #1}%
    \def\PT@temp{#2}%
@@ -43,8 +107,10 @@
    \fi}
 \def\PT@getwidths
   {\let\column\PT@firstrun@column
-   \column{0}{l}%
-   \PT@cols=0%
+   \let\savecolumns\PT@savewidths
+   \let\restorecolumns\PT@restorewidths
+   \column{@begin@}{@{}l@{}}
+   \PT@cols=0\relax%
    \let\fromto\PT@fromto
    \let\nextline\PT@resetcolumn
    \PT@changedfalse % nothing has changed so far
@@ -53,10 +119,14 @@
    \ifx\column\PT@otherrun@column
    \else
       % we are in first run, print extra info
-      \PT@typeout{Number of columns: \the\PT@cols}%
+      \PT@typeout@{Number of columns: \the\PT@cols}%
       \PT@typeout@{Column list: \Print\PT@allcols}%
    \fi
    \let\PT@firstrun@column\PT@otherrun@column
+   \let\savecolumns\PT@gobbleoptional
+   \let\restorecolumns\PT@gobbleoptional
+   \let\PT@savewidths\PT@gobbleoptional
+   \let\PT@restorewidths\PT@gobbleoptional
    \ifPT@changed
       % we need to rerun if something has changed
       \expandafter\PT@getwidths
@@ -68,60 +138,110 @@
 \def\PT@sortcols
   {\edef\PT@sortedlist
      {\Foldr{\noexpand\Cons}{\noexpand\Nil}%
-        {\Insertsort\PT@ltwidth\PT@allcols}}%
+        {\Insertsort\PT@ltmax\PT@allcols}}%
    \PT@typeout@{Sorted columns: \Print\PT@sortedlist}%
-   \PT@cols=0%
+   \PT@cols=0\relax%
    \Execute{\Map\PT@numbercol\PT@sortedlist}%
-   \PT@typeout@{Numbered successfully.}%
+   \PT@typeout@{Numbered successfully, last column is \StripColumn\PT@lastcol}%
+      \ifx\PT@currentwidths\empty
+      \else
+         \PT@typeout@{Saving table information for \PT@currentwidths .}%
+         \expandafter\PT@saveinformation\expandafter{\PT@currentwidths}%
+      \fi
    \PT@typeset}
 \def\PT@typeset
-  {\edef\PT@temp{\Execute{\Map\PT@preamble\PT@sortedlist}}%
-   \PT@typeout@{Preamble: \PT@temp}%
+  {\edef\PT@temp{@{}\Execute{\Map\PT@preamble\PT@sortedlist}}%
+   %\PT@typeout@{Preamble: \PT@temp}%
    \let\fromto\PT@multicolumn
    \PT@resetcolumn % we are at the beginning of a line
    \let\nextline=\PT@resetandcr
-   \expandafter\PT@begin\expandafter{\PT@temp}
+   \expandafter\PT@begin\expandafter{\PT@temp}%
    \the\toks@
    \PT@end
    \endgroup
-   \expandafter\end\expandafter{\PT@environment}}
-\def\PT@firstrun@column #1#2%
-  {\@namedef{PT@col@#1.type}{#2}%
-   \@namedef{PT@col@#1.width}{0pt}% initialize the width of the column
-   % add the new column to the (sortable) list of all columns
-   \PT@consmacro\PT@allcols{PT@col@#1}%
-   \advance\PT@cols by 1\relax%
+   \expandafter\end\expandafter{\PT@environment}}%
+\newcommand\PT@firstrun@column[3][0pt]%
+  {\@ifundefined{PT@col@#2.type}%
+      {\PT@typeout@{Defining column #2 at #1.}%
+       \@namedef{PT@col@#2.type}{#3}%
+       \@namedef{PT@col@#2.width}{#1}% initialize the width of the column
+       % add the new column to the (sortable) list of all columns
+       \PT@consmacro\PT@allcols{PT@col@#2}%
+       \advance\PT@cols by 1\relax}%
+      {\expandafter\ifx\csname PT@col@#2.type\endcsname\empty
+         \relax % will be defined in a later table of the same set
+       \else
+         \PackageWarning{polytable}{Redefining column #2}%
+       \fi
+       \@namedef{PT@col@#2.type}{#3}%
+       % TODO: allow redefinition of width
+      }%
+   \@ifundefined{PT@col@#2.max}%
+      {\@namedef{PT@col@#2.max}{#1}%
+       \expandafter\let\csname PT@col@#2.trusted\endcsname\PT@true}{}%
    \ignorespaces}
-\def\PT@otherrun@column
-  {\expandafter\ignorespaces\@gobbletwo}
+\newcommand\PT@otherrun@column[3][]%
+  {\ignorespaces}
 \def\PT@fromto #1#2#3%
-  {\global\PT@colwidth=\expandafter\@nameuse\expandafter
-                         {\PT@currentcol.width}\relax
-   \ifdim\PT@colwidth>\csname PT@col@#1.width\endcsname\relax
-     % we need to change the width
-     \PT@typeout@{s #1: old=\@nameuse{PT@col@#1.width} new=\the\PT@colwidth}%
-     \PT@changedtrue
-     \PT@enamedef{PT@col@#1.width}{\the\PT@colwidth}%
+  {\PT@infromto
+   \def\PT@infromto{%
+     \PackageError{polytable}{Nested fromto.}}%
+   \def\PT@temp{PT@col@#1}%
+   \ifx\PT@currentcol\PT@temp
+     \PT@typeout@{No need to skip columns.}%
+   \else
+     \PT@colwidth=\expandafter\@nameuse\expandafter
+                    {\PT@currentcol.width}\relax
+     \ifdim\PT@colwidth>\csname PT@col@#1.width\endcsname\relax
+       % we need to change the width
+       \PT@typeout@{s #1: old=\@nameuse{PT@col@#1.width} new=\the\PT@colwidth}%
+       \PT@changedtrue
+       \PT@enamedef{PT@col@#1.width}{\the\PT@colwidth}%
+     \fi
+     \PT@colwidth=\expandafter\@nameuse\expandafter
+                    {\PT@currentcol.max}\relax
+     \ifdim\PT@colwidth>\csname PT@col@#1.max\endcsname\relax
+       % we need to change the width
+       \PT@typeout@{S #1: old=\@nameuse{PT@col@#1.max} new=\the\PT@colwidth}%
+       \PT@changedtrue
+       \PT@checkrerun
+       \PT@enamedef{PT@col@#1.max}{\the\PT@colwidth}%
+     \fi
+     \ifnum\csname PT@col@#1.trusted\endcsname=\PT@false\relax
+       \ifdim\PT@colwidth=\csname PT@col@#1.max\endcsname\relax
+         \PT@typeout@{#1=\the\PT@colwidth\space is now trusted}%
+         \expandafter\let\csname PT@col@#1.trusted\endcsname\PT@true%
+       \fi
+     \fi
    \fi
    \begingroup
-   \global\PT@colwidth=\@nameuse{PT@col@#1.width}%
    \ifmmode
-     \let\PT@mathorrelax=$
+     \let\d@llarbegin=$%$
+     \let\d@llarend=$%$
+     \let\col@sep=\arraycolsep
    \else
-     \let\PT@mathorrelax=\relax
+     \let\d@llarbegin=\begingroup
+     \let\d@llarend=\endgroup
+     \let\col@sep=\tabcolsep
    \fi
-   \setbox0=\hbox{%
-     \PT@mathorrelax
-     \begingroup
-     \expandafter\expandafter\expandafter\PT@begin
+   %\def\PT@currentcol{PT@col@#1}%
+   %\ifx\PT@currentcol\PT@nullcol
+   %\else
+   %  \PT@addbeginmacro\PT@currentpreamble{@{}}%
+   %\fi
+   \expandafter\expandafter\expandafter
+     \def\expandafter\expandafter\expandafter\PT@currentpreamble
        \expandafter\expandafter\expandafter
          {\csname PT@col@#1.type\endcsname}%
-     #3%
-     \PT@end
-     \endgroup
-     \PT@mathorrelax}%
-   \global\advance\PT@colwidth by \wd0\relax%
+   \setbox0=\hbox{%
+     \expandafter\@mkpream\expandafter{\PT@currentpreamble}%
+     \def\@sharp{\strut #3}%
+     %\show\@preamble
+     \@preamble}%
+   \expandafter\gdef\expandafter\PT@temp\expandafter{\the\wd0}%
    \endgroup
+   \global\PT@colwidth=\@nameuse{PT@col@#1.width}%
+   \global\advance\PT@colwidth by \PT@temp\relax%
    \ifdim\PT@colwidth>\csname PT@col@#2.width\endcsname\relax
      % we need to change the width
      \PT@typeout@{c #2:
@@ -130,18 +250,44 @@
      \PT@changedtrue
      \PT@enamedef{PT@col@#2.width}{\the\PT@colwidth}%
    \fi
+   \global\PT@colwidth=\@nameuse{PT@col@#1.max}%
+   \global\advance\PT@colwidth by \PT@temp\relax%
+   \ifdim\PT@colwidth>\csname PT@col@#2.max\endcsname\relax
+     % we need to change the width
+     \PT@typeout@{C #2:
+                  old=\@nameuse{PT@col@#2.max}
+                  new=\the\PT@colwidth}%
+     \PT@changedtrue
+     \PT@checkrerun
+     \PT@enamedef{PT@col@#2.max}{\the\PT@colwidth}%
+   \fi
+   \ifnum\csname PT@col@#2.trusted\endcsname=\PT@false\relax
+     \ifdim\PT@colwidth=\csname PT@col@#2.max\endcsname\relax
+       \PT@typeout@{#2=\the\PT@colwidth\space is now trusted}%
+       \expandafter\let\csname PT@col@#2.trusted\endcsname\PT@true%
+     \fi
+   \fi
    \def\PT@currentcol{PT@col@#2}%
+   \let\PT@infromto\empty
    \ignorespaces}%
-\def\PT@resetcolumn
+\def\PT@checkrerun
+  {\ifnum\PT@inrestore=\PT@true\relax
+     \PT@rerun
+   \fi}
+\newcommand*{\PT@resetcolumn}[1][]%
   {\let\PT@currentcol\PT@nullcol}
 \def\PT@nullcol
-  {PT@col@0}
+  {PT@col@@begin@}
 \def\Execute{\Foldr\Sequence\empty}
 \def\Sequence #1#2{#1#2}
 \def\ShowColumn #1%
   {\ShowColumn@#1\ShowColumn@}
 \def\ShowColumn@ PT@col@#1\ShowColumn@
   {#1 }
+\def\StripColumn #1%
+  {\expandafter\StripColumn@#1\StripColumn@}
+\def\StripColumn@ PT@col@#1\StripColumn@
+  {#1}
 \def\Print#1{\Execute{\Map\ShowColumn#1}}
 \def\PT@TeXif #1%
   {\expandafter\@gobble#1\relax
@@ -151,26 +297,44 @@
    \fi}
 \def\PT@gobblefalse\else\relax\gobbletrue\fi #1#2%
   {\fi #1}
-\def\PT@ltwidth #1#2%
-  {\PT@TeXif{\ifdim\csname #1.width\endcsname<\csname #2.width\endcsname}}
+\def\PT@ltmax #1#2%
+  {\PT@TeXif{\ifdim\csname #1.max\endcsname<\csname #2.max\endcsname}}
 \def\PT@numbercol #1%
-  {\PT@enamedef{#1.num}{\the\PT@cols}%
-   \advance\PT@cols by 1}
+  {%\PT@typeout@{numbering #1 as \the\PT@cols}%
+   \PT@enamedef{#1.num}{\the\PT@cols}%
+   \def\PT@lastcol{#1}%
+   \advance\PT@cols by 1\relax}
 \def\PT@preamble #1%
-   {l}
-\def\PT@resetandcr
-  {\PT@typeout@{Next line ...}%
-   \PT@resetcolumn\\}
+   {l@{}}
+\newcommand{\PT@resetandcr}[1][0pt]%
+  {\ifx\PT@currentcol\PT@lastcol
+   \else
+     \ifx\PT@currentcol\PT@nullcol
+       \edef\PT@currentcol{\Head{\Tail\PT@sortedlist}}%
+     \fi
+     \edef\PT@currentcol@{\StripColumn\PT@currentcol}%
+     \edef\PT@lastcol@
+       {\StripColumn\PT@lastcol}%
+     \PT@typeout@{adding implicit fromto from \PT@currentcol@
+                                  \space to \PT@lastcol@}%
+     \expandafter\expandafter\expandafter\fromto
+       \expandafter\expandafter\expandafter{%
+         \expandafter\expandafter\expandafter\PT@currentcol@
+           \expandafter}\expandafter{\PT@lastcol@}{}%
+   \fi
+   \PT@typeout@{Next line ...}%
+   \PT@resetcolumn\\[#1]}
 \def\PT@multicolumn #1#2#3%
-  {% skip to current position
+  {%\omit\PT@disableomitonce
+   % skip to current position
    \global\PT@cols=\@nameuse{PT@col@#1.num}%
    \global\advance\PT@cols
      by -\expandafter\csname\PT@currentcol.num\endcsname\relax
    \ifx\PT@currentcol\PT@nullcol
      \global\advance\PT@cols by -1%
    \fi
-   \PT@typeout@{skipping ...}%
-   \PT@typeout@{nf=\expandafter\ShowColumn
+   \PT@typeout@{skipping:
+                nf=\expandafter\ShowColumn
                      \expandafter{\PT@currentcol}nt=#1 %
                 from=\expandafter
                        \csname\PT@currentcol.num\endcsname\space
@@ -211,19 +375,186 @@
 \def\PT@NextCol
   {\PT@typeout@{ & }%
    &}%
-\def\ptabular{%
-   \let\PT@begin\tabular
+\def\PT@placeinbox#1#2#3%
+  {\PT@colwidth=\@nameuse{PT@col@#1.max}%
+   \advance\PT@colwidth by -\expandafter\csname\PT@currentcol.max\endcsname
+   \leavevmode
+   \hb@xt@\PT@colwidth{%
+     \expandafter\@mkpream\expandafter{@{}l@{}}%
+     \let\@sharp\empty%
+     %\show\@preamble
+     \@preamble}%
+   \PT@colwidth=\@nameuse{PT@col@#2.max}%
+   \advance\PT@colwidth by -\@nameuse{PT@col@#1.max}%
+   \ifmmode
+     \PT@typeout@{YES, WE ARE IN MATH MODE!}%
+     \let\d@llarbegin=$%$
+     \let\d@llarend=$%$
+     \let\col@sep=\arraycolsep
+   \else
+     \let\d@llarbegin=\begingroup
+     \let\d@llarend=\endgroup
+     \let\col@sep=\tabcolsep
+   \fi
+   %\def\PT@currentcol{PT@col@#1}%
+   \expandafter\expandafter\expandafter
+     \def\expandafter\expandafter\expandafter\PT@currentpreamble
+       \expandafter\expandafter\expandafter
+         {\csname PT@col@#1.type\endcsname}%
+   %\ifx\PT@currentcol\PT@nullcol
+   %\else
+   %  \PT@addbeginmacro\PT@currentpreamble{@{}}%
+   %\fi
+   \hb@xt@\PT@colwidth{%
+     \expandafter\@mkpream\expandafter{\PT@currentpreamble}%
+     \def\@sharp{\strut #3}%
+     %\show\@preamble
+     \@preamble}%
+   \def\PT@currentcol{PT@col@#2}%
+   \ignorespaces}%
+\newcommand*{\PT@setmaxwidth}[3][\PT@false]% #2 column name, #3 maximum width
+  {\@namedef{PT@col@#2.max}{#3}%
+   \expandafter\let\csname PT@col@#2.trusted\endcsname=#1%
+   \column{#2}{}}
+\def\PT@loadtable#1% #1 table id number
+  {\PT@typeout@
+     {Calling \expandafter\string
+                \csname PT@restore@\romannumeral #1\endcsname.}%
+   \let\maxcolumn\PT@setmaxwidth
+   %\expandafter\show\csname PT@load@\romannumeral #1\endcsname
+   \csname PT@restore@\romannumeral #1\endcsname}
+\def\PT@loadtablebyname#1% #1 set name
+  {\PT@typeout@{Loading table information for column width set #1.}%
+   \expandafter\PT@loadtable\expandafter{\csname PT@widths@#1\endcsname}}%
+\def\PT@saveinformation#1% #1 set name
+  {\expandafter\def\expandafter\PT@temp\expandafter
+     {\csname PT@widths@#1\endcsname}%
+   \expandafter\def\expandafter\PT@temp\expandafter
+     {\csname PT@restore@\romannumeral\PT@temp\endcsname}%
+   \expandafter\gdef\PT@temp{}% start empty
+   % this is: \Execute{\Map{\PT@savecolumn{\PT@temp}}\PT@sortedlist}
+   \expandafter\Execute\expandafter{\expandafter
+     \Map\expandafter{\expandafter\PT@savecolumn
+       \expandafter{\PT@temp}}\PT@sortedlist}}
+\def\PT@savecolumn#1#2% #1 macro name, #2 column name
+  {\PT@typeout@{saving column #2 in \string #1 ...}%
+   \def\PT@temp{#2}%
+   \ifx\PT@temp\PT@nullcol
+     \PT@typeout@{skipping nullcol ...}%
+   \else
+     \PT@typeout@{max=\csname #2.max\endcsname, %
+                  width=\csname #2.width\endcsname, %
+                  trusted=\csname #2.trusted\endcsname}%
+     % we need the column command in here
+     % we could do the same in \column, but then the location of
+     % \save / \restore matters ...
+     \PT@gaddendmacro{#1}{\maxcolumn}%
+     \ifnum\csname #2.trusted\endcsname=\PT@true\relax
+       \PT@gaddendmacro{#1}{[\PT@true]}%
+     \fi
+     \edef\PT@temp{\StripColumn{#2}}%
+     \PT@addargtomacro{#1}{PT@temp}%
+     \PT@addargtomacro{#1}{#2.max}%
+     \PT@gaddendmacro{#1}{\column}%
+     \PT@addoptargtomacro{#1}{#2.width}%
+     \edef\PT@temp{\StripColumn{#2}}%
+     \PT@addargtomacro{#1}{PT@temp}%
+     \PT@addargtomacro{#1}{#2.type}%
+     %\show#1%
+   \fi
+  }
+\newcommand*{\PT@savewidths}[1][default@]
+  {\PT@typeout@{Executing \string\savecolumns [#1].}%
+   \def\PT@currentwidths{#1}%
+   \PT@verifywidths{#1}%
+   \global\advance\PT@table by 1\relax
+   \expandafter\xdef\csname PT@widths@#1\endcsname
+     {\the\PT@table}%
+   \PT@loadtable{\PT@table}%
+   \ignorespaces}
+\newcommand*{\PT@restorewidths}[1][default@]
+  {\PT@typeout@{Executing \string\restorecolumns [#1].}%
+   \def\PT@currentwidths{#1}%
+   \let\PT@inrestore\PT@true
+   \PT@loadtablebyname{#1}%
+   \ignorespaces}
+\def\PT@comparewidths#1% #1 full column name
+  {\@ifundefined{#1.max}%
+     {\PT@typeout@{computed width for #1 is fine ...}}%
+     {\ifdim\csname #1.max\endcsname>\csname #1.width\endcsname\relax
+        \PT@typeout@{Preferring saved width for \StripColumn{#1}.}%
+        \PT@changedtrue
+        \PT@colwidth=\@nameuse{#1.max}\relax
+        \PT@enamedef{#1.width}{\the\PT@colwidth}%
+      \fi}}
+\def\PT@trustedmax#1%
+  {\PT@TeXif{\ifnum\csname #1.trusted\endcsname=\PT@true}}
+\def\PT@equalwidths#1% #1 full column name
+  {\@ifundefined{#1.max}{}%
+     {\ifdim\csname #1.max\endcsname=\csname #1.width\endcsname\relax
+        \PT@typeout@{col #1 is okay ...}%
+      \else
+        \PT@rerun% a rerun is needed
+      \fi}}
+\def\PT@verifywidths#1% #1 column width set name
+  {\@ifundefined{PT@widths@#1}%
+     {\PT@typeout@{Nothing to verify yet for set #1.}%
+      \PT@typeout@{Scheduling set #1 for verification at end of document.}%
+      \AtEndDocument{\PT@verifywidths{#1}}}%
+     {\PT@typeout@{Verifying column width set #1.}%
+      \expandafter\PT@verify@widths\expandafter
+        {\csname PT@widths@#1\endcsname}{#1}}}
+
+\def\PT@verify@widths#1#2% #1 set id number, #2 set name
+  {\@ifundefined{PT@restore@\romannumeral #1}{}%
+     {\begingroup
+        \let\column\PT@firstrun@column
+        \PT@cols=0\relax%
+        \def\PT@allcols{\Nil}%
+        \PT@loadtablebyname{#2}%
+        \PT@table=#1\relax
+        % nullcolumn is not loaded, therefore:
+        \expandafter\def\csname\PT@nullcol .width\endcsname{0pt}%
+        % checking trust
+        \All{\PT@trustedmax}{\PT@allcols}%
+           {\PT@typeout@{All maximum widths can be trusted -- writing .max!}%
+            \PT@save@table{.max}}%
+           {\PT@typeout@{Untrustworthy maximums widths -- writing .width!}%
+            \PT@rerun
+            \PT@save@table{.width}}%
+      \endgroup}%
+   \PT@typeout@{Verification for #2 successful.}}
+\def\PT@save@table#1%
+  {\PT@typeout@{Saving column width information.}%
+   \if@filesw
+    {\immediate\write\@auxout{%
+       \gdef\expandafter\noexpand
+         \csname PT@restore@\romannumeral\PT@table\endcsname
+           {\Execute{\Map{\PT@write@column{#1}}\PT@allcols}}}}%
+   \fi}
+\def\PT@write@column #1#2%
+  {\noexpand\maxcolumn^^J%
+    {\StripColumn{#2}}%
+    {\@nameuse{#2#1}}}%
+\newenvironment{ptabular}[1][c]%
+  {\def\PT@begin{\tabular[#1]}%
    \let\PT@end\endtabular
    \beginpolytable}
+  {\endpolytable}
 
-\let\endptabular\endpolytable
-
-\def\parray{%
-   \let\PT@begin\array
+\newenvironment{parray}[1][c]%
+  {\def\PT@begin{\array[#1]}%
    \let\PT@end\endarray
    \beginpolytable}
+  {\endpolytable}
 
-\let\endparray\endpolytable
+\def\pboxed{%
+   \let\PT@begin\@gobble
+   \let\PT@end\empty
+   \let\PT@multicolumn\PT@placeinbox
+   \expandafter\beginpolytable\ignorespaces}
+
+\let\endpboxed\endpolytable
 \endinput
 %%
 %% End of file `polytable.sty'.
