@@ -7,6 +7,7 @@ Known bugs or problems
 
 *  document command line options more systematically
    - for instance, document --path=:bla and --path=bla:
+   [ This is at least in the manpage now. ]
 
 *  add @@ and || quoting with typical errors as FAQ
 
