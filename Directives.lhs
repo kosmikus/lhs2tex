@@ -29,6 +29,11 @@
 > type Formats			=  FiniteMap Char Equation
 > type Equation			=  (Bool, [Bool], [String], [Token])
 
+ks, 20.07.03: The |Equation| type contains the following information:
+does the definition have surrounding parentheses, do the arguments
+have surrounding parentheses, what are the names of the arguments,
+and the tokens to replace the macro with.
+
 \NB Die Substution wird nicht als Funktion |[[Token]] -> [Token]|
 repr"asentiert, da math |Pos Token| verlangt.
 

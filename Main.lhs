@@ -53,7 +53,9 @@
 >                                       [Warranty] -> quitSuccess (programInfo ++ "\n\n" ++ warranty)
 >                                       [s] -> lhs2TeX s          flags (reverse initdirs) n
 >                                       _   -> quitError (incompatibleStylesError styles)
->   (_,_,errs)                  -> quitError (concat errs)
+>   (_,_,errs)                  -> do hPutStrLn stderr $ (concat errs)
+>                                     hPutStrLn stderr $ "Trying compatibility mode option handling ..."
+>                                     cstyle args
 >  where
 >    quitSuccess s              =  do hPutStrLn stdout $ s
 >                                     exitWith ExitSuccess
@@ -134,7 +136,11 @@ Converting command line options into directives.
 
 > uheader                       :: String
 > uheader                       =  "lhs2TeX [ options ] files\n\nAvailable options:\n"
->
+
+ks, 20.07.2003: The short option for @--align@ has been changed into @-A@. Otherwise
+@-align@ would not trigger comptaibility mode, but be interpreted as a valid option
+usage.
+
 > options                       :: [OptDescr (State -> State,[Class] -> [Class],[Style])]
 > options                       =
 >   [ Option ['h','?'] ["help"](NoArg (id, id, [Help]))                                 "get this help"
@@ -145,9 +151,11 @@ Converting command line options into directives.
 >   , Option []    ["poly"]    (NoArg (id, id, [Poly]))                                 "poly mode"
 >   , Option []    ["code"]    (NoArg (id, id, [CodeOnly]))                             "code mode"
 >   , Option []    ["verb"]    (NoArg (id, id, [Verb]))                                 "verbatim"
->   , Option ['a'] ["align"]   (ReqArg (\c -> (id, (Directive Align c:), [])) "col")    "align at <col>"
+>   , Option ['A'] ["align"]   (ReqArg (\c -> (id, (Directive Align c:), [])) "col")    "align at <col>"
 >   , Option ['i'] ["include"] (ReqArg (\f -> (id, (Directive Include f:), [])) "file") "include <file>"
->   , Option ['l'] ["let"]     (ReqArg (\s -> (id, (Directive Let s:), [])) "flag")     "set <flag>"
+>   , Option ['l'] ["let"]     (ReqArg (\s -> (id, (Directive Let s:), [])) "equation") "assume <equation>"
+>   , Option ['s'] ["set"]     (ReqArg (\s -> (id, (Directive Let (s ++ "=True"):), [])) "flag")  "set <flag>"
+>   , Option ['u'] ["unset"]   (ReqArg (\s -> (id, (Directive Let (s ++ "=False"):), [])) "flag") "unset <flag>"
 >   , Option ['P'] ["path"]    (ReqArg (\p -> (\s -> s { searchpath = modifySearchPath (searchpath s) p }, id , [])) "path") 
 >                                                                                       "modify search path"
 >   , Option []    ["copying"] (NoArg (id, id, [Copying]))                              "display license"
@@ -156,6 +164,29 @@ Converting command line options into directives.
 >
 > formatStr			:: String -> Formatter
 > formatStr str			=  formats (texparse 1 str) `handle` abort
+
+Compatibility mode option handling.
+
+> cstyle                        :: [String] -> IO ()
+> cstyle args@(('-':a) : x)     =  case encode a of
+>   Just sty                    -> cstyle' sty x
+>   Nothing                     -> cstyle' Typewriter args
+> cstyle args                   =  cstyle' Typewriter args
+
+> cstyle'                       :: Style -> [String] -> IO ()
+> cstyle' s args                =  let (dirs,files) = coptions args
+>                                  in  lhs2TeX s state0 dirs files
+
+> coptions                      :: [String] -> ([Class], [String])
+> coptions                      =  foldr (<|) ([], [])
+>   where
+>   "-align" <| (ds, s : as)    =  (Directive Align s : ds, as)
+>   "-i" <| (ds, s : as)        =  (Directive Include s : ds, as)
+>   "-l" <| (ds, s : as)        =  (Directive Let s : ds, as)
+>   ('-' : 'i' : s) <| (ds, as) =  (Directive Include s : ds, as)
+>   ('-' : 'l' : s) <| (ds, as) =  (Directive Let s : ds, as)
+>   s <| (ds, as)               =  (ds, s : as)
+
 
 We abort immediately if an error has occured.
 

@@ -206,13 +206,16 @@ False| indicates that the decision is up the caller.
 > substitute			:: (CToken tok) => Formats -> Bool -> Chunk tok -> [tok]
 > substitute d auto chunk	=  snd (eval chunk)
 >   where
+>   eval                        :: (CToken tok) => [Item tok] -> (Mode,[tok])
 >   eval [e]			=  eval' e
 >   eval chunk			=  (Optional False, concat [ snd (eval' i) | i <- chunk ])
 >
+>   eval'                       :: (CToken tok) => Item tok -> (Mode,[tok])
 >   eval' (Delim s)		=  (Optional False, [s])
 >   eval' (Apply [])		=  impossible "eval'"
 >   eval' (Apply (e : es))	=  eval'' False e es
 >
+>   eval''                      :: (CToken tok) => Bool -> Atom tok -> [Atom tok] -> (Mode,[tok])
 >   eval'' _ (Atom s) es	=  case FM.lookup (string (token s)) d of
 >     Nothing			-> (Optional False, s : args es)
 >     Just (opt, opts, lhs, rhs)-> (Optional opt, set s (concat (fmap sub rhs)) ++ args bs)
@@ -240,7 +243,9 @@ Token des Ersetzungstexts dessen Position.
 \NB Es ist keine gute Idee Klammern um Atome wegzulassen, dann werden
 auch bei @deriving (Eq)@ und @module M (a)@ die Klammern entfernt.
 
+>   args                        :: (CToken tok) => [Atom tok] -> [tok]
 >   args es			=  concat [ sp ++ snd (eval'' False i []) | i <- es ] -- $\cong$ Applikation
+>   sp                          :: (CToken tok) => [tok]
 >   sp | auto			=  [fromToken (TeX sub'space)]
 >      | otherwise		=  []
 
