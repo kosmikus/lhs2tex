@@ -69,7 +69,7 @@ ks, 17.07.2003: As with the typewriter path, this is now conditionally
 included for math or poly mode.
 
 \begin{code}
-%if anyMath
+%if (style == math) || (style == poly)
 %if times
 \usepackage{times}\renewcommand{\ttdefault}{cmtt}
 \SetMathAlphabet{\mathrm}{normal}{OT1}{ptm}{m}{n}
@@ -138,6 +138,9 @@ column specifiers. It only works for @poly@ style.
   \let\commentend=\empty}
 
 \visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{1mm}
 
 \newcommand{\hsindent}[1]{\quad}% default is fixed indentation
 %endif
