@@ -1,17 +1,17 @@
 
-# .SUFFIXES : .tex .dvi .pdf .ps
+.SUFFIXES : .tex .dvi .pdf .ps
 
-%.dvi : %.tex
+.tex.dvi:
 	sh -c ' \
 	  $(LATEX) $(LATEX_OPTS) $<; \
 	  while grep -c "Warning.*Rerun" $(<:.tex=.log); \
 	    do $(LATEX) $(LATEX_OPTS) $<; done;'
 
-%.pdf : %.tex
+.tex.pdf:
 	sh -c ' \
 	  $(PDFLATEX) $(PDFLATEX_OPTS) $<; \
 	  while grep -c "Warning.*Rerun" $(<:.tex=.log); \
 	    do $(PDFLATEX) $(PDFLATEX_OPTS) $<; done;'
 
-%.ps : %.dvi
+.dvi.ps:
 	$(DVIPS) -D600 -o $@ $<
