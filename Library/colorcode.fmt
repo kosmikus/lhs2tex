@@ -4,6 +4,10 @@
 %
 % code in a colored box for poly style in lhs2TeX
 %
+% Permission is granted to include this file (or parts of this file) 
+% literally into other documents, regardless of the conditions or 
+% license applying to these documents.
+%
 % Andres Loeh, September 2004, ver 1.5
 %
 % TODO: split in fmt and sty

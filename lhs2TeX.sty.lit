@@ -1,3 +1,13 @@
+\begin{code}
+%if False
+%
+% Permission is granted to include this file (or parts of this file) 
+% literally into other documents, regardless of the conditions or 
+% license applying to these documents.
+%
+%endif
+\end{code}
+
 %-------------------------------=  --------------------------------------------
 \section{\TeX\ definitions}
 %-------------------------------=  --------------------------------------------
