@@ -1,5 +1,14 @@
-o  offene %{ Klammer ohne schlieﬂende %} (Fail: Main.lhs:186: Non-exhaustive patterns in lambda)
-o  document command line options more systematically
+Known bugs or problems
+======================
+
+*  opening %{ parenthesis without closing %} 
+   causes (Fail: Main.lhs:186: Non-exhaustive patterns in lambda)
+   [ I think this is fixed. ]
+
+*  document command line options more systematically
    - for instance, document --path=:bla and --path=bla:
-o  add @@ and || quoting with typical errors as FAQ
+
+*  add @@ and || quoting with typical errors as FAQ
+
+*  operator sections involving `infix` operators don't render nicely
 

@@ -3,10 +3,10 @@ dnl Generic Haskell configure script
 dnl
 
 # Is it there?
-AC_INIT(lhs2tex,1.9)
+AC_INIT(lhs2tex,1.10)
 
-VERSION=1.9
-NUMVERSION=109
+VERSION=1.10
+NUMVERSION=110
 AC_SUBST(VERSION)
 AC_SUBST(NUMVERSION)
 

@@ -3,7 +3,7 @@ dnl modified); alas, I cannot remember where I found it.
 dnl
 AC_DEFUN(AC_CHECK_TEXMF, [
 AC_ARG_WITH(texmf,
-  [  --with-texmf=<path>     path to an existing texmf tree ($TEXMFLOCAL)],
+  [[  --with-texmf=DIR        path to an existing texmf tree [$TEXMFLOCAL]]],
   [case "$withval" in
     yes|no) texmf= ;;
     *) texmf="$withval" ;;

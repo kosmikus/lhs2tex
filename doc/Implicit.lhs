@@ -5,4 +5,4 @@
 %format omega13
 |[omega, omega13, omega13']|\par
 %format omega13'
-|[omega, omega13, omega13']|\par
+|[omega, omega13, omega13']|

@@ -253,8 +253,10 @@ Remove trailing blank line.
 
 > format (Environment Haskell s)=  display s
 > format (Environment Code s)	=  display s
-> format (Environment Spec s)	=  display s
-> format (Environment  Evaluate s)
+> format (Environment Spec s)	=  do st <- fetch
+>                                     when (not (style st `elem` [CodeOnly,NewCode])) $
+>                                       display s
+> format (Environment Evaluate s )
 >				=  do st <- fetch
 >				      result <- fromIO (hugs (file st) (opts st) (map unNL s))
 >				      --fromIO (hPutStrLn stderr result)	-- TEST

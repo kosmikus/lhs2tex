@@ -257,7 +257,6 @@
 \and
   {Andres L\"oh}\\
   \smaller \tabular{c}
-           Universiteit Utrecht\\
            Institute of Information and Computing Sciences\\
            Utrecht University, P.O.~Box 80.089\\
            3508 TB Utrecht, The Netherlands\\
@@ -548,7 +547,7 @@ style only.
 The \textbf{poly} style has been designed to lift the restrictions
 that \textbf{math} style still has. Multiple alignments and thus
 complex layouts are possible:
-\input{ZipPoly}
+\input{ZipPoly}%
 If run in \textbf{poly} style, @lhs2TeX@ produces \LaTeX\ code
 that makes use of the @polytable@ package, a package that has
 been specifically designed to fit the needs that arise while
@@ -854,7 +853,7 @@ produces output similar to
 \end{colorsurround}
 If the function is used with two few arguments as in the text,
 a default symbol is substituted (usually a @\cdot@, but that is
-cusomizable, cf. Section~\ref{subst}).
+customizable, cf. Section~\ref{subst}).
 
 %%%
 %%%
@@ -1381,7 +1380,7 @@ which is based on Haskell, but adds additional syntactic constructs.
 
 The input
 \input{AGExampleIn}%
-prodces the following output:
+produces the following output:
 \input{AGExample}
 
 %%%
@@ -1456,7 +1455,9 @@ The output will look similar to this:
 \input{InteractiveGhci}
 \end{colorsurround}
 Note that it is possible to pass interpreter commands such
-as @:t@ to the external program. Note furthermore the difference
+as @:t@ to the external program. 
+(ADAPT EXAMPLE TO SHOW THIS:)
+Note furthermore the difference
 in output between an @\eval@ and a @\perform@ command.
 
 %%%
