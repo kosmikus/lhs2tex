@@ -32,6 +32,7 @@ LATEX           := @LATEX@
 XDVI            := @XDVI@
 GV              := @GV@
 DVIPS           := @DVIPS@
+MKINSTDIR       := ./mkinstalldirs
 
 $(objects) : %.o : %.lhs
 	$(GHC) -c $(GHCFLAGS) $< -o $@
