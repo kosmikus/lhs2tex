@@ -61,7 +61,11 @@ fi
 AC_SUBST(POLYTABLE_INSTALL)
 AC_PATH_PROG(MKTEXLSR,mktexlsr)
 
-AC_CONFIG_FILES(config.mk Version.lhs)
+# docdir and expansion
+docdir="$datadir/doc/$PACKAGE_TARNAME-$PACKAGE_VERSION"
+AC_SUBST(docdir)
+
+AC_CONFIG_FILES(config.mk Version.lhs lhs2TeX.1)
 AC_OUTPUT
 
 echo "Configuration succesfully completed."

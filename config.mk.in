@@ -6,7 +6,8 @@ DISTDIR         := $(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
 bindir          = @bindir@
 datadir         = @datadir@
 stydir          = @datadir@/@PACKAGE_TARNAME@
-docdir          = @datadir@/doc/@PACKAGE_TARNAME@-@PACKAGE_VERSION@
+docdir          = @docdir@
+mandir          = @mandir@
 prefix          = @prefix@
 exec_prefix     = @exec_prefix@
 

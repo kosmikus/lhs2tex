@@ -271,7 +271,7 @@ PACKAGE_VERSION='1.10pre2'
 PACKAGE_STRING='lhs2tex 1.10pre2'
 PACKAGE_BUGREPORT=''
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS VERSION NUMVERSION PRE GHC INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S MV CP RM MKDIR TOUCH DIFF GREP SED SORT UNIQ FIND LATEX PDFLATEX XDVI GV DVIPS KPSEWHICH texmf POLYTABLE_INSTALL MKTEXLSR LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS VERSION NUMVERSION PRE GHC INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S MV CP RM MKDIR TOUCH DIFF GREP SED SORT UNIQ FIND LATEX PDFLATEX XDVI GV DVIPS KPSEWHICH texmf POLYTABLE_INSTALL MKTEXLSR docdir LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -2238,7 +2238,11 @@ echo "${ECHO_T}no" >&6
 fi
 
 
-                    ac_config_files="$ac_config_files config.mk Version.lhs"
+# docdir and expansion
+docdir="$datadir/doc/$PACKAGE_TARNAME-$PACKAGE_VERSION"
+
+
+                              ac_config_files="$ac_config_files config.mk Version.lhs lhs2TeX.1"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -2793,6 +2797,7 @@ do
   # Handling of arguments.
   "config.mk" ) CONFIG_FILES="$CONFIG_FILES config.mk" ;;
   "Version.lhs" ) CONFIG_FILES="$CONFIG_FILES Version.lhs" ;;
+  "lhs2TeX.1" ) CONFIG_FILES="$CONFIG_FILES lhs2TeX.1" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
    { (exit 1); exit 1; }; };;
@@ -2904,6 +2909,7 @@ s,@KPSEWHICH@,$KPSEWHICH,;t t
 s,@texmf@,$texmf,;t t
 s,@POLYTABLE_INSTALL@,$POLYTABLE_INSTALL,;t t
 s,@MKTEXLSR@,$MKTEXLSR,;t t
+s,@docdir@,$docdir,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF

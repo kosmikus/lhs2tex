@@ -1,0 +1,228 @@
+.TH LHS2TEX "1" "March 2005" "lhs2TeX" "User Commands"
+.SH NAME
+lhs2TeX \- a literate Haskell to (La)TeX code translator
+
+.SH SYNOPSIS
+.B lhs2TeX
+[options]
+file
+
+.SH DESCRIPTION
+This tool takes as its input a literate Haskell source
+file (Bird-style or LaTeX-style or even a combination thereof),
+and produces output, which, depending on the
+.B STYLE
+selected, can be either a LaTeX document or a stripped version
+of the code. 
+The output is produced on stdout.
+Several directives are interpreted by
+.B lhs2TeX
+itself and can be used to customize the output further.
+
+.SH OPTIONS
+There are two sorts of options for 
+\fBlhs2TeX\fR. The first selects a
+.B STYLE
+which governs the overal mode of operation for 
+\fBlhs2TeX\fR. Only one style may be selected:
+
+
+.TP
+.B --poly
+The poly style is an improvement of the older
+.B math
+style. It produces a LaTeX document, with the code blocks
+formatted using a proportional font. The output is highly customizable
+using formatting directives. Furthermore, the resulting code
+respects some of the alignments made in the source file.
+
+.TP
+.B --math
+The math style is as
+.B poly
+style, but has less alignment capabilities. Tokens appearing in the
+source file at a special column are all aligned in the
+output. Furthermore, indentation is respected.
+
+.TP
+.B --newcode
+In the new code style, everything but code blocks is stripped from
+the file. In addition, certain syntactic transformations can be
+performed on the code using formatting directives. For example, if
+the source code is annotated in certain positions to produce even
+nicer results in
+.B poly
+style, one can use
+.B newcode
+style to remove these annotations.
+
+.TP
+.B --code
+In code style, all comments and specification code is stripped from
+the file, so that only the code remains. Use this if you want to
+produce a smaller version of your source file.
+
+.TP
+.B --tt
+Typewriter style prints code almost verbatim, using a monospaced font,
+but formatting certain symbols (lambda abstraction, arrows ...) using
+an extended character set. This style is default if no style is
+explicitly selected, but this behaviour should not be relied upon.
+The default style may be changed in future versions.
+
+.TP
+.B --verb
+Verbatim style prints code as-is, using a monospaced font. No
+formatting whatsoever is applied to the code. However,
+.B lhs2TeX
+does not make use of a LaTeX verbatim environment, but rather
+escapes special TeX constructs in the translation. This implies that
+it is easier to pass the resulting TeX code to macros or use it
+inside certain environments than it would be with a native
+verbatim-environment.
+
+.PD
+.PP
+The following options are considered are also considered as styles,
+but return only information about the program:
+
+.TP
+\fB-h\fR, \fB-?\fR, \fB--help\fR
+Returns a short usage message listing all the available options.
+
+.TP
+\fB-V\fR, \fB--version\fR
+Returns version information. 
+
+.TP
+.B --copying
+Displays the complete GNU General Public License.
+
+.TP
+.B --warranty
+Displays the parts of the GPL than concerns warranty.
+
+.PD
+.PP
+The remaining options modify the behaviour of the program.
+
+.TP
+\fB-P\fIpath\fR, \fB--path=\fIpath\fR
+Takes a (colon-separated) list
+.I path
+of paths that are used
+as search path for files to be included. If the list starts
+with a colon, then the list is appended to the current
+search path. If the list ends with a colon, then the list
+is prepended to the current search path. If there is neither
+a colon at the beginning nor at the end of the list, then
+the list replaces the current search path. 
+
+Environment
+variables can be used in the list of paths, if enclosed
+in curly braces, i.e.,
+.I {VAR}
+expands to the current value of the environment variable
+VAR. If a path ends with a double slash 
+\fI//\fR, then all subdirectories
+of that path are included in the search path. Note that this
+can significantly slow down
+.B lhs2TeX
+when looking for files.
+
+The built-in default search path of
+.B lhs2TeX
+is
+
+.nf
+   {HOME}/lhs2TeX//
+   {HOME}/.lhs2TeX//
+   {LHS2TEX}//
+   /usr/local/share/lhs2tex//
+   /usr/local/share/lhs2TeX//
+   /usr/local/lib/lhs2tex//
+   /usr/local/lib/lhs2TeX//
+   /usr/share/lhs2tex//
+   /usr/share/lhs2TeX//
+   /usr/lib/lhs2tex//
+   /usr/lib/lhs2TeX//
+.fi
+
+.TP
+\fB-i\fIfile\fR, \fB--include=\fIfile\fR
+Includes
+.I file
+before anything else. This option has the same effect
+as an
+
+.nf
+   %include \fIfile\fR
+.fi
+
+directive at the beginning of the source file.
+
+.TP
+\fB-l\fIequation\fR, \fB--let=\fIequation\fR
+Assumes
+.I equation
+while processing the source file. This option has the
+same effect as a
+
+.nf
+   %let \fIequation\fR
+.fi
+
+directive at the beginning of the source file.
+
+.TP
+\fB-s\fIflag\fR, \fB--set=\fIflag\fR
+Sets
+.I flag
+to
+.B True
+at the beginning of the source file. This option has
+the same effect as a
+
+.nf
+   %let \fIflag\fR=True
+.fi
+
+at the beginning of the source file.
+
+.TP
+\fB-u\fIflag\fR, \fB--unset=\fIflag\fR
+Sets
+.I flag
+to
+.B False
+at the beginning of the source file. This option has
+the same effect as a
+
+.nf
+   %let \fIflag\fR=False
+.fi
+
+at the beginning of the source file.
+
+.SH VERSION
+@VERSION@
+
+.SH AUTHORS
+Andres Loeh <polytable at andres-loeh dot de> wrote
+.B poly 
+and
+.B newcode
+styles and is the current maintainer of the package.
+
+Ralf Hinze <ralf at informatik dot uni-bonn dot de> wrote
+the original
+.BR lhs2TeX .
+
+.SH SEE ALSO
+.IR http://www.cs.uu.nl/~andres/lhs2tex ,
+the 
+.B lhs2TeX 
+homepage
+.br
+.IR Guide2.pdf ,
+the manual

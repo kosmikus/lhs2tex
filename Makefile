@@ -144,7 +144,8 @@ install : bin
 	$(MKINSTDIR) $(DESTDIR)$(stydir)
 	$(INSTALL) -m 644 lhs2TeX.sty lhs2TeX.fmt $(DESTDIR)$(stydir)
 	$(INSTALL) -m 644 Library/*.fmt $(DESTDIR)$(stydir)
-# TODO: install documentation
+	$(INSTALL) -m 644 doc/Guide2.pdf $(DESTDIR)$(docdir)
+	$(INSTALL) -m 644 lhs2TeX.1 $(DESTDIR)$(mandir)/man1
 ifeq ($(INSTALL_POLYTABLE),yes)
 # install polytable package
 	$(MKINSTDIR) $(DESTDIR)$(polydir)
@@ -169,6 +170,7 @@ srcdist : doc
 	$(INSTALL) -m 644 $(psources) Version.lhs.in $(snipssrc) $(DISTDIR)
 	$(INSTALL) -m 644 lhs2TeX.fmt.lit lhs2TeX.sty.lit $(DISTDIR)
 	$(INSTALL) -m 644 Makefile common.mk config.mk.in $(DISTDIR)
+	$(INSTALL) -m 644 lhs2TeX.1.in $(DISTDIR)
 	$(INSTALL) -m 755 configure mkinstalldirs install-sh $(DISTDIR)
 	$(INSTALL) -m 644 TODO LICENSE RELEASE $(DISTDIR)
 	cat INSTALL | sed -e "s/@ProgramVersion@/$(PACKAGE_VERSION)/" \
@@ -198,6 +200,7 @@ bindist: lhs2TeX lhs2TeX.fmt lhs2TeX.sty doc
 	$(INSTALL) -m 644 $(psources) Version.lhs.in $(snipssrc) $(DISTDIR)
 	$(INSTALL) -m 644 lhs2TeX.fmt.lit lhs2TeX.sty.lit $(DISTDIR)
 	$(INSTALL) -m 644 Makefile common.mk config.mk.in $(DISTDIR)
+	$(INSTALL) -m 644 lhs2TeX.1.in $(DISTDIR)
 	$(INSTALL) -m 755 configure mkinstalldirs install-sh $(DISTDIR)
 	$(INSTALL) -m 644 TODO LICENSE RELEASE $(DISTDIR)
 	cat INSTALL | sed -e "s/@ProgramVersion@/$(PACKAGE_VERSION)/" \
