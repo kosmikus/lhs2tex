@@ -70,7 +70,10 @@ Format directives. \NB @%format ( = "(\;"@ is legal.
 >     tex (Qual (m:ms) s)	=  Conid m : tex (Qual ms s)
 >      -- ks, 03.09.2003: was "tex (Qual m s) = Conid m : tex s"; 
 >      -- seems strange though ...
->     subscript f s		=  [f (reverse w)
+>     subscript f s  
+>       | null t && not (null w) && (null v || head w == '_')
+>                               =  underscore f s
+>       | otherwise             =  [f (reverse w)
 >                                  , TeX (Text ((if   not (null v)
 >                                                then "_{" ++ reverse v ++ "}" 
 >                                                else ""
@@ -79,6 +82,27 @@ Format directives. \NB @%format ( = "(\;"@ is legal.
 >         where s'		=  reverse s
 >               (t, u)		=  span (== '\'') s'
 >               (v, w)		=  span isDigit u
+
+ks, 02.02.2004: I have added implicit formatting via |underscore|.
+The above condition should guarantee that it is (almost) only used in 
+cases where previously implicit formatting did not do anything useful.
+The function |underscore| typesets an identifier such as
+|a_b_c| as $a_{b_{c}}$. TODO: Instead of hard-coded subscripting a
+substitution directive should be invoked here.
+
+>     underscore f s
+>                               =  [f t]
+>                                  ++ if null u then []
+>                                               else [TeX (Text ("_{"))]
+>                                                    ++
+>                                                    proc_u
+>                                                    ++
+>                                                    [TeX (Text ("}"))]
+>         where (t, u)          =  break (== '_') s
+>               tok_u           =  tokenize (tail u)
+>               proc_u          =  case tok_u of
+>                                    Left  _ -> [f (tail u)] -- should not happen
+>                                    Right t -> t
 
 > lhs				:: Parser Token (String, [Bool], [String])
 > lhs				=  do f <- varid `mplus` conid

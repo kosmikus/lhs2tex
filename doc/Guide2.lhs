@@ -947,6 +947,19 @@ The corresponding output is:
 \input{Implicit}
 \end{colorsurround}
 
+Another form of implicit formatting only takes place only if the token to
+be formatted does not end in primes, and only if digits at the end are 
+immediately preceded by an underscore. The reason for these conditions is
+compatibility. If the conditions are met, then the token is split at
+underscores, and the part to the right of an underscore is typeset as
+subscript to the part on the left, recursively. Again, let us look at an
+example:
+\input{ImplicitUnderscoreIn}
+And its output:
+\begin{colorsurround}
+\input{ImplicitUnderscore}
+\end{colorsurround}
+
 %%%
 %%%
 
