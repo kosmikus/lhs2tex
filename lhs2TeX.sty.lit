@@ -33,8 +33,11 @@ gleichzeitig Math und Verbatim formatieren zu k"onnen.
 ks, 17.07.2003: Added a conditional that only includes this part
 if the selected style is typewriter style.
 
+ks, 28.07.2003: Removed the conditional again as it breaks
+compatibility. Not sure what to do here. Maybe create a new,
+clean @lhs2TeX.sty@ that should be included into new documents.
+
 \begin{code}
-%if style == tt
 %if not latex209
 \DeclareFontFamily{OT1}{cmtex}{}
 \DeclareFontShape{OT1}{cmtex}{m}{n}
@@ -58,7 +61,6 @@ if the selected style is typewriter style.
 %endif
 
 \newcommand{\Sp}{\hskip.33334em\relax}
-%endif
 \end{code}
 
 %-------------------------------=  --------------------------------------------

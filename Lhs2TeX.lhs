@@ -329,6 +329,7 @@ Fit f"ur \LaTeX~2.09 machen @%if latex209@
 \input{Verbatim}
 \input{Typewriter}
 \input{Math}
+\input{MathPoly}
 \input{Directives}
 \input{HsLexer}
 

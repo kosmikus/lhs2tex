@@ -11,11 +11,11 @@ LHS2TEX = ../lhs2TeX
 
 %.tex : %.snip
 #	lhs2TeX -verb -i../lhs2TeX.fmt -l'meta = True' $< > $@
-	$(LHS2TEX) --verbose --math --align 33 -l'meta = True' -i../lhs2TeX.fmt $< > $@
+	$(LHS2TEX) --verbose --math --align=33 -smeta -i../lhs2TeX.fmt $< > $@
 
 %.tex : %.lhs
 #	lhs2TeX -verb -i../lhs2TeX.fmt -l'meta = True' $< > $@
-	$(LHS2TEX) --verbose --math --align 33 -l'meta = True' -i../lhs2TeX.fmt $< > $@
+	$(LHS2TEX) --verbose --math --align=33 -smeta -i../lhs2TeX.fmt $< > $@
 
 %.ps : %.dvi
 	dvips -D600 -o $@ $<

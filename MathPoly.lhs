@@ -1,6 +1,12 @@
 %-------------------------------=  --------------------------------------------
-\subsection{Math formatter}
+\subsection{Poly formatter}
 %-------------------------------=  --------------------------------------------
+
+ks, 28.07.2003: This is a new style that is based on the old @math@-style
+and is intended to replace @math@ style in a future version. Because the
+former @math@ style should remain compatible, I've copied the entire module.
+Essentially, there are the same functions here doing the same job, but there
+are subtle differences, and they will grow over time \dots
 
 %if codeOnly || showModuleHeader
 
@@ -49,7 +55,7 @@
 >				@> lift (expand 0)
 >				@> tokenize
 >				@> lift (number 1 1)
->	--			@> when auto (lift (filter (isNotSpace . token)))
+>	--		       |@> when auto (lift (filter (isNotSpace . token)))|
 >				@> lift (partition (\t -> catCode t /= White))
 >				@> exprParse *** return
 >				@> lift (substitute fmts auto) *** return
@@ -63,7 +69,7 @@
 >                                                    in  (autocols cs' ats,ats)
 >                                       )
 >                               @> return *** when auto (lift (fmap (fmap (filter (isNotSpace . token)))))
->       --                      @> return *** when auto (lift (fmap (fmap (addSpaces . filter (isNotSpace . token)))))
+>       --                     |@> return *** when auto (lift (fmap (fmap (addSpaces . filter (isNotSpace . token)))))|
 >                               @> lift (\((cs,z),ats) -> (cs,(z,ats)))
 >                               @> return *** lift (\(z,ats) -> leftIndent fmts auto z [] ats)
 >       -- ks, 17.07.2003: i've changed "stack" into "[]" and thereby disabled
@@ -324,7 +330,7 @@ legal atom (|string| is applied to it).
 >                                               -> Int              -- "Traegheit"
 >                                               -> [[Pos tok]]      -- positionierte tokens per Zeile
 >                                               -> [Line [Pos tok]]
-> align cs sep lat toks         =  fmap (\t -> {- trace (show (map token t) ++ "\n") $ -}
+> align cs sep lat toks         =  fmap (\t -> {- |trace (show (map token t) ++ "\n") $| -}
 >                                              let res = splitn ("B",0) False cs t
 >                                              in  if null [x | x <- t
 >                                                          , (row x /= 0 || col x /= 0) && isNotSpace (token x)]
@@ -491,7 +497,7 @@ Letztlich wird die augenblickliche Zeile auf den Stack gelegt.
 >   loop first stack []	        =  (Empty, stack)  -- fertig
 >   loop first stack (l:ls)     =  case l of
 >       Blank                   -> loop True stack ls -- Leerzeilen ignorieren
->    {- Poly x | trace (show x) False -> undefined -}
+>    {-| Poly x || trace (show x) False -> undefined |-}
 >       Poly []                 -> loop True stack ls -- naechste Zeile
 >       Poly (((n,c),[],ind):rs)
 >         | first               -> loop True stack (Poly rs:ls) -- ignoriere leere Spalten zu Beginn

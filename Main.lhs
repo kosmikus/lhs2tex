@@ -265,12 +265,12 @@ Remove trailing blank line.
 >				      update (\st@State{file = f', lineno = l'} ->
 >				          st{file = f, files = (f', l') : files st, path = d ++ dir f})
 >				      -- |d <- fromIO getCurrentDirectory|
->				      --fromIO (setCurrentDirectory (dir f))
+>				      -- |fromIO (setCurrentDirectory (dir f))|
 >				      (str,f) <- fromIO (chaseFile sp (d ++ f))
 >                                     update (\st -> st { file = f })
 >                                     fromIO (when (verbose st) (hPutStr stderr $ "(" ++ f))
 >				      formatStr str
->				      --fromIO (setCurrentDirectory d)
+>				      -- |fromIO (setCurrentDirectory d)|
 >				      update (\st'@State{files = (f, l) : fs} ->
 >				          st'{file = f, lineno = l, files = fs, path = d})
 >                                     fromIO (when (verbose st) (hPutStrLn stderr $ ")"))
@@ -428,7 +428,7 @@ response then lies between the first two occurences of |magic|.
 > extract			:: String -> String
 > extract s			=  v
 >     where (t, u)		=  breaks (isPrefix magic) s
->           --u'			=  tail (dropWhile (/='\n') u)
+>           -- |u'			=  tail (dropWhile (/='\n') u)|
 >           u'			=  drop (length magic) u
 >           (v, _)		=  breaks (isPrefix magic) u'
 
