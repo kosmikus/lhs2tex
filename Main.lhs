@@ -125,6 +125,7 @@ Initial state.
 >     where toggles0		=  --[(decode CodeOnly, Bool (sty == CodeOnly))]
 >				   [("style", Int (fromEnum sty))]
 >                               ++ [("version", Int numversion)]
+>                               ++ [("pre", Int pre)]
 >				++ [ (decode s, Int (fromEnum s)) | s <- [(minBound :: Style) .. maxBound] ]
 >				-- |++ [ (s, Bool False) || s <- ["underlineKeywords", "spacePreserving", "meta", "array", "latex209", "times", "euler" ] ]|
 

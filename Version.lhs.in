@@ -12,4 +12,9 @@
 > numversion                    :: Int
 > numversion                    =  @NUMVERSION@
 
+Used internally to distinguish prereleases.
+
+> pre                           :: Int
+> pre                           =  @PRE@
+
 %endif
