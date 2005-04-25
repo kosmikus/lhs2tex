@@ -8,7 +8,7 @@
 % literally into other documents, regardless of the conditions or 
 % license applying to these documents.
 %
-% Andres Loeh, October 2004, ver 1.5
+% Andres Loeh, April 2005, ver 1.6
 %
 % TODO: split in fmt and sty (not done, but @ifundefined included)
 %       use \[ \] in arrayhs (fleqn problem)
@@ -16,18 +16,18 @@
 %         by using \allowdisplaybreaks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %endif
-
+%
 %if style /= newcode
-
+%
 %if False
 % The follwing subst replaces the bad default from lhs2TeX.fmt.
 % The idea is to just provide the basic structure in the subst, and
 % let the rest be handled by a LaTeX environment.
 %endif
-
+%
 %subst code a = "\begin{hscode}\SaveRestoreHook'n" a "\ColumnHook'n\end{hscode}\resethooks'n"
-
-
+%
+%
 % This package provides two environments suitable to take the place
 % of hscode, called "plainhscode" and "arrayhscode". 
 
@@ -36,7 +36,7 @@
 % similar to formulas. Note that if these dimensions are changed,
 % the spacing around displayed math formulas changes as well.
 % All code is indented using \leftskip.
-
+%
 % Changed 19.08.2004 to reflect changes in colorcode. Should work with
 % CodeGroup.sty.
 
@@ -99,6 +99,13 @@
 
 \newcommand{\mathhs}{\sethscode{mathhscode}}
 
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
 % The framed environment places code in a framed box.
 
 \def\codeframewidth{\arrayrulewidth}
@@ -152,7 +159,7 @@
    \fi
    \parskip=\belowdisplayskip\par\noindent}
 
-}% end ifundefined
+}{}% end ifundefined
 \makeatother
 
 %endif
