@@ -1,0 +1,31 @@
+%if False
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% spacing.fmt
+%
+% Formatting sequences of ^ as spaces of different width.
+% Note that the default formatting of (^) is affected by this.
+%
+% Permission is granted to include this file (or parts of this file) 
+% literally into other documents, regardless of the conditions or 
+% license applying to these documents.
+%
+% Andres Loeh, April 2005, ver 1.0
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%endif
+%if style == newcode
+
+%format ^ =
+%format ^^ = " "
+%format ^^^ = "  "
+%format ^^^^ = "   "
+
+%else
+
+%format ^ = " "
+%format ^^ = "\;"
+%format ^^^ = "\quad "
+%format ^^^^ = "\qquad "
+%format ^^. = ^^ "."
+
+%endif

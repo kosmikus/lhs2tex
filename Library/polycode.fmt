@@ -30,7 +30,7 @@
 %
 % This package provides two environments suitable to take the place
 % of hscode, called "plainhscode" and "arrayhscode". 
-
+%
 % The plain environment surrounds each code block by vertical space,
 % and it uses \abovedisplayskip and \belowdisplayskip to get spacing
 % similar to formulas. Note that if these dimensions are changed,
@@ -39,11 +39,11 @@
 %
 % Changed 19.08.2004 to reflect changes in colorcode. Should work with
 % CodeGroup.sty.
-
+%
 \makeatletter
-\@@ifundefined{polycoderead}{%
+\@@ifundefined{hspolycoderead}{%
 
-\global\let\polycoderead\empty
+\global\let\hspolycoderead\empty
 
 \newcommand{\hsnewpar}[1]%
   {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
@@ -161,5 +161,5 @@
 
 }{}% end ifundefined
 \makeatother
-
+%
 %endif

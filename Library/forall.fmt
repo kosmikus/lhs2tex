@@ -1,0 +1,62 @@
+%if False
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% forall.fmt
+%
+% *EXPERIMENTAL*
+% Semi-automatic formatting of the . as either function
+% composition (normally) or a period (when used after a
+% forall).
+%
+% Permission is granted to include this file (or parts of this file) 
+% literally into other documents, regardless of the conditions or 
+% license applying to these documents.
+%
+% Andres Loeh, April 2005, ver 1.0
+%
+% TODO: split in fmt and sty (not done, but @ifundefined included)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%endif
+%
+%if style /= newcode
+%
+% First, let's redefine the forall, and the dot.
+%
+%format forall(x) = forall_ x "\hsforall "
+%format .         = "\hsdot{" `comp_` "}{" period_ "}"
+%format `comp_`   = "\circ "
+%format period_   = "."
+%format forall_   = "\forall "
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\makeatletter
+\@@ifundefined{hsforallread}{%
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@@addto@@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+}{}% end ifundefined
+\makeatother
+%endif
