@@ -695,27 +695,36 @@ to be able to operate normally.
 
 Essential definitions are collected in two files, @lhs2TeX.fmt@
 (containing basic directives) and @lhs2TeX.sty@ (containing basic
-\LaTeX\ setup). These two files should be included -- directly or 
-indirectly -- in every file to be processed by @lhs2TeX@!
+\LaTeX\ setup). These two files should be included (using @%include@)
+-- directly or indirectly -- in every file to be processed by
+@lhs2TeX@!
 \input{IncludePrelude}%
-It is perfectly possible to design own libraries that replace or extend
-these basic files and to include those own libraries instead.
-It is not recommended, though, to edit these two files directly.
-If you are not satisfied with some of the default definition, create
-your own file to redefine selected part. This way, if @lhs2TeX@ is updated,
-you will still be able to benefit from improvements and changes in the
-``prelude'' files.
+It is perfectly possible to design
+own libraries that replace or extend these basic files and to include
+those own libraries instead.  It is not recommended, though, to edit
+these two files directly.  If you are not satisfied with some of the
+default definition, create your own file to redefine selected
+part. This way, if @lhs2TeX@ is updated, you will still be able to
+benefit from improvements and changes in the ``prelude'' files.
 
-There is a reason why the prelude is split into two files: if several
-files are to be processed separately by @lhs2TeX@ (for example,
-because they should be translated using different styles), but all
-included into one \TeX\ document, then \TeX\ level inclusion can be
-used (using @\input@ or a more sophisticated command). In this case,
-@lhs2TeX.fmt@ should be included in every single file (it contains the
-directives necessary for @lhs2TeX@ to proceed), whereas @lhs2TeX.sty@
-should only be included once in the central document to be processed
-by \LaTeX\ (that file contains the setup to make \LaTeX\ understand
-the output that @lhs2TeX@ writes).
+It is possible to use @lhs2TeX@ in a setup where a \TeX document
+is split into several files, and each of the files should be processed
+separately by @lhs2TeX@ (for
+example, because they should be translated using different styles).
+This situation is the reason why there are two files, @lhs2TeX.fmt@
+and @lhs2TeX.sty@. The file @lhs2TeX.fmt@ should be
+included (using @%include@) in every single file -- it contains the
+directives necessary for @lhs2TeX@ to proceed. In addition,
+@lhs2TeX.sty@ should be included (also using @%include@) exactly
+once in the central document to be processed by \LaTeX\ -- the file
+@lhs2TeX.sty@ contains the setup to make \LaTeX\ understand the output
+that @lhs2TeX@ writes.
+
+\begin{important}[Warning]
+Note that both @lhs2TeX.fmt@ and @lhs2TeX.sty@ contain @lhs2TeX@
+directives, and therefore \emph{cannot} be included using \TeX\ or \LaTeX\
+include mechanisms such as @\input@ or @\usepackage@.
+\end{important}
 
 %%%
 %%%
