@@ -716,7 +716,7 @@ and @lhs2TeX.sty@. The file @lhs2TeX.fmt@ should be
 included (using @%include@) in every single file -- it contains the
 directives necessary for @lhs2TeX@ to proceed. In addition,
 @lhs2TeX.sty@ should be included (also using @%include@) exactly
-once in the central document to be processed by \LaTeX\ -- the file
+once in the central document to later be processed by \LaTeX\ -- the file
 @lhs2TeX.sty@ contains the setup to make \LaTeX\ understand the output
 that @lhs2TeX@ writes.
 
