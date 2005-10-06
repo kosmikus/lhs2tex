@@ -19,6 +19,9 @@ MKINSTDIR       := ./mkinstalldirs
 ### lhs dependencies (from %include lines)
 ###
 
+ifdef SORT
+ifdef UNIQ
+
 MKLHSDEPEND = $(GREP) "^%include " $< \
                | $(SED) -e 's,^%include ,$*.tex : ,' \
                | $(SORT) | $(UNIQ) > $*.ld
@@ -27,12 +30,8 @@ MKFMTDEPEND = $(GREP) "^%include " $< \
                | $(SED) -e 's,^%include ,$*.fmt : ,' \
                | $(SORT) | $(UNIQ) > $*.ld
 
-###
-### hs dependencies
-###
-
-
-MKGHCDEPEND = $(GHC) -M -optdep-f -optdep$*.d $(GHCFLAGS) $<
+endif
+endif
 
 ###
 ### dependency postprocessing
@@ -52,15 +51,6 @@ all : default
 default : bin doc
 bin : lhs2TeX lhs2TeX.fmt lhs2TeX.sty
 
-%.d : %.lhs
-	$(MKGHCDEPEND); \
-	$(CP) $*.d $*.dd; \
-	$(DEPPOSTPROC) < $*.dd >> $*.d; \
-	$(RM) -f $*.dd
-
-$(objects) : %.o : %.lhs
-	$(GHC) -c $(GHCFLAGS) $< -o $@
-
 -include $(sources:%.lhs=%.d)
 
 # I don't understand this ... (ks)
@@ -77,8 +67,7 @@ $(objects) : %.o : %.lhs
 #	fi ; \
 #	fi
 
-%.hi : %.o
-	@:
+ifdef MKLHSDEPEND
 
 %.ld : %.lhs
 	$(MKLHSDEPEND); \
@@ -92,11 +81,13 @@ $(objects) : %.o : %.lhs
 	$(DEPPOSTPROC) < $*.ldd >> $*.ld; \
 	$(RM) -f $*.ldd
 
+-include $(sources:%.lhs=%.ld)
+
+endif
+
 %.tex : %.lhs lhs2TeX Lhs2TeX.fmt lhs2TeX.fmt
 #	lhs2TeX -verb -iLhs2TeX.fmt $< > $@
 	./lhs2TeX --math --align 33 -iLhs2TeX.fmt $< > $@
-
--include $(sources:%.lhs=%.ld)
 
 %.tt : %.snip lhs2TeX lhs2TeX.fmt
 	./lhs2TeX --tt -lmeta=True -ilhs2TeX.fmt $< > $@
@@ -113,8 +104,8 @@ lhs2TeX.sty: lhs2TeX.sty.lit lhs2TeX
 lhs2TeX.fmt: lhs2TeX.fmt.lit lhs2TeX
 	./lhs2TeX --code lhs2TeX.fmt.lit > lhs2TeX.fmt
 
-lhs2TeX : $(objects)
-	$(GHC) $(GHCFLAGS) -o lhs2TeX $(objects)
+lhs2TeX : $(sources)
+	$(GHC) $(GHCFLAGS) --make -o lhs2TeX $(sources)
 
 doc : bin
 	cd doc; $(MAKE)
