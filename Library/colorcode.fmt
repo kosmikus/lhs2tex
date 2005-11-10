@@ -2,7 +2,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % colorcode.fmt
 %
-% code in a colored box for poly style in lhs2TeX
+% code in a colored box for poly style in lhs2TeX;
+% very experimental
 %
 % Permission is granted to include this file (or parts of this file) 
 % literally into other documents, regardless of the conditions or 

@@ -8,7 +8,7 @@
 % literally into other documents, regardless of the conditions or 
 % license applying to these documents.
 %
-% Andres Loeh, April 2005, ver 1.6
+% Andres Loeh, November 2005, ver 1.7
 %
 % TODO: split in fmt and sty (not done, but @ifundefined included)
 %       use \[ \] in arrayhs (fleqn problem)
@@ -130,6 +130,16 @@
 
 \newcommand{\framedhs}{\sethscode{framedhscode}}
 
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
 % The joinhscode environment is a separate environment that
 % can be used to surround and thereby connect multiple code
 % blocks.
@@ -163,3 +173,4 @@
 \makeatother
 %
 %endif
+
