@@ -8,7 +8,7 @@
 % literally into other documents, regardless of the conditions or 
 % license applying to these documents.
 %
-% Andres Loeh, November 2005, ver 1.7
+% Andres Loeh, November 2005, ver 1.8
 %
 % TODO: split in fmt and sty (not done, but @ifundefined included)
 %       use \[ \] in arrayhs (fleqn problem)
@@ -135,6 +135,8 @@
 
 \newenvironment{inlinehscode}%
   {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}%
    \def\fromto##1##2##3{##3}%
    \def\nextline{}}{\) }%
 
