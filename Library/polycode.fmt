@@ -135,8 +135,8 @@
 
 \newenvironment{inlinehscode}%
   {\(\def\column##1##2{}%
-   \let\>\undefined\let\<\undefined
-   \newcommand\>[1][]{}\newcommand\<[1][]{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
    \def\fromto##1##2##3{##3}%
    \def\nextline{}}{\) }%
 
