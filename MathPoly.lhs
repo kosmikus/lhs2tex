@@ -64,6 +64,7 @@ are subtle differences, and they will grow over time \dots
 >                               @> lift lines
 >                               @> when auto (lift (fmap addSpaces))
 >                               @> lift (\ts -> (autoalign sep ts,ts))
+>       --                     |@> lift (\(x,y) -> trace ((unlines $ map show $ y) ++ "\n" ++ show x) (x,y))|
 >                               @> lift (\(cs,ts) -> let ats = align cs sep lat ts
 >                                                        cs' = [("B",0)] ++ cs 
 >                                                           ++ [("E",error "E column")]
@@ -163,9 +164,14 @@ to |math| style. Also added |anyright|.
 >         | row v' == 0 && col v' == 0
 >                               -> findCols (v:vs)  -- skip internal tokens (automatically added spaces)
 >         | length (string (token v)) >= sep
->                               -> {- |trace ("found: " ++ show (col v')) $| -} col v' : findCols vs
->         | otherwise           -> {- |trace ("found too short")|            -} findCols vs
->
+>                               -> {- |trace ("found: " ++ show (col v')) $| -} col v' : findCols (v':vs)
+>         | otherwise           -> {- |trace ("found too short")|            -} findCols (v':vs)
+
+ks, 21.11.2005: I've fixed a bug that was known to me since long ago, but I never got
+around to investigate. When a parametrized formatting directive directly precedes a
+token that should be aligned, then sometimes that token was not aligned. The reason
+was that in |findCols| above, the recursive calls used |vs| instead of |(v':vs)|.
+
 > align                         :: (CToken tok) => [(String,Int)]   -- alignment-info (Name, Spalte)
 >                                               -> Int              -- "Trennung"
 >                                               -> Int              -- "Traegheit"

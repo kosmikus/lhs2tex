@@ -2,8 +2,7 @@
 
 %include lhs2TeX.fmt
 %include lhs2TeX.sty
-
-%format ^^ = "\;"
+%include spacing.fmt
 
 \begin{document}
 
