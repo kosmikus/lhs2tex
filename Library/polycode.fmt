@@ -109,6 +109,7 @@
 % The framed environment places code in a framed box.
 
 \def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
 
 \newenvironment{framedhscode}%
   {\parskip=\abovedisplayskip\par\noindent
@@ -142,34 +143,21 @@
 
 \newcommand{\inlinehs}{\sethscode{inlinehscode}}
 
-% The joinhscode environment is a separate environment that
+% The joincode environment is a separate environment that
 % can be used to surround and thereby connect multiple code
 % blocks.
 
-\newenvironment{joinhscode}%
-  {\parskip=\abovedisplayskip\par\noindent
-   \begingroup
-   \ifx\hscode\framedhscode
-     \arrayrulewidth=\codeframewidth
-     \tabular{@@{}||p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}||@@{}}%
-     \hline\\[-1.5ex]%
-     \endtabular
-     \let\hline=\relax\let\framedhslinecorrect=\@@gobbletwo
-   \fi
-   \def\hsnewpar##1{\par}%
-   \abovedisplayskip=0pt%
-   \parskip=0pt%
-   \lineskip=0pt%
-   \belowdisplayskip=0pt}%
-  {\endgroup
-   \ifx\hscode\framedhscode
-     \arrayrulewidth=\codeframewidth
-     %\hrule height \arrayrulewidth\relax%
-     \tabular{@@{}||p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}||@@{}}%
-     \\[-1.5ex]\hline
-     \endtabular
-   \fi
-   \parskip=\belowdisplayskip\par\noindent}
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
 
 }{}% end ifundefined
 \makeatother
