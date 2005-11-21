@@ -37,6 +37,9 @@ The most notable changes are:
 
 * There are some new forms of implicit formatting directives.
 
+* The LaTeX code produced in the poly style looks slightly
+  more beautiful.
+
 * There is a new Library section, containing
 
 Requirements and Download
