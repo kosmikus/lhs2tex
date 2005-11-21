@@ -135,6 +135,7 @@ install : bin
 	$(MKINSTDIR) $(DESTDIR)$(stydir)
 	$(INSTALL) -m 644 lhs2TeX.sty lhs2TeX.fmt $(DESTDIR)$(stydir)
 	$(INSTALL) -m 644 Library/*.fmt $(DESTDIR)$(stydir)
+	$(MKINSTDIR) $(DESTDIR)$(docdir)
 	$(INSTALL) -m 644 doc/Guide2.pdf $(DESTDIR)$(docdir)
 	$(INSTALL) -m 644 lhs2TeX.1 $(DESTDIR)$(mandir)/man1
 ifeq ($(INSTALL_POLYTABLE),yes)

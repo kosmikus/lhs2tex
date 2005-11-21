@@ -1,5 +1,5 @@
 
-                     lhs2TeX version 1.10
+                     lhs2TeX version 1.11
                      ====================
 
 We are pleased to announce a new release of lhs2TeX, 
@@ -20,10 +20,13 @@ lhs2TeX includes the following features:
 
 * A manual explaining all the important aspects of lhs2TeX.
 
-Changes
--------
+Changes (w.r.t. lhs2TeX 1.9)
+----------------------------
 
-This is a bugfix release, with only minor new features.
+[Note that 1.10 has never been released to avoid confusion
+with some privately distributed versions.] 
+
+This is a maintenance release, with only minor new features.
 The most notable changes are:
 
 * Specification code is now handled correctly (that is, ignored) 
@@ -33,6 +36,8 @@ The most notable changes are:
   the "newcode" style.
 
 * There are some new forms of implicit formatting directives.
+
+* There is a new Library section, containing
 
 Requirements and Download
 -------------------------

@@ -6,6 +6,7 @@ LHS2TEX = ../lhs2TeX
 SNIPPETSGD  = $(shell $(GREP) "\\\\input{" Guide2.lhs | $(SED) "s/^.*input{\(.*\)}.*$$/\1.tex/")
 ifdef STC
 SNIPPETSSTC = $(shell $(GREP) "\\\\input{" STC.lhs | $(SED) "s/^.*input{\(.*\)}.*$$/\1.tex/")
+SNIPPETSTLL = $(shell $(GREP) "\\\\input{" TLL.lhs | $(SED) "s/^.*input{\(.*\)}.*$$/\1.tex/")
 STCFLAGS="--let=stc=True"
 endif
 
@@ -41,6 +42,9 @@ Guide2.tex : Guide2.lhs $(SNIPPETSGD)
 	$(LHS2TEX) --poly -P.:.. $< > $@
 
 STC.tex : STC.lhs $(SNIPPETSSTC)
+	$(LHS2TEX) --poly $< > $@
+
+TLL.tex : TLL.lhs $(SNIPPETSTLL)
 	$(LHS2TEX) --poly $< > $@
 
 # determine mode and then run lhs2TeX

@@ -258,12 +258,12 @@ in a conditional checking |anyMath|.
 %subst code a    	= "\begingroup\par\noindent\advance\leftskip\mathindent\('n\begin{pboxed}\SaveRestoreHook'n" a "\ColumnHook'n\end{pboxed}'n\)\par\noindent\endgroup\resethooks'n"
 %endif
 %subst column c a       = "\column{" c "}{" a "}'n"
-%subst fromto b e t     = "\fromto{" b "}{" e "}{{}" t "{}}'n"
+%subst fromto b e t     = "\>[" b "]{}" t "{}\<[" e "]'n"
 %subst left             = "@{}l@{}"
 %subst centered         = "@{}c@{}"
 %subst dummycol         = "@{}l@{}"
-%subst newline   	= "\nextline'n"
-%subst blankline        = "\nextline[\blanklineskip]'n"
+%subst newline   	= "\\'n"
+%subst blankline        = "\\[\blanklineskip]'n"
 %subst indent n         = "\hsindent{" n "}"
 %let anyMath            = True
 %endif

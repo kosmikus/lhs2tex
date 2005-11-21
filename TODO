@@ -16,5 +16,3 @@ Features planned for future versions of polytable
 =================================================
 
 * Private columns are not shared with save-/restorecolumns.
-
-* Make save-/restorecolumns work correctly for ptabular and parray.
