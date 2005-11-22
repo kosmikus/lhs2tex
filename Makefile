@@ -144,8 +144,8 @@ ifeq ($(INSTALL_POLYTABLE),yes)
 	$(MKINSTDIR) $(DESTDIR)$(polydir)
 	$(INSTALL) -m 644 polytable/*.sty $(DESTDIR)$(polydir)
 endif
-	$(MKINSTDIR) $(DESTDIR)$(texdir)
-	$(INSTALL) -m 644 Library/*.sty $(DESTDIR)$(texdir)
+	# $(MKINSTDIR) $(DESTDIR)$(texdir)
+	# $(INSTALL) -m 644 Library/*.sty $(DESTDIR)$(texdir)
 ifndef DESTDIR
 	$(MKTEXLSR)
 else
