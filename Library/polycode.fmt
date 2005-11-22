@@ -16,6 +16,9 @@
 %         by using \allowdisplaybreaks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %endif
+%if not lhs2tex_polycode_fmt_read
+%let lhs2tex_polycode_fmt_read = True
+%include lhs2TeX.fmt
 %
 %if style /= newcode
 %
@@ -40,10 +43,8 @@
 % Changed 19.08.2004 to reflect changes in colorcode. Should work with
 % CodeGroup.sty.
 %
+\ReadOnlyOnce{polycode.fmt}%
 \makeatletter
-\@@ifundefined{hspolycoderead}{%
-
-\global\let\hspolycoderead\empty
 
 \newcommand{\hsnewpar}[1]%
   {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
@@ -159,8 +160,7 @@
    \global\let\hscode=\orighscode
    \global\let\endhscode=\origendhscode}%
 
-}{}% end ifundefined
 \makeatother
 %
 %endif
-
+%endif

@@ -50,7 +50,8 @@
 >                                                 (state0,[],[]) o
 >                                  in
 >                                     case styles of
->                                       []  -> lhs2TeX Typewriter flags (reverse initdirs) n
+>                                       []  -> lhs2TeX Poly flags (reverse initdirs) n
+>                                           -- ks, 22.11.2005, changed default style to |Poly|
 >                                       [Help]     -> quitSuccess (usageInfo uheader options)
 >                                       [Version]  -> quitSuccess programInfo
 >                                       [Copying]  -> quitSuccess (programInfo ++ "\n\n" ++ copying)

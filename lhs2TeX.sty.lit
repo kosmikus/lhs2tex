@@ -6,6 +6,16 @@
 % license applying to these documents.
 %
 %endif
+%if not lhs2tex_lhs2tex_sty_read
+%let lhs2tex_lhs2tex_sty_read = True
+%include lhs2TeX.fmt
+%
+%if style /= newcode
+%
+\makeatletter
+\@@ifundefined{lhs2tex.lhs2tex.sty.read}{\@@namedef{lhs2tex.lhs2tex.sty.read}{}}\endinput
+
+\newcommand\ReadOnlyOnce[1]{\@@ifundefined{#1}{\@@namedef{#1}{}}\endinput}
 \end{code}
 
 %-------------------------------=  --------------------------------------------
@@ -174,4 +184,10 @@ column specifiers. It only works for @poly@ style.
 \newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
 
 \makeatother
+\end{code}
+
+\begin{code}
+%
+%endif
+%endif
 \end{code}

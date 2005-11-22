@@ -6,6 +6,8 @@
 % license applying to these documents.
 %
 %endif
+%if not lhs2tex_lhs2tex_fmt_read
+%let lhs2tex_lhs2tex_fmt_read = True
 \end{code}
 
 %-------------------------------=  --------------------------------------------
@@ -458,5 +460,19 @@ etc~(for all lower and upper case greek letters).
 %format M.>=      = "\geq "
 %format M.>       = ">"
 %endif
+%endif
+\end{code}
+
+%-------------------------------=  --------------------------------------------
+\section{\LaTeX commands}
+%-------------------------------=  --------------------------------------------
+
+New, 21.11.2005: @lhs2TeX.sty@ is now included from @lhs2TeX.fmt@.
+
+\begin{code}
+%include lhs2TeX.sty
+\end{code}
+
+\begin{code}
 %endif
 \end{code}
