@@ -11,11 +11,13 @@
 % literally into other documents, regardless of the conditions or 
 % license applying to these documents.
 %
-% Andres Loeh, April 2005, ver 1.0
+% Andres Loeh, November 2005, ver 1.1
 %
-% TODO: split in fmt and sty (not done, but @ifundefined included)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %endif
+%if not lhs2tex_forall_fmt_read
+%let lhs2tex_forall_fmt_read = True
+%include lhs2TeX.fmt
 %
 %if style /= newcode
 %
@@ -33,8 +35,8 @@
 % composition operator can be chosen. Similarly, period_
 % is used for the period.
 %
+\ReadOnlyOnce{forall.fmt}%
 \makeatletter
-\@@ifundefined{hsforallread}{%
 
 % The HaskellResetHook is a list to which things can
 % be added that reset the Haskell state to the beginning.
@@ -57,6 +59,6 @@
 % In the beginning, we should reset Haskell once.
 \HaskellReset
 
-}{}% end ifundefined
 \makeatother
+%endif
 %endif

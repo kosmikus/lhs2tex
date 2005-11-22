@@ -10,8 +10,7 @@
 %
 % Andres Loeh, November 2005, ver 1.8
 %
-% TODO: split in fmt and sty (not done, but @ifundefined included)
-%       use \[ \] in arrayhs (fleqn problem)
+% TODO: use \[ \] in arrayhs (fleqn problem)
 %       think about penalties and better pagebreaks
 %         by using \allowdisplaybreaks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

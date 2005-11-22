@@ -9,16 +9,20 @@
 % literally into other documents, regardless of the conditions or 
 % license applying to these documents.
 %
-% Andres Loeh, April 2005, ver 1.0
+% Andres Loeh, November 2005, ver 1.1
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %endif
+%if not lhs2tex_spacing_fmt_read
+%let lhs2tex_spacing_fmt_read = True
+%
 %if style == newcode
 
 %format ^ =
 %format ^^ = " "
 %format ^^^ = "  "
 %format ^^^^ = "   "
+%format ^^. =
 
 %else
 
@@ -28,4 +32,5 @@
 %format ^^^^ = "\qquad "
 %format ^^. = ^^ "."
 
+%endif
 %endif

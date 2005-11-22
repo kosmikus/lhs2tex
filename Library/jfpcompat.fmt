@@ -1,0 +1,34 @@
+%if False
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% jfpcompat.fmt
+%
+% jfp.cls is incompatible with array.sty! This is a fix.
+% This is included in the lhs2TeX distribution because
+% lhs2TeX depends on array.sty, and many lhs2TeX users are
+% JFP authors.
+%
+% Permission is granted to include this file (or parts of this file) 
+% literally into other documents, regardless of the conditions or 
+% license applying to these documents.
+%
+% Andres Loeh, November 2005, ver 1.1
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%endif
+%if not lhs2tex_jfpcompat_fmt_read
+%let lhs2tex_jfpcompat_fmt_read = True
+%include lhs2TeX.fmt
+% 
+\ReadOnlyOnce{jfpcompat.fmt}%
+\makeatletter
+\def\@@authortable{%
+  \leavevmode \hbox \bgroup $\col@@sep\tabcolsep
+  \let\d@@llarbegin\begingroup
+  \let\d@@llarend\endgroup
+  \let\\\author@@tabcrone
+  \ignorespaces
+  \@@tabarray}
+
+\makeatother
+%
+%endif

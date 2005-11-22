@@ -9,16 +9,17 @@
 % literally into other documents, regardless of the conditions or 
 % license applying to these documents.
 %
-% Andres Loeh, September 2004, ver 1.5
+% Andres Loeh, November 2005, ver 1.6
 %
-% TODO: split in fmt and sty
-%       fix spacing behaviour for other environments
+% TODO: fix spacing behaviour for other environments
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %endif
-
+%if not lhs2tex_colorcode_fmt_read
+%let lhs2tex_colorcode_fmt_read = True
 %include polycode.fmt
-
+%
 %if style /= newcode
+\ReadOnlyOnce{colorcode.fmt}%
 
 \RequirePackage{colortbl}
 \RequirePackage{calc}
@@ -59,4 +60,5 @@
 \newcommand{\colorhs}{\sethscode{colorhscode}}
 \newcommand{\barhs}{\sethscode{barhscode}}
 
+%endif
 %endif
