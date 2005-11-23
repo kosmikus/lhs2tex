@@ -1,6 +1,4 @@
-hugs -p'!@#$^&*' <stdin> <<!
-
-product [1..10]
-
-
-:quit
+ghci -fglasgow-exts -pgmF dist/build/lhs2TeX/lhs2TeX -optF-Pdoc: -optF--pre -F -ignore-dot-ghci ./dist/build/lhs2TeX/doc/InteractivePre.lhs <<!
+putStrLn "!@#$^&*"
+answer
+putStrLn "!@#$^&*"

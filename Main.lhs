@@ -8,8 +8,10 @@
 > where
 >
 > import Char
-> import System.IO ( hPutStr, hPutStrLn, stderr, stdout )
+> import System.IO ( hClose, hPutStr, hPutStrLn, stderr, stdout, openFile, IOMode(..), Handle(..) )
+> import System.Directory ( copyFile )
 > import System.Console.GetOpt
+> import Text.Regex ( matchRegex, mkRegex )
 > import System
 > import Version
 >
@@ -45,10 +47,10 @@
 
 > main'				:: [String] -> IO ()
 > main' args                    =  case getOpt Permute options args of
->   (o,n,[])                    -> let (flags,initdirs,styles) 
->                                         = foldl (\(s,d,x) (sf,df,ns) -> (sf s,df d,ns ++ x))
+>   (o,n,[])                    -> do (flags,initdirs,styles) 
+>                                        <- foldM (\(s,d,x) (sf,df,ns) -> do s' <- sf s
+>                                                                            return (s',df d,ns ++ x))
 >                                                 (state0,[],[]) o
->                                  in
 >                                     case styles of
 >                                       []  -> lhs2TeX Poly flags (reverse initdirs) n
 >                                           -- ks, 22.11.2005, changed default style to |Poly|
@@ -56,8 +58,10 @@
 >                                       [Version]  -> quitSuccess programInfo
 >                                       [Copying]  -> quitSuccess (programInfo ++ "\n\n" ++ copying)
 >                                       [Warranty] -> quitSuccess (programInfo ++ "\n\n" ++ warranty)
->                                       [s] -> lhs2TeX s          flags (reverse initdirs) n
->                                       _   -> quitError (incompatibleStylesError styles)
+>                                       [Pre] | length n >= 3 -> preprocess flags (reverse initdirs) n
+>                                       [s]    -> lhs2TeX s flags (reverse initdirs) n
+>                                       _      -> quitError (incompatibleStylesError styles)
+>                                     when (output flags /= stdout) (hClose (output flags))
 >   (_,_,errs)                  -> do hPutStrLn stderr $ (concat errs)
 >                                     hPutStrLn stderr $ "Trying compatibility mode option handling ..."
 >                                     cstyle args
@@ -80,6 +84,7 @@ State.
 >                                          searchpath :: [FilePath],
 >				           file       :: FilePath,	-- also used for `hugs'
 >				           lineno     :: LineNo,
+>                                          output     :: Handle,
 >				           opts       :: String,        -- options for `hugs'
 >				           files      :: [(FilePath, LineNo)], -- includees (?)
 >				           path       :: FilePath,      -- for relative includes
@@ -101,6 +106,7 @@ Initial state.
 > state0        		=  State { verbose    = False,
 >                                          searchpath = searchPath,
 >				           lineno     = 0,
+>                                          output     = stdout,
 >				           opts       = "",
 >				           files      = [],
 >				           path       = "",
@@ -132,6 +138,19 @@ Initial state.
 >				++ [ (decode s, Int (fromEnum s)) | s <- [(minBound :: Style) .. maxBound] ]
 >				-- |++ [ (s, Bool False) || s <- ["underlineKeywords", "spacePreserving", "meta", "array", "latex209", "times", "euler" ] ]|
 
+> preprocess                    :: State -> [Class] -> [String] -> IO ()
+> preprocess flags dirs (f1:f2:f3:_)
+>                               =  if (f1 == f2)
+>                                  then copyFile f2 f3
+>                                  else do c <- readFile f1
+>                                          case matchRegex (mkRegex "^%include") c of
+>                                            Nothing -> copyFile f2 f3
+>                                            Just _  -> -- supposed to be an lhs2TeX file
+>                                                       do h <- openFile f3 WriteMode
+>                                                          lhs2TeX NewCode (flags { output = h }) dirs [f1]
+>                                                          hClose h
+> preprocess _ _ _              =  error "preprocess: too few arguments"
+
 > lhs2TeX			:: Style -> State -> [Class] -> [String] -> IO ()
 > lhs2TeX s flags dirs files    =  do (str, file) <- input files
 >                                     expandedpath <- expandPath (searchpath flags)
@@ -158,27 +177,30 @@ ks, 24.03.2004: The long option @--verbose@ has been removed for now,
 because with some versions of GHC it triggers ambiguity errors with
 @--verb@.
 
-> options                       :: [OptDescr (State -> State,[Class] -> [Class],[Style])]
+> options                       :: [OptDescr (State -> IO State,[Class] -> [Class],[Style])]
 > options                       =
->   [ Option ['h','?'] ["help"](NoArg (id, id, [Help]))                                 "get this help"
+>   [ Option ['h','?'] ["help"](NoArg (return, id, [Help]))                                 "get this help"
 >   , Option ['v'] [] {- ["verbose"] -}
->                              (NoArg (\s -> s { verbose = True }, id, []))             "be verbose"
->   , Option ['V'] ["version"] (NoArg (id, id, [Version]))                              "show version"
->   , Option []    ["tt"]      (NoArg (id, id, [Typewriter]))                           "typewriter style"
->   , Option []    ["math"]    (NoArg (id, id, [Math]))                                 "math style"
->   , Option []    ["poly"]    (NoArg (id, id, [Poly]))                                 "poly style"
->   , Option []    ["code"]    (NoArg (id, id, [CodeOnly]))                             "code style"
->   , Option []    ["newcode"] (NoArg (id, id, [NewCode]))                              "new code style"
->   , Option []    ["verb"]    (NoArg (id, id, [Verb]))                                 "verbatim"
->   , Option ['A'] ["align"]   (ReqArg (\c -> (id, (Directive Align c:), [])) "col")    "align at <col>"
->   , Option ['i'] ["include"] (ReqArg (\f -> (id, (Directive Include f:), [])) "file") "include <file>"
->   , Option ['l'] ["let"]     (ReqArg (\s -> (id, (Directive Let s:), [])) "equation") "assume <equation>"
->   , Option ['s'] ["set"]     (ReqArg (\s -> (id, (Directive Let (s ++ "=True"):), [])) "flag")  "set <flag>"
->   , Option ['u'] ["unset"]   (ReqArg (\s -> (id, (Directive Let (s ++ "=False"):), [])) "flag") "unset <flag>"
->   , Option ['P'] ["path"]    (ReqArg (\p -> (\s -> s { searchpath = modifySearchPath (searchpath s) p }, id , [])) "path") 
+>                              (NoArg (\s -> return $ s { verbose = True }, id, []))        "be verbose"
+>   , Option ['V'] ["version"] (NoArg (return, id, [Version]))                              "show version"
+>   , Option []    ["tt"]      (NoArg (return, id, [Typewriter]))                           "typewriter style"
+>   , Option []    ["math"]    (NoArg (return, id, [Math]))                                 "math style"
+>   , Option []    ["poly"]    (NoArg (return, id, [Poly]))                                 "poly style"
+>   , Option []    ["code"]    (NoArg (return, id, [CodeOnly]))                             "code style"
+>   , Option []    ["newcode"] (NoArg (return, id, [NewCode]))                              "new code style"
+>   , Option []    ["verb"]    (NoArg (return, id, [Verb]))                                 "verbatim"
+>   , Option []    ["pre"]     (NoArg (return, id, [Pre]))                                  "act as ghc preprocessor"
+>   , Option ['o'] ["output"]  (ReqArg (\f -> (\s -> do h <- openFile f WriteMode
+>                                                       return $ s { output = h }, id, [])) "file") "specify output file"
+>   , Option ['A'] ["align"]   (ReqArg (\c -> (return, (Directive Align c:), [])) "col")    "align at <col>"
+>   , Option ['i'] ["include"] (ReqArg (\f -> (return, (Directive Include f:), [])) "file") "include <file>"
+>   , Option ['l'] ["let"]     (ReqArg (\s -> (return, (Directive Let s:), [])) "equation") "assume <equation>"
+>   , Option ['s'] ["set"]     (ReqArg (\s -> (return, (Directive Let (s ++ "=True"):), [])) "flag")  "set <flag>"
+>   , Option ['u'] ["unset"]   (ReqArg (\s -> (return, (Directive Let (s ++ "=False"):), [])) "flag") "unset <flag>"
+>   , Option ['P'] ["path"]    (ReqArg (\p -> (\s -> return $ s { searchpath = modifySearchPath (searchpath s) p }, id , [])) "path") 
 >                                                                                       "modify search path"
->   , Option []    ["copying"] (NoArg (id, id, [Copying]))                              "display license"
->   , Option []    ["warranty"](NoArg (id, id, [Warranty]))                             "info about warranty"
+>   , Option []    ["copying"] (NoArg (return, id, [Copying]))                              "display license"
+>   , Option []    ["warranty"](NoArg (return, id, [Warranty]))                             "info about warranty"
 >   ]
 >
 > formatStr			:: String -> Formatter
@@ -355,7 +377,7 @@ Printing documents.
 
 > eject				:: Doc -> Formatter
 > eject Empty			=  return ()
-> eject (Text s)		=  fromIO (putStr s)
+> eject (Text s)		=  do st <- fetch; fromIO (hPutStr (output st) s)
 > eject (d1 :^: d2)		=  eject d1 >> eject d2
 > eject (Embedded s)		=  formatStr s
 > eject (Sub s ds)		=  do st <- fetch; substitute (subst st)

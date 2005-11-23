@@ -1,0 +1,14 @@
+name:		lhs2tex
+version:	1.11
+license:	GPL
+license-file:	LICENSE
+author:		Ralf Hinze <ralf@informatik.uni-bonn.de>
+maintainer:	Andres Loeh <lhs2tex@andres-loeh.de>
+stability:	stable
+homepage:	http://www.andres-loeh.de/lhs2tex/
+package-url:	http://www.andres-loeh.de/lhs2tex/lhs2tex-1.11.tar.gz
+synopsis:	Preprocessor for typesetting Haskell sources with LaTeX
+build-depends:	base, haskell98
+
+executable:	lhs2TeX
+main-is:	Main.lhs
