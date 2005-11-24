@@ -306,7 +306,7 @@ writePersistLhs2texBuildConfig lbi = do
   writeFile lhs2texBuildInfoFile (show lbi)
 
 -- would be nice if there'd be a predefined way to detect this
-isWindows = "win" `isPrefixOf` os
+isWindows = "mingw" `isPrefixOf` os || "win" `isPrefixOf` os 
 
 -- should really be exported by LocalBuildInfo
 absolutePath pkg_descr lbi copydest s =
