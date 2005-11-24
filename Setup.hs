@@ -2,21 +2,24 @@ import Distribution.Setup (CopyDest(..))
 import Distribution.Simple
 import Distribution.Simple.Configure (withPrograms)
 import Distribution.Simple.Utils (die,rawSystemExit,maybeExit,copyFileVerbose)
-import Distribution.Simple.LocalBuildInfo (LocalBuildInfo(..),mkDataDir)
+import Distribution.Simple.LocalBuildInfo (LocalBuildInfo(..),mkDataDir,substDir)
 import Distribution.Program (Program(..),ProgramConfiguration(..),
                              ProgramLocation(..),simpleProgram,lookupProgram,
                              rawSystemProgramConf)
 import Distribution.Compat.ReadP (readP_to_S)
-import Distribution.Compat.FilePath (joinFileName)
+import Distribution.Compat.FilePath (joinFileName,dropAbsolutePrefix)
 import Data.Char (isSpace)
-import Data.Maybe (listToMaybe)
+import Data.List (isSuffixOf,isPrefixOf)
+import Data.Maybe (listToMaybe,isJust)
 import Control.Monad (when,unless)
 import Text.Regex (matchRegex,matchRegexAll,mkRegex,mkRegexWithOpts,subRegex)
 import System.Cmd (system)
 import System.Exit
 import System.IO (hGetContents,hClose,hPutStrLn,stderr)
+import System.IO.Error (try)
 import System.Process (runInteractiveProcess,waitForProcess)
 import System.Directory
+import System.Info (os)
 
 lhs2tex = "lhs2TeX"
 minPolytableVersion = [0,8,2]
@@ -27,7 +30,9 @@ pre = 2
 main = defaultMainWithHooks lhs2texHooks
 
 lhs2texBuildInfoFile :: FilePath
-lhs2texBuildInfoFile = "./.setup-lhs2tex-config"
+lhs2texBuildInfoFile = "." `joinFileName` ".setup-lhs2tex-config"
+
+generatedFiles = ["Version.lhs","lhs2TeX.1"]
 
 data Lhs2texBuildInfo =
   Lhs2texBuildInfo { installPolyTable      ::  Maybe String,
@@ -40,7 +45,11 @@ lhs2texHooks = defaultUserHooks
                                      simpleProgram "mktexlsr"],
                    postConf       = lhs2texPostConf,
                    postBuild      = lhs2texPostBuild,
-                   postInst       = lhs2texPostInst }
+                   postCopy       = lhs2texPostCopy,
+                   postInst       = lhs2texPostInst,
+                   regHook        = lhs2texRegHook,
+                   cleanHook      = lhs2texCleanHook
+                 }
 
 lhs2texPostConf a cf pd lbi =
     do  -- check polytable
@@ -86,7 +95,7 @@ lhs2texPostConf a cf pd lbi =
                                                   replace "@VERSION@" version .
                                                   replace "@NUMVERSION@" (show numversion) .
                                                   replace "@PRE@" (show pre) >>= writeFile f)
-              ["Version.lhs","lhs2TeX.1"]
+              generatedFiles
         return ExitSuccess
   where runKpseWhich v = runCommandProgramConf 0 "kpsewhich" (withPrograms lbi) [v]
         runKpseWhichVar v = runKpseWhich $ "-expand-var='$" ++ v ++ "'"
@@ -142,10 +151,57 @@ lhs2texBuildDocumentation a v pd lbi =
         loop
         setCurrentDirectory d
 
-lhs2texPostInst a v pd lbi =
-    do  let dataPref = mkDataDir pd lbi NoCopyDest
-        putStrLn $ dataPref
-        exitWith ExitSuccess
+lhs2texPostCopy a (cd,v) pd lbi =
+    do  ebi <- getPersistLhs2texBuildConfig
+        let dataPref = mkDataDir pd lbi cd
+        createDirectoryIfMissing True dataPref
+        -- lhs2TeX library
+        fmts <- fmap (filter (".fmt" `isSuffixOf`)) (getDirectoryContents "Library")
+        mapM_ (\f -> copyFileVerbose v ("Library" `joinFileName` f) (dataPref `joinFileName` f))
+              fmts
+        -- documentation difficult due to lack of docdir
+        let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
+        let lhs2texDocDir = lhs2texDir `joinFileName` "doc"
+        let docDir = if isWindows
+                       then dataPref `joinFileName` "Documentation"
+                       else absolutePath pd lbi cd (datadir lbi `joinFileName` "doc" `joinFileName` datasubdir lbi)
+        let manDir = if isWindows
+                       then dataPref `joinFileName` "Documentation"
+                       else absolutePath pd lbi cd (datadir lbi `joinFileName` "man")
+        createDirectoryIfMissing True docDir
+        copyFileVerbose v (lhs2texDocDir `joinFileName` "Guide2.pdf") (docDir `joinFileName` "Guide2.pdf")
+        when (not isWindows) $
+          do createDirectoryIfMissing True manDir
+             copyFileVerbose v ("lhs2TeX.1") (manDir `joinFileName` "lhs2TeX.1")
+        -- polytable
+        case (installPolyTable ebi) of
+          Just texmf -> do  let texmfDir = absolutePath pd lbi cd texmf
+                                ptDir = texmfDir `joinFileName` "tex" `joinFileName` "latex"
+                                                 `joinFileName` "polytable"
+                            createDirectoryIfMissing True ptDir
+                            stys <- fmap (filter (".sty" `isSuffixOf`))
+                                         (getDirectoryContents "polytable")
+                            mapM_ (\f -> copyFileVerbose v ("polytable" `joinFileName` f)
+                                                           (ptDir `joinFileName` f))
+                                  stys
+          Nothing    -> return ()
+        return ExitSuccess
+
+lhs2texPostInst a (_,v) pd lbi =
+    do  lhs2texPostCopy a (NoCopyDest,v) pd lbi
+        lhs2texRegHook pd lbi (undefined,undefined,v)
+        return ExitSuccess
+
+lhs2texRegHook pd lbi (_,_,v) =
+    do  ebi <- getPersistLhs2texBuildConfig
+        when (isJust . installPolyTable $ ebi) $
+          do  rawSystemProgramConf v "mktexlsr" (withPrograms lbi) []
+              return ()
+
+lhs2texCleanHook pd lbi v pshs =
+    do  cleanHook defaultUserHooks pd lbi v pshs
+        try $ removeFile lhs2texBuildInfoFile
+        mapM_ (try . removeFile) generatedFiles
 
 matchRegexRepeatedly re str =
     case matchRegexAll re str of
@@ -248,4 +304,14 @@ getPersistLhs2texBuildConfig = do
 writePersistLhs2texBuildConfig :: Lhs2texBuildInfo -> IO ()
 writePersistLhs2texBuildConfig lbi = do
   writeFile lhs2texBuildInfoFile (show lbi)
+
+-- would be nice if there'd be a predefined way to detect this
+isWindows = "win" `isPrefixOf` os
+
+-- should really be exported by LocalBuildInfo
+absolutePath pkg_descr lbi copydest s =
+  case copydest of
+    NoCopyDest   -> substDir pkg_descr lbi s
+    CopyPrefix d -> substDir pkg_descr lbi{prefix=d} s
+    CopyTo     p -> p `joinFileName` (dropAbsolutePrefix (substDir pkg_descr lbi s))
 
