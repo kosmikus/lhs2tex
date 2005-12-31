@@ -79,22 +79,26 @@ State.
 
 > type CondInfo                 =  (FilePath, LineNo, Bool, Bool)
 
-> data State			=  State { style      :: Style,
+> data State                    =  State { style      :: Style,
 >                                          verbose    :: Bool,
 >                                          searchpath :: [FilePath],
->				           file       :: FilePath,	-- also used for `hugs'
->				           lineno     :: LineNo,
+>                                          file       :: FilePath,      -- also used for `hugs'
+>                                          lineno     :: LineNo,
+>                                          ofile      :: FilePath,
+>                                          olineno    :: LineNo,
+>                                          atnewline  :: Bool,
+>                                          fldir      :: Bool,          -- file/linenumber directives
 >                                          output     :: Handle,
->				           opts       :: String,        -- options for `hugs'
->				           files      :: [(FilePath, LineNo)], -- includees (?)
->				           path       :: FilePath,      -- for relative includes
->				           fmts       :: Formats,
->				           subst      :: Substs,
->				           stack      :: [Formats],	-- for grouping
->				           toggles    :: Toggles,	-- @%let@ defined toggles
->					   conds      :: [CondInfo],	-- for conditional directives
->					   align      :: Maybe Int,	-- math: internal alignment column
->				           stacks     :: (Math.Stack, Math.Stack),	-- math: indentation stacks
+>                                          opts       :: String,        -- options for `hugs'
+>                                          files      :: [(FilePath, LineNo)], -- includees (?)
+>                                          path       :: FilePath,      -- for relative includes
+>                                          fmts       :: Formats,
+>                                          subst      :: Substs,
+>                                          stack      :: [Formats],     -- for grouping
+>                                          toggles    :: Toggles,       -- @%let@ defined toggles
+>                                          conds      :: [CondInfo],    -- for conditional directives
+>                                          align      :: Maybe Int,     -- math: internal alignment column
+>                                          stacks     :: (Math.Stack, Math.Stack),      -- math: indentation stacks
 >                                          separation :: Int,           -- poly: separation
 >                                          latency    :: Int,           -- poly: latency
 >                                          pstack     :: Poly.Stack     -- poly: indentation stack
@@ -102,32 +106,37 @@ State.
 
 Initial state.
 
-> state0			:: State
-> state0        		=  State { verbose    = False,
+> state0                        :: State
+> state0                        =  State { verbose    = False,
 >                                          searchpath = searchPath,
->				           lineno     = 0,
+>                                          lineno     = 0,
+>                                          olineno    = 0,
+>                                          atnewline  = True,
+>                                          fldir      = False,
 >                                          output     = stdout,
->				           opts       = "",
->				           files      = [],
->				           path       = "",
->				           fmts       = FM.fromList [],
->				           subst      = FM.fromList [],
->					   stack      = [],
->				           conds      = [],
->				           align      = Nothing,
->				           stacks     = ([], []),
+>                                          opts       = "",
+>                                          files      = [],
+>                                          path       = "",
+>                                          fmts       = FM.fromList [],
+>                                          subst      = FM.fromList [],
+>                                          stack      = [],
+>                                          conds      = [],
+>                                          align      = Nothing,
+>                                          stacks     = ([], []),
 >                                          separation = 2,
 >                                          latency    = 2,
 >                                          pstack     = [],
 >                                          -- ks, 03.01.04: added to prevent warnings during compilation
 >                                          style      = error "uninitialized style",
 >                                          file       = error "uninitialized filename",
+>                                          ofile      = error "uninitialized filename",
 >                                          toggles    = error "uninitialized toggles"
 >                                        }
 
 > initState			:: Style -> FilePath -> [FilePath] -> State -> State
 > initState sty filePath ep s   =  s { style = sty, 
->                                      file = filePath, 
+>                                      file = filePath,
+>                                      ofile = filePath,
 >                                      searchpath = ep,
 >                                      toggles = FM.fromList toggles0 
 >                                    }
@@ -192,6 +201,8 @@ because with some versions of GHC it triggers ambiguity errors with
 >   , Option []    ["pre"]     (NoArg (return, id, [Pre]))                                  "act as ghc preprocessor"
 >   , Option ['o'] ["output"]  (ReqArg (\f -> (\s -> do h <- openFile f WriteMode
 >                                                       return $ s { output = h }, id, [])) "file") "specify output file"
+>   , Option []    ["file-directives"]
+>                              (NoArg (\s -> return $ s { fldir = True }, id, []))          "generate %file directives"
 >   , Option ['A'] ["align"]   (ReqArg (\c -> (return, (Directive Align c:), [])) "col")    "align at <col>"
 >   , Option ['i'] ["include"] (ReqArg (\f -> (return, (Directive Include f:), [])) "file") "include <file>"
 >   , Option ['l'] ["let"]     (ReqArg (\s -> (return, (Directive Let s:), [])) "equation") "assume <equation>"
@@ -377,7 +388,20 @@ Printing documents.
 
 > eject				:: Doc -> Formatter
 > eject Empty			=  return ()
-> eject (Text s)		=  do st <- fetch; fromIO (hPutStr (output st) s)
+> eject (Text s)		=  do  st <- fetch
+>                                      let (ls,enl) = checkNLs 0 s
+>                                      when (fldir st && not (null s) && atnewline st && (ofile st /= file st || olineno st /= lineno st)) $
+>                                        do  fromIO (hPutStr (output st) ("%file " ++ show (lineno st) ++ file st ++ " " ++ "\n"))
+>                                            store (st { ofile = file st, olineno = lineno st })
+>                                            
+>                                      fromIO (hPutStr (output st) s)
+>                                      update (\st -> st { olineno = olineno st + ls, atnewline = enl (atnewline st)})
+>     where
+>     checkNLs n ('\n':[])      =  (n+1,const True)
+>     checkNLs n (_:[])         =  (n,const False)
+>     checkNLs n []             =  (n,id)
+>     checkNLs n ('\n':xs)      =  checkNLs (n+1) xs
+>     checkNLs n (_:xs)         =  checkNLs n xs
 > eject (d1 :^: d2)		=  eject d1 >> eject d2
 > eject (Embedded s)		=  formatStr s
 > eject (Sub s ds)		=  do st <- fetch; substitute (subst st)
