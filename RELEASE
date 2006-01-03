@@ -26,9 +26,6 @@ Changes (w.r.t. lhs2TeX 1.9)
 [Note that 1.10 has never been released to avoid confusion
 with some privately distributed versions.] 
 
-This is a maintenance release, with only minor new features.
-The most notable changes are:
-
 * Specification code is now handled correctly (that is, ignored) 
   in the "code" and "newcode" styles.
 
@@ -40,7 +37,12 @@ The most notable changes are:
 * The LaTeX code produced in the poly style looks slightly
   more beautiful.
 
-* There is a new Library section, containing
+* There is a new Library section, containing some frequently
+  used formatting directives.
+
+* Generation of file/linenumber directives in the produced
+  LaTeX code, for Stefan Wehr's "adjust" tool. Based on a
+  patch submitted by Stefan Wehr.
 
 Requirements and Download
 -------------------------

@@ -391,7 +391,7 @@ Printing documents.
 > eject (Text s)		=  do  st <- fetch
 >                                      let (ls,enl) = checkNLs 0 s
 >                                      when (fldir st && not (null s) && atnewline st && (ofile st /= file st || olineno st /= lineno st)) $
->                                        do  fromIO (hPutStr (output st) ("%file " ++ show (lineno st) ++ file st ++ " " ++ "\n"))
+>                                        do  fromIO (hPutStr (output st) ("%file " ++ show (lineno st) ++ " " ++ (show $ file st) ++ "\n"))
 >                                            store (st { ofile = file st, olineno = lineno st })
 >                                            
 >                                      fromIO (hPutStr (output st) s)
