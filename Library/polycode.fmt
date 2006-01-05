@@ -160,6 +160,7 @@
    \global\let\endhscode=\origendhscode}%
 
 \makeatother
+\EndFmtInput
 %
 %endif
 %endif

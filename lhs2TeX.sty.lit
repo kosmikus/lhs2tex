@@ -13,9 +13,12 @@
 %if style /= newcode
 %
 \makeatletter
-\@@ifundefined{lhs2tex.lhs2tex.sty.read}{\@@namedef{lhs2tex.lhs2tex.sty.read}{}}\endinput
+\@@ifundefined{lhs2tex.lhs2tex.sty.read}{\@@namedef{lhs2tex.lhs2tex.sty.read}{}}\SkipToFmtEnd
 
-\newcommand\ReadOnlyOnce[1]{\@@ifundefined{#1}{\@@namedef{#1}{}}\endinput}
+\newcommand\SkipToFmtEnd{}%
+\newcommand\EndFmtInput{}%
+\def\SkipToFmtEnd#1\EndFmtInput{}%
+\newcommand\ReadOnlyOnce[1]{\@@ifundefined{#1}{\@@namedef{#1}{}}\SkipToFmtEnd}
 \end{code}
 
 %-------------------------------=  --------------------------------------------
@@ -184,6 +187,7 @@ column specifiers. It only works for @poly@ style.
 \newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
 
 \makeatother
+\EndFmtInput
 \end{code}
 
 \begin{code}

@@ -60,5 +60,6 @@
 \HaskellReset
 
 \makeatother
+\EndFmtInput
 %endif
 %endif
