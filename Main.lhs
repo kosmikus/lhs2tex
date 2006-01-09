@@ -11,7 +11,7 @@
 > import System.IO ( hClose, hPutStr, hPutStrLn, stderr, stdout, openFile, IOMode(..), Handle(..) )
 > import System.Directory ( copyFile )
 > import System.Console.GetOpt
-> import Text.Regex ( matchRegex, mkRegex )
+> import Text.Regex ( matchRegex, mkRegexWithOpts )
 > import System
 > import Version
 >
@@ -51,14 +51,15 @@
 >                                        <- foldM (\(s,d,x) (sf,df,ns) -> do s' <- sf s
 >                                                                            return (s',df d,ns ++ x))
 >                                                 (state0,[],[]) o
->                                     case styles of
+>                                     case reverse styles of
 >                                       []  -> lhs2TeX Poly flags (reverse initdirs) n
 >                                           -- ks, 22.11.2005, changed default style to |Poly|
 >                                       [Help]     -> quitSuccess (usageInfo uheader options)
 >                                       [Version]  -> quitSuccess programInfo
 >                                       [Copying]  -> quitSuccess (programInfo ++ "\n\n" ++ copying)
 >                                       [Warranty] -> quitSuccess (programInfo ++ "\n\n" ++ warranty)
->                                       [Pre] | length n >= 3 -> preprocess flags (reverse initdirs) n
+>                                       [Pre] | length n >= 3 -> preprocess flags (reverse initdirs) False n  -- used as preprocessor -pgmF -F
+>                                       [Pre,Help] | length n >= 3 -> preprocess flags (reverse initdirs) True n  -- used as literate preprocessor -pgmL
 >                                       [s]    -> lhs2TeX s flags (reverse initdirs) n
 >                                       _      -> quitError (incompatibleStylesError styles)
 >                                     when (output flags /= stdout) (hClose (output flags))
@@ -147,18 +148,18 @@ Initial state.
 >				++ [ (decode s, Int (fromEnum s)) | s <- [(minBound :: Style) .. maxBound] ]
 >				-- |++ [ (s, Bool False) || s <- ["underlineKeywords", "spacePreserving", "meta", "array", "latex209", "times", "euler" ] ]|
 
-> preprocess                    :: State -> [Class] -> [String] -> IO ()
-> preprocess flags dirs (f1:f2:f3:_)
->                               =  if (f1 == f2)
+> preprocess                    :: State -> [Class] -> Bool -> [String] -> IO ()
+> preprocess flags dirs lit (f1:f2:f3:_)
+>                               =  if (f1 == f2) && not lit
 >                                  then copyFile f2 f3
 >                                  else do c <- readFile f1
->                                          case matchRegex (mkRegex "^%include") c of
+>                                          case matchRegex (mkRegexWithOpts "^%include" True False) c of
 >                                            Nothing -> copyFile f2 f3
 >                                            Just _  -> -- supposed to be an lhs2TeX file
 >                                                       do h <- openFile f3 WriteMode
 >                                                          lhs2TeX NewCode (flags { output = h }) dirs [f1]
 >                                                          hClose h
-> preprocess _ _ _              =  error "preprocess: too few arguments"
+> preprocess _ _ _ _            =  error "preprocess: too few arguments"
 
 > lhs2TeX			:: Style -> State -> [Class] -> [String] -> IO ()
 > lhs2TeX s flags dirs files    =  do (str, file) <- input files
@@ -579,7 +580,7 @@ This situation is unclear to me. It should be clarified.]
 
 > programInfo                   :: String
 > programInfo                   =
->     "lhs2TeX " ++ version ++ ", Copyright (C) 1997-2005 Ralf Hinze, Andres Loeh\n\n\
+>     "lhs2TeX " ++ version ++ ", Copyright (C) 1997-2006 Ralf Hinze, Andres Loeh\n\n\
 >     \lhs2TeX comes with ABSOLUTELY NO WARRANTY;\n\
 >     \for details type `lhs2TeX --warranty'.\n\
 >     \This is free software, and you are welcome to redistribute it\n\
