@@ -4,8 +4,7 @@
 \def\tt#1#2{\origtt}
 
 >\documentclass{article}
->%include lhs2TeX.fmt
->%include lhs2TeX.sty
+>%include polycode.fmt
 >\begin{document}
 >This is the famous ``Hello world'' example, 
 >written in Haskell:

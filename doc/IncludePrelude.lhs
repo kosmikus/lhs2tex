@@ -3,5 +3,4 @@
 
 \begin{code}
 dir(include) "lhs2TeX.fmt"
-dir(include) "lhs2TeX.sty"
 \end{code}

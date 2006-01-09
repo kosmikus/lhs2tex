@@ -37,7 +37,6 @@
 
 %let doc = True
 %include lhs2TeX.fmt
-%include lhs2TeX.sty
 %include Version.lhs
 
 \newlength{\lwidth}
@@ -338,8 +337,8 @@ With @lhs2TeX@ come a couple of library files (containing basic
 Here, @$HOME@ and @$LHS2TEX@ denote the current values of
 these two environment variables. Thus, if @lhs2TeX@ is installed
 to a non-standard path, you might want to set the environment
-variable @$LHS2TEX@ to point to the directory where the files
-@lhs2TeX.sty@ and @lhs2TeX.fmt@ have been installed to.
+variable @$LHS2TEX@ to point to the directory where
+@lhs2TeX.fmt@ and the other library files have been installed to.
 
 \begin{important}
 To be able to use ``poly'' style, the two \LaTeX\ 
@@ -693,9 +692,18 @@ but configurable via directives. As a consequence,
 a minimal amount of functionality has to be defined for @lhs2TeX@
 to be able to operate normally.
 
-Essential definitions are collected in two files, @lhs2TeX.fmt@
-(containing basic directives) and @lhs2TeX.sty@ (containing basic
-\LaTeX\ setup). These two files should be included (using @%include@)
+Essential definitions are collected in the file @lhs2TeX.fmt@.
+\begin{important}[Note to users of previous versions]
+There used to be a file @lhs2TeX.sty@ that also contained a part
+of the prelude declarations. This file does still exist for
+compatibility reasons, but is now deprecated. It should \emph{not}
+be included directly in any of your documents anymore.
+\end{important}
+If you are using the \textbf{poly} or \textbf{newcode}
+styles, some of the defaults in @lhs2TeX.fmt@ are sub-optimal.
+In this case, there is a better prelude @polycode.fmt@ (which includes
+@lhs2TeX.fmt@ in turn). One of the two files @lhs2TeX.fmt@ or @polycode.fmt@
+should be included (using @%include@)
 -- directly or indirectly -- in every file to be processed by
 @lhs2TeX@!
 \input{IncludePrelude}%
@@ -703,25 +711,17 @@ It is perfectly possible to design
 own libraries that replace or extend these basic files and to include
 those own libraries instead.  It is not recommended, though, to edit
 these two files directly.  If you are not satisfied with some of the
-default definition, create your own file to redefine selected
-part. This way, if @lhs2TeX@ is updated, you will still be able to
+default definitions, create your own file to redefine selected
+parts. This way, if @lhs2TeX@ is updated, you will still be able to
 benefit from improvements and changes in the ``prelude'' files.
 
-It is possible to use @lhs2TeX@ in a setup where a \TeX document
+It is possible to use @lhs2TeX@ in a setup where a \TeX\ document
 is split into several files, and each of the files should be processed
-separately by @lhs2TeX@ (for
-example, because they should be translated using different styles).
-This situation is the reason why there are two files, @lhs2TeX.fmt@
-and @lhs2TeX.sty@. The file @lhs2TeX.fmt@ should be
-included (using @%include@) in every single file -- it contains the
-directives necessary for @lhs2TeX@ to proceed. In addition,
-@lhs2TeX.sty@ should be included (also using @%include@) exactly
-once in the central document to later be processed by \LaTeX\ -- the file
-@lhs2TeX.sty@ contains the setup to make \LaTeX\ understand the output
-that @lhs2TeX@ writes.
+separately by @lhs2TeX@. In this case, just include @lhs2TeX.fmt@
+(or @polycode.fmt@) in every single file source file.
 
 \begin{important}[Warning]
-Note that both @lhs2TeX.fmt@ and @lhs2TeX.sty@ contain @lhs2TeX@
+Note that both @lhs2TeX.fmt@ and @polycode.fmt@ contain @lhs2TeX@
 directives, and therefore \emph{cannot} be included using \TeX\ or \LaTeX\
 include mechanisms such as @\input@ or @\usepackage@.
 \end{important}
@@ -779,7 +779,7 @@ formatted as ``|undefined|'', and @not@ is formatted
 as ``|not|''. If you look at @lhs2TeX.fmt@, you will find the
 following directives that do the job:
 \input{FormatIdentifierExamples}%
-Here, @\plus@ refers to a \LaTeX\ macro defined in @lhs2TeX.sty@:
+Here, @\plus@ refers to a \LaTeX\ macro defined in the lhs2\TeX\ prelude:
 \input{PlusDefinition}%
 If you are not satisfied with any of the default definitions,
 just redefine them. A @%format@ directive scopes over the rest
@@ -791,7 +791,7 @@ are defined, the last one is used. Thus, after
 %format undefined = "\Varid{undefined}"
 %format not       = "!"
 you get ``|++|'', ``|undefined|'', and ``|not|'', respectively.
-Note that @\Varid@ is a macro defined in @lhs2TeX.sty@ that
+Note that @\Varid@ is a macro defined in the lhs2\TeX\ prelude that
 can be used to typeset identifier names. It is predefined to
 be the same as @\mathit@, but can be changed. Do not use identifier
 names in \TeX\ replacements directly. For instance,
@@ -1132,7 +1132,7 @@ appropriate position in the output, which gets as argument the
 column difference in the source between the token that is 
 indented, and the base token. In the situation of the
 above example, the call is @\hsindent{12}@. The default definition
-in @lhs2TeX.sty@
+in the lhs2\TeX\ prelude
 ignores the argument and inserts a fixed amount of space:
 \input{HsIndent}%
 
@@ -1216,7 +1216,7 @@ It is possible to share alignment information between different
 code blocks. This can be desirable, especially when one wants
 to interleave the definition of a single function with longer
 comments. This feature is implemented on the \TeX\ level 
-(the commands are defined in @lhs2TeX.sty@).
+(the commands are defined in the lhs2\TeX\ prelude).
 
 Here is an example of its use:
 \input{SaveRestoreIn}%
@@ -1317,7 +1317,7 @@ These are some of the most common uses of conditionals:
       that puts this technique to use.
 \end{compactitem}
 
-The @lhs2TeX.fmt@ and @lhs2TeX.sty@ files use conditionals to
+The lhs2\TeX\ library files use conditionals to
 include different directives depending on the style selected, but
 they also use conditionals to provide additional or modified behaviour
 if some flags are set. These flags are @underlineKeywords@,
@@ -1325,8 +1325,8 @@ if some flags are set. These flags are @underlineKeywords@,
 directives), @array@ (use @array@ environment instead of @tabular@
 to format code blocks in \textbf{math} style; use @parray@ instead
 of @pboxed@ in \textbf{poly} style), @latex209@ (adapt for use with
-\LaTeX\ 2.09 (DOES IT WORK?)), @euler@, and @standardsymbols@. 
-TODO: document the purpose of these flags better. 
+\LaTeX\ 2.09 (not supported anymore)), @euler@, and @standardsymbols@. 
+%TODO: document the purpose of these flags better. 
 It is likely that these flags
 will be replaced by a selection of library files that can be selectively
 included in documents in future versions of @lhs2TeX@.
@@ -1517,10 +1517,11 @@ annotations were needed to format some Haskell extensions
 satisfactory. The following input file makes use of Template
 Haskell, and uses the formatting directives for both
 \textbf{newcode} and \textbf{poly} style. The @%options@
-directive instructs @lhs2TeX@ to feed the input through
-a preprocessor, using the @-pgmF@ option of @ghci@. The
-preprocessor @lhs2TeXpre@ is a very rudimentary shell script
-included in the documentation directory of the distribution.
+directive instructs @ghci@ to use @lhs2TeX@ itself as
+the literate preprocessor, using the @-pgmL@ option of @ghci@.
+The @lhs2TeX@ binary itself acts as a suitable literate 
+preprocessor if the @--pre@ command line option is passed, which
+is achieved using the @-optL--pre@ option:
 \input{InteractivePreIn}%
 This is the corresponding output:
 \begin{colorsurround}
@@ -1686,23 +1687,6 @@ that there is an old version in the working directory. Now,
 usually a local old copy of @lhs2TeX.fmt@ can be removed.
 
 \begin{problem}
-Every time at the end of processing a file, \LaTeX\ complains.
-This happens only when using the @\savecolumns@ feature.
-\end{problem}
-This is the result of a name clash between the @amsmath@ package 
-with the @lazylist@ package. A workaround
-is to load @amsmath@ \emph{before} the @lhs2TeX.sty@ file
-is included. The problem has been fixed in @polytable@ version
-0.7.2, so a better solution is to upgrade to this version.
-
-\begin{problem}
-When I try to use ``poly'' style, \LaTeX\ sometimes complains
-with the error message ``there is no line here to end''.
-\end{problem}
-This is a bug in the @polytable@ package for which there
-is a workaround. TODO.
-
-\begin{problem}
 In ``math'' style, I have aligned several symbols on one
 column, but @lhs2TeX@ still won't align the code block.
 \end{problem}
@@ -1733,7 +1717,8 @@ This usually is a problem with one of your formatting directives.
 If you start a \TeX\ group in one of your directives but do not
 close it, then this error arises. You should not write such unbalanced
 formatting directives unless you make sure that they do never span
-an aligned column. TODO: Write example.
+an aligned column.
+%TODO: Write example.
 
 \begin{thebibliography}{99}
 
