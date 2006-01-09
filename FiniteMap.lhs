@@ -41,6 +41,13 @@ part. \NB |Node [('a', empty)] Nothing| is not legal.
 >         EQ 			-> lookup x t
 >         GT 			-> Nothing
 
+> keys                          :: (Ord a) => Trie a b -> [[a]]
+> keys                          =  keys' []
+>     where
+>     keys' acc (Leaf x _)      =  [acc ++ x]
+>     keys' acc (Node xs v)     =  maybe [] (const [acc]) v ++
+>                                  concatMap (\ (x,t) -> keys' (acc ++ [x]) t) xs
+
 Derived functions.
 
 > (!)				:: (Ord a) => Trie a b -> [a] -> b
