@@ -247,19 +247,11 @@
 
 \title{@Guide2lhs2TeX@\\
   \smaller (for version \ProgramVersion)}
-\author{{Ralf Hinze}\\
+\author{{Ralf Hinze and Andres L\"oh}\\
   \smaller \tabular{c}
            Institut f\"ur Informatik III, Universit\"at Bonn\\
            R\"omerstra\ss e 164, 53117 Bonn, Germany\\
-           \texttt{ralf@@informatik.uni-bonn.de}
-           \endtabular
-\and
-  {Andres L\"oh}\\
-  \smaller \tabular{c}
-           Institute of Information and Computing Sciences\\
-           Utrecht University, P.O.~Box 80.089\\
-           3508 TB Utrecht, The Netherlands\\
-           \texttt{andres@@cs.uu.nl}
+           \verb|{ralf,andres}@informatik.uni-bonn.de|
            \endtabular}%
 \date{\today}
 \maketitle
