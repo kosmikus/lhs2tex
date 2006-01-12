@@ -13,11 +13,13 @@
 %if style /= newcode
 %
 \makeatletter
-\@@ifundefined{lhs2tex.lhs2tex.sty.read}{\@@namedef{lhs2tex.lhs2tex.sty.read}{}}\SkipToFmtEnd
+\@@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
 
-\newcommand\SkipToFmtEnd{}%
-\newcommand\EndFmtInput{}%
-\def\SkipToFmtEnd#1\EndFmtInput{}%
 \newcommand\ReadOnlyOnce[1]{\@@ifundefined{#1}{\@@namedef{#1}{}}\SkipToFmtEnd}
 \end{code}
 
@@ -26,8 +28,6 @@
 %-------------------------------=  --------------------------------------------
 
 \begin{code}
-\makeatletter
-
 %if latex209
 \input{amstext.sty}
 \input{amssymb.sty}
