@@ -154,7 +154,11 @@ Initial state.
 >                                  then copyFile f2 f3
 >                                  else do c <- readFile f1
 >                                          case matchRegex (mkRegexWithOpts "^%include" True False) c of
->                                            Nothing -> copyFile f2 f3
+>                                            Nothing -> if lit then
+>                                                          do h <- openFile f3 WriteMode
+>                                                             lhs2TeX NewCode (flags { output = h }) (Directive Include "lhs2TeX.fmt" : dirs) [f1]
+>                                                             hClose h
+>                                                       else copyFile f2 f3
 >                                            Just _  -> -- supposed to be an lhs2TeX file
 >                                                       do h <- openFile f3 WriteMode
 >                                                          lhs2TeX NewCode (flags { output = h }) dirs [f1]
