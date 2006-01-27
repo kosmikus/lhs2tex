@@ -43,10 +43,10 @@
 \subsubsection{Main loop}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
-> main				:: IO ()
-> main				=  getArgs >>= main'
+> main                          :: IO ()
+> main                          =  getArgs >>= main'
 
-> main'				:: [String] -> IO ()
+> main'                         :: [String] -> IO ()
 > main' args                    =  case getOpt Permute options args of
 >   (o,n,[])                    -> do (flags,initdirs,styles) 
 >                                        <- foldM (\(s,d,x) (sf,df,ns) -> do s' <- sf s
@@ -75,7 +75,7 @@
 >    incompatibleStylesError ss =  "only one style allowed from: "
 >                                     ++ unwords (map (\s -> "--" ++ decode s) ss) ++ "\n"
 
-> type Formatter		=  XIO Exc State ()
+> type Formatter                =  XIO Exc State ()
 
 State.
 
@@ -137,19 +137,19 @@ Initial state.
 >                                          externals  = FM.empty
 >                                        }
 
-> initState			:: Style -> FilePath -> [FilePath] -> State -> State
+> initState                     :: Style -> FilePath -> [FilePath] -> State -> State
 > initState sty filePath ep s   =  s { style = sty, 
 >                                      file = filePath,
 >                                      ofile = filePath,
 >                                      searchpath = ep,
 >                                      toggles = FM.fromList toggles0 
 >                                    }
->     where toggles0		=  --[(decode CodeOnly, Bool (sty == CodeOnly))]
->				   [("style", Int (fromEnum sty))]
+>     where toggles0            =  --[(decode CodeOnly, Bool (sty == CodeOnly))]
+>                                  [("style", Int (fromEnum sty))]
 >                               ++ [("version", Int numversion)]
 >                               ++ [("pre", Int pre)]
->				++ [ (decode s, Int (fromEnum s)) | s <- [(minBound :: Style) .. maxBound] ]
->				-- |++ [ (s, Bool False) || s <- ["underlineKeywords", "spacePreserving", "meta", "array", "latex209", "times", "euler" ] ]|
+>                               ++ [ (decode s, Int (fromEnum s)) | s <- [(minBound :: Style) .. maxBound] ]
+>                               -- |++ [ (s, Bool False) || s <- ["underlineKeywords", "spacePreserving", "meta", "array", "latex209", "times", "euler" ] ]|
 
 > preprocess                    :: State -> [Class] -> Bool -> [String] -> IO ()
 > preprocess flags dirs lit (f1:f2:f3:_)
@@ -168,19 +168,19 @@ Initial state.
 >                                                          hClose h
 > preprocess _ _ _ _            =  error "preprocess: too few arguments"
 
-> lhs2TeX			:: Style -> State -> [Class] -> [String] -> IO ()
+> lhs2TeX                       :: Style -> State -> [Class] -> [String] -> IO ()
 > lhs2TeX s flags dirs files    =  do (str, file) <- input files
 >                                     expandedpath <- expandPath (searchpath flags)
->				      toIO (do store (initState s file expandedpath flags)
->					       formats (map (No 0) dirs) `handle` abort
->				               formatStr (addEndEOF str)
+>                                     toIO (do store (initState s file expandedpath flags)
+>                                              formats (map (No 0) dirs) `handle` abort
+>                                              formatStr (addEndEOF str)
 >                                              stopexternals)
 >   where   addEndEOF           =  (++"%EOF\n") . unlines . lines
 
-> input				:: [String] -> IO (String, FilePath)
-> input []			=  do s <- getContents; return (s, "<stdin>")
+> input                         :: [String] -> IO (String, FilePath)
+> input []                      =  do s <- getContents; return (s, "<stdin>")
 > input ["-"]                   =  do s <- getContents; return (s, "<stdin>")
-> input (filePath : _)		=  do chaseFile [] filePath
+> input (filePath : _)          =  do chaseFile [] filePath
 
 Converting command line options into directives.
 
@@ -223,8 +223,8 @@ because with some versions of GHC it triggers ambiguity errors with
 >   , Option []    ["warranty"](NoArg (return, id, [Warranty]))                             "info about warranty"
 >   ]
 >
-> formatStr			:: String -> Formatter
-> formatStr str			=  formats (texparse 1 str) `handle` abort
+> formatStr                     :: String -> Formatter
+> formatStr str                 =  formats (texparse 1 str) `handle` abort
 
 Compatibility mode option handling.
 
@@ -251,91 +251,91 @@ Compatibility mode option handling.
 
 We abort immediately if an error has occured.
 
-> abort				:: Exc -> Formatter
-> abort (msg, context)		=  do st <- fetch
->				      fromIO (hPutStrLn stderr (text st))
->				      fromIO (exitWith (ExitFailure 1))
->     where text st		=  "*** Error in " ++ at (file st) (lineno st) ++ ": \n"
->				++ unlines [ "included from " ++ at f l | (f, l) <- (files st) ]
->				++ msg ++ "\n"
->				++ unlines (take 4 (lines context))
->           at f n		=  "file " ++ f ++ " line " ++ show n
+> abort                         :: Exc -> Formatter
+> abort (msg, context)          =  do st <- fetch
+>                                     fromIO (hPutStrLn stderr (text st))
+>                                     fromIO (exitWith (ExitFailure 1))
+>     where text st             =  "*** Error in " ++ at (file st) (lineno st) ++ ": \n"
+>                               ++ unlines [ "included from " ++ at f l | (f, l) <- (files st) ]
+>                               ++ msg ++ "\n"
+>                               ++ unlines (take 4 (lines context))
+>           at f n              =  "file " ++ f ++ " line " ++ show n
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Formatting}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
-> formats			:: [Numbered Class] -> Formatter
+> formats                       :: [Numbered Class] -> Formatter
 > formats []                    =  return ()
 > formats (No n  (Directive d s) : ts)
->     | conditional d		=  do update (\st -> st{lineno = n})
->				      st <- fetch
->				      directive d s (file st,n) 
+>     | conditional d           =  do update (\st -> st{lineno = n})
+>                                     st <- fetch
+>                                     directive d s (file st,n) 
 >                                                   (conds st) (toggles st) ts
-> formats (No n t : ts)		=  do update (\st -> st{lineno = n})
->				      format t
->				      formats ts
+> formats (No n t : ts)         =  do update (\st -> st{lineno = n})
+>                                     format t
+>                                     formats ts
 
-> format			:: Class -> Formatter
-> -- |format (Many ('%' : '%' : _))	=  return ()|	-- @%%@-Kommentare werden entfernt
-> format (Many s)		=  out (Text s)
-> format (Inline s)		=  inline s
-> format (Command Hs s)		=  inline s
-> format (Command (Vrb b) s)	=  out (Verbatim.inline b s)
-> format (Command Eval s)	=  do st <- fetch
+> format                        :: Class -> Formatter
+> -- |format (Many ('%' : '%' : _))     =  return ()|   -- @%%@-Kommentare werden entfernt
+> format (Many s)               =  out (Text s)
+> format (Inline s)             =  inline s
+> format (Command Hs s)         =  inline s
+> format (Command (Vrb b) s)    =  out (Verbatim.inline b s)
+> format (Command Eval s)       =  do st <- fetch
 >                                     when (not (style st `elem` [CodeOnly,NewCode])) $
 >                                       do result <- external (map unNL s)
->				           inline result
-> format (Command Perform s)	=  do st <- fetch
+>                                          inline result
+> format (Command Perform s)    =  do st <- fetch
 >                                     when (not (style st `elem` [CodeOnly,NewCode])) $
 >                                       do result <- external s
->				           out (Text (trim result))
+>                                          out (Text (trim result))
 >     where
 
 Remove trailing blank line.
 
->     trim			=  reverse .> skip .> reverse
+>     trim                      =  reverse .> skip .> reverse
 >
->     skip s | all isSpace t	=  u
->            | otherwise	=  s
->            where (t, u) 	=  breakAfter (== '\n') s
+>     skip s | all isSpace t    =  u
+>            | otherwise        =  s
+>            where (t, u)       =  breakAfter (== '\n') s
 
 > format (Environment Haskell s)=  display s
-> format (Environment Code s)	=  display s
-> format (Environment Spec s)	=  do st <- fetch
+> format (Environment Code s)   =  display s
+> format (Environment Spec s)   =  do st <- fetch
 >                                     when (not (style st `elem` [CodeOnly,NewCode])) $
 >                                       display s
 > format (Environment Evaluate s )
->				=  do st <- fetch
->				      result <- external (map unNL s)
->				      --fromIO (hPutStrLn stderr result)	-- TEST
->				      display result
-> format (Environment Hide s)	=  return ()
+>                               =  do st <- fetch
+>                                     result <- external (map unNL s)
+>                                     --fromIO (hPutStrLn stderr result)        -- TEST
+>                                     display result
+> format (Environment Hide s)   =  return ()
 > format (Environment Ignore s) =  return ()
 > format (Environment (Verbatim b) s)
->				=  out (Verbatim.display 120 b s)
-> format (Directive Format s)	=  do st <- fetch
->				      b@(n,e) <- fromEither (parseFormat s)
->				      store (st{fmts = FM.add b (fmts st)})
-> format (Directive Subst s)	=  do st <- fetch
->				      b <- fromEither (parseSubst s)
->				      store (st{subst = FM.add b (subst st)})
+>                               =  out (Verbatim.display 120 b s)
+> format (Directive Format s)   =  do st <- fetch
+>                                     b@(n,e) <- fromEither (parseFormat s)
+>                                     store (st{fmts = FM.add b (fmts st)})
+> format (Directive Subst s)    =  do st <- fetch
+>                                     b <- fromEither (parseSubst s)
+>                                     store (st{subst = FM.add b (subst st)})
 > format (Directive Include arg)=  do st <- fetch
->				      let d  = path st
+>                                     let d  = path st
 >                                     let sp = searchpath st
->				      update (\st@State{file = f', lineno = l'} ->
->				          st{file = f, files = (f', l') : files st, path = d ++ dir f})
->				      -- |d <- fromIO getCurrentDirectory|
->				      -- |fromIO (setCurrentDirectory (dir f))|
->				      (str,f) <- fromIO (chaseFile sp (d ++ f))
+>                                     update (\st@State{file = f', lineno = l'} ->
+>                                         st{file = f, files = (f', l') : files st, path = d ++ dir f})
+>                                     -- |d <- fromIO getCurrentDirectory|
+>                                     -- |fromIO (setCurrentDirectory (dir f))|
+>                                     (str,f) <- fromIO (chaseFile sp (d ++ f))
 >                                     update (\st -> st { file = f })
 >                                     fromIO (when (verbose st) (hPutStr stderr $ "(" ++ f))
->				      formatStr (addEndNL str)
->				      -- |fromIO (setCurrentDirectory d)|
->				      update (\st'@State{files = (f, l) : fs} ->
->				          st'{file = f, lineno = l, files = fs, path = d})
+>                                     formatStr (addEndNL str)
+>                                     -- |fromIO (setCurrentDirectory d)|
+>                                     update (\st'@State{files = (f, l) : fs} ->
+>                                         st'{file = f, lineno = l, files = fs, path = d})
 >                                     fromIO (when (verbose st) (hPutStrLn stderr $ ")"))
->     where f			=  withoutSpaces arg
+>     where f                   =  withoutSpaces arg
 >           addEndNL            =  (++"\n") . unlines . lines
 
 ks, 25.01.2003: If added the above function at the suggestion of NAD, but
@@ -352,8 +352,8 @@ to make sure that exactly one linebreak ends up in the output, but not
 more, as a double newline is interpreted as a \par by TeX, and that might 
 also not be desired.
 
-> format (Directive Begin _)	=  update (\st -> st{stack = fmts st : stack st})
-> format (Directive End _)	=  do st <- fetch
+> format (Directive Begin _)    =  update (\st -> st{stack = fmts st : stack st})
+> format (Directive End _)      =  do st <- fetch
 >                                     when (null (stack st)) $
 >                                       do fromIO (hPutStrLn stderr $ "unbalanced %} in line " 
 >                                                                       ++ show (lineno st))
@@ -364,12 +364,12 @@ ks, 11.09.03: added exception handling for unbalanced grouping
 
 \Todo{|toggles| should be saved, as well.}
 
-> format (Directive Let s)	=  do st <- fetch
->				      t <- fromEither (define (toggles st) s)
->				      store st{toggles = FM.add t (toggles st)}
+> format (Directive Let s)      =  do st <- fetch
+>                                     t <- fromEither (define (toggles st) s)
+>                                     store st{toggles = FM.add t (toggles st)}
 > format (Directive Align s)
->     | all isSpace s		=  update (\st -> st{align = Nothing, stacks  = ([], [])})
->     | otherwise		=  update (\st -> st{align = Just (read s), stacks  = ([], [])})
+>     | all isSpace s           =  update (\st -> st{align = Nothing, stacks  = ([], [])})
+>     | otherwise               =  update (\st -> st{align = Just (read s), stacks  = ([], [])})
 
 \NB @%align@ also resets the left identation stacks.
 
@@ -380,20 +380,20 @@ the corresponding indentation stack |pstack|.
 >                               =  update (\st -> st{separation = read s, pstack = []})
 > format (Directive Latency s)  =  update (\st -> st{latency = read s, pstack = []})  
 
-> format (Directive File s)	=  update (\st -> st{file = withoutSpaces s})
-> format (Directive Options s)	=  update (\st -> st{opts = trim s})
->     where trim		=  dropWhile isSpace .> reverse .> dropWhile isSpace .> reverse
+> format (Directive File s)     =  update (\st -> st{file = withoutSpaces s})
+> format (Directive Options s)  =  update (\st -> st{opts = trim s})
+>     where trim                =  dropWhile isSpace .> reverse .> dropWhile isSpace .> reverse
 
-> format (Error exc)		=  raise exc
+> format (Error exc)            =  raise exc
 
 Printing documents.
 %{
 %format d1
 %format d2
 
-> eject				:: Doc -> Formatter
-> eject Empty			=  return ()
-> eject (Text s)		=  do  st <- fetch
+> eject                         :: Doc -> Formatter
+> eject Empty                   =  return ()
+> eject (Text s)                =  do  st <- fetch
 >                                      let (ls,enl) = checkNLs 0 s
 >                                      when (fldir st && not (null s) && atnewline st && (ofile st /= file st || olineno st /= lineno st)) $
 >                                        do  fromIO (hPutStr (output st) ("%file " ++ show (lineno st) ++ " " ++ (show $ file st) ++ "\n"))
@@ -407,17 +407,17 @@ Printing documents.
 >     checkNLs n []             =  (n,id)
 >     checkNLs n ('\n':xs)      =  checkNLs (n+1) xs
 >     checkNLs n (_:xs)         =  checkNLs n xs
-> eject (d1 :^: d2)		=  eject d1 >> eject d2
-> eject (Embedded s)		=  formatStr s
-> eject (Sub s ds)		=  do st <- fetch; substitute (subst st)
+> eject (d1 :^: d2)             =  eject d1 >> eject d2
+> eject (Embedded s)            =  formatStr s
+> eject (Sub s ds)              =  do st <- fetch; substitute (subst st)
 >     where
->     substitute d		=  case FM.lookup s d of
->         Nothing		-> raise (undef s, "")
->         Just sub		-> eject (sub ds)
+>     substitute d              =  case FM.lookup s d of
+>         Nothing               -> raise (undef s, "")
+>         Just sub              -> eject (sub ds)
 >
-> undef				:: String -> String
-> undef s			=  "`" ++ s ++ "' is not defined;\n\
->				   \perhaps you forgot to include \"lhs2TeX.fmt\"?"
+> undef                         :: String -> String
+> undef s                       =  "`" ++ s ++ "' is not defined;\n\
+>                                  \perhaps you forgot to include \"lhs2TeX.fmt\"?"
 
 %}
 
@@ -425,51 +425,51 @@ Printing documents.
 \subsubsection{Style dependent formatting}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
-> out				:: Doc -> Formatter
-> out d				=  do st <- fetch; eject (select (style st))
->     where select CodeOnly	=  Empty
+> out                           :: Doc -> Formatter
+> out d                         =  do st <- fetch; eject (select (style st))
+>     where select CodeOnly     =  Empty
 >           select NewCode      =  Empty
->           select _		=  d
+>           select _            =  d
 
-> inline, display		:: String -> Formatter
-> inline s			=  do st <- fetch
->				      d <- fromEither (select (style st) st)
->				      eject d
->   where select Verb st	=  Right (Verbatim.inline False s)
->         select Typewriter st	=  Typewriter.inline (fmts st) s
->         select Math st	=  Math.inline (fmts st) (isTrue (toggles st) auto) s
+> inline, display               :: String -> Formatter
+> inline s                      =  do st <- fetch
+>                                     d <- fromEither (select (style st) st)
+>                                     eject d
+>   where select Verb st        =  Right (Verbatim.inline False s)
+>         select Typewriter st  =  Typewriter.inline (fmts st) s
+>         select Math st        =  Math.inline (fmts st) (isTrue (toggles st) auto) s
 >         select Poly st        =  Poly.inline (fmts st) (isTrue (toggles st) auto) s
->         select CodeOnly st	=  return Empty
+>         select CodeOnly st    =  return Empty
 >         select NewCode st     =  return Empty   -- generate PRAGMA or something?
 
-> display s			=  do st <- fetch
->				      (d, st') <- fromEither (select (style st) st)
->				      store st'
->				      eject d
->   where select Verb st	=  return (Verbatim.display 120 False s, st)
->         select Typewriter st	=  do d <- Typewriter.display (fmts st) s; return (d, st)
->         select Math st	=  do (d, sts) <- Math.display (fmts st) (isTrue (toggles st) auto) (stacks st) (align st) s
->				      return (d, st{stacks = sts})
+> display s                     =  do st <- fetch
+>                                     (d, st') <- fromEither (select (style st) st)
+>                                     store st'
+>                                     eject d
+>   where select Verb st        =  return (Verbatim.display 120 False s, st)
+>         select Typewriter st  =  do d <- Typewriter.display (fmts st) s; return (d, st)
+>         select Math st        =  do (d, sts) <- Math.display (fmts st) (isTrue (toggles st) auto) (stacks st) (align st) s
+>                                     return (d, st{stacks = sts})
 >         select Poly st        =  do (d, pstack') <- Poly.display (fmts st) (isTrue (toggles st) auto) (separation st) (latency st) (pstack st) s
 >                                     return (d, st{pstack = pstack'})
 >         select NewCode st     =  do d <- NewCode.display (fmts st) s
 >                                     let p = sub'pragma $ Text ("LINE " ++ show (lineno st + 1) ++ " " ++ show (filename $ file st))
 >                                     return (p <> sub'nl <> d, st)
->         select CodeOnly st	=  return (Text (trim s), st)
+>         select CodeOnly st    =  return (Text (trim s), st)
 
-> auto				=  "autoSpacing"
-> isTrue togs s			=  bool (value togs s)
+> auto                          =  "autoSpacing"
+> isTrue togs s                 =  bool (value togs s)
 
 Delete leading and trailing blank line (only the first!).
 
-> trim				:: String -> String
-> trim				=  skip .> reverse .> skip .> reverse
+> trim                          :: String -> String
+> trim                          =  skip .> reverse .> skip .> reverse
 >     where
->     skip			:: String -> String
->     skip ""			=  ""
->     skip s | all isSpace t	=  u
->            | otherwise	=  s
->            where (t, u) 	=  breakAfter (== '\n') s
+>     skip                      :: String -> String
+>     skip ""                   =  ""
+>     skip s | all isSpace t    =  u
+>            | otherwise        =  s
+>            where (t, u)       =  breakAfter (== '\n') s
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Conditional directives}
@@ -484,26 +484,26 @@ conditions of the current @%if@-chain.
 ks, 16.08.2004: At the end of the input, we might want to check for unbalanced if's or
 groups.
 
-> directive			:: Directive -> String 
+> directive                     :: Directive -> String 
 >                               -> (FilePath,LineNo) -> [CondInfo] -> Toggles
->				-> [Numbered Class] -> Formatter
+>                               -> [Numbered Class] -> Formatter
 > directive d s (f,l) stack togs ts
 >                               =  dir d s stack
 >   where
->   dir If s bs			=  do b <- fromEither (eval togs s)
->				      skipOrFormat ((f, l, bool b, True) : bs) ts
+>   dir If s bs                 =  do b <- fromEither (eval togs s)
+>                                     skipOrFormat ((f, l, bool b, True) : bs) ts
 >   dir Elif s ((f,l,b2,b1):bs) =  do b <- fromEither (eval togs s)
->				      skipOrFormat ((f, l, bool b, not b2 && b1) : bs) ts
+>                                     skipOrFormat ((f, l, bool b, not b2 && b1) : bs) ts
 >   dir Else _ ((f,l,b2,b1):bs) =  skipOrFormat ((f, l, not b2 && b1, True) : bs) ts
 >   dir Endif _ ((f,l,b2,b1):bs)=  skipOrFormat bs ts
 >   dir EOF _ []                =  return ()  -- nothing left to do
 >   dir EOF s bs                =  raise (init $ unlines (map unBalancedIf bs), s)
->   dir d s _			=  raise ("spurious %" ++ decode d, s)
+>   dir d s _                   =  raise ("spurious %" ++ decode d, s)
 
-> skipOrFormat			:: [CondInfo] -> [Numbered Class] -> Formatter
-> skipOrFormat stack ts		=  do  update (\st -> st{conds = stack})
->				       if andS stack  then formats ts
->				                      else skip ts
+> skipOrFormat                  :: [CondInfo] -> [Numbered Class] -> Formatter
+> skipOrFormat stack ts         =  do  update (\st -> st{conds = stack})
+>                                      if andS stack  then formats ts
+>                                                     else skip ts
 
 > andS                          :: [CondInfo] -> Bool
 > andS                          =  and . map (\(_,_,x,y) -> x && y)
@@ -511,11 +511,11 @@ groups.
 > unBalancedIf                  :: CondInfo -> String
 > unBalancedIf (f,l,_,_)        =  "%if at " ++ f ++ " line " ++ show l ++ " not closed"
 
-> skip				:: [Numbered Class] -> Formatter
-> skip []			=  return ()
+> skip                          :: [Numbered Class] -> Formatter
+> skip []                       =  return ()
 > skip ts@(No n  (Directive d s) : _)
->     | conditional d		=  formats ts
-> skip (t : ts)			=  skip ts
+>     | conditional d           =  formats ts
+> skip (t : ts)                 =  skip ts
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Active commands}
@@ -586,8 +586,8 @@ that appears before the first occurrence of |magic| on the same
 line is the prompt, and everything between the first |magic|
 and the second |magic| plus prompt is the result we look for.
 
-> magic				:: String
-> magic				=  "!@#$^&*"
+> magic                         :: String
+> magic                         =  "!@#$^&*"
 >
 > extract'                      :: Handle -> IO String
 > extract' h                    =  fmap (extract . unlines) (readMagic 2)
@@ -598,30 +598,30 @@ and the second |magic| plus prompt is the result we look for.
 >                                              |  otherwise                                 =  n - 1
 >                                      fmap (l:) (readMagic n')
 
-> extract			:: String -> String
-> extract s			=  v
->     where (t, u)		=  breaks (isPrefix magic) s
+> extract                       :: String -> String
+> extract s                     =  v
+>     where (t, u)              =  breaks (isPrefix magic) s
 >           -- t contains everything up to magic, u starts with magic
->           -- |u'			=  tail (dropWhile (/='\n') u)|
+>           -- |u'                      =  tail (dropWhile (/='\n') u)|
 >           pre                 =  reverse . takeWhile (/='\n') . reverse $ t
 >           prelength           =  if null pre then 0 else length pre + 1
 >           -- pre contains the prefix of magic on the same line
->           u'			=  drop (length magic + prelength) u
+>           u'                  =  drop (length magic + prelength) u
 >           -- we drop the magic string, plus the newline, plus the prefix
->           (v, _)		=  breaks (isPrefix (pre ++ magic)) u'
+>           (v, _)              =  breaks (isPrefix (pre ++ magic)) u'
 >           -- we look for the next occurrence of prefix plus magic
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Reading files}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
-> dir, nondir			:: FilePath -> FilePath
+> dir, nondir                   :: FilePath -> FilePath
 > dir filePath
->     | null d			=  ""
->     | otherwise		=  reverse d
->     where d			=  dropWhile (/= '/') (reverse filePath)
+>     | null d                  =  ""
+>     | otherwise               =  reverse d
+>     where d                   =  dropWhile (/= '/') (reverse filePath)
 >
-> nondir			=  reverse . takeWhile (/= '/') . reverse
+> nondir                        =  reverse . takeWhile (/= '/') . reverse
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{GPL-related program information}

@@ -16,18 +16,18 @@ therefore there has been much overlap between the two modules.
 > import qualified FiniteMap as FM
 > import Auxiliaries
 
-> when True f			=  f
-> when False f			=  return
+> when True f                   =  f
+> when False f                  =  return
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Adding positional information}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
-> type Row			=  Int
-> type Col			=  Int
+> type Row                      =  Int
+> type Col                      =  Int
 >
-> data Pos a			=  Pos {row :: !Row, col :: !Col, ann :: a}
->				   deriving (Show)
+> data Pos a                    =  Pos {row :: !Row, col :: !Col, ann :: a}
+>                                  deriving (Show)
 
 %{
 %format r1
@@ -43,32 +43,32 @@ therefore there has been much overlap between the two modules.
 %}
 
 > instance (CToken tok) => CToken (Pos tok) where
->     catCode (Pos _ _ t)	=  catCode t
->     token (Pos _ _ t)		=  token t
->     inherit (Pos r c t') t	=  Pos r c (inherit t' t)
->     fromToken t		=  Pos 0 0 (fromToken t)
+>     catCode (Pos _ _ t)       =  catCode t
+>     token (Pos _ _ t)         =  token t
+>     inherit (Pos r c t') t    =  Pos r c (inherit t' t)
+>     fromToken t               =  Pos 0 0 (fromToken t)
 
 Numbering the list of tokens.
 
-> number			:: Row -> Col -> [Token] -> [Pos Token]
-> number r c []			=  []
-> number r c (t : ts)		=  Pos r c t : number r' c' ts
->     where (r', c')		=  count r c (string t)
+> number                        :: Row -> Col -> [Token] -> [Pos Token]
+> number r c []                 =  []
+> number r c (t : ts)           =  Pos r c t : number r' c' ts
+>     where (r', c')            =  count r c (string t)
 >
-> count				:: Row -> Col -> String -> (Row, Col)
-> count r c []			=  (r, c)
+> count                         :: Row -> Col -> String -> (Row, Col)
+> count r c []                  =  (r, c)
 > count r c (a : s)
->     | a == '\n'		=  count (r + 1) 1       s
->     | otherwise		=  count r       (c + 1) s
+>     | a == '\n'               =  count (r + 1) 1       s
+>     | otherwise               =  count r       (c + 1) s
 
 Splitting the token list in lines.
 
-> lines				:: [Pos a] -> [[Pos a]]
-> lines				=  split 1
+> lines                         :: [Pos a] -> [[Pos a]]
+> lines                         =  split 1
 >     where
->     split _   []		=  []
->     split r ts		=  us : split (r + 1) vs
->         where (us, vs)	=  span (\t -> row t <= r) ts
+>     split _   []              =  []
+>     split r ts                =  us : split (r + 1) vs
+>         where (us, vs)        =  span (\t -> row t <= r) ts
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{A very simple Haskell Parser}
@@ -215,5 +215,5 @@ There are subtle differences between the two styles.
 
 For inline-code.
 
-> latexs			:: (CToken tok) => Formats -> [tok] -> Doc
-> latexs dict			=  catenate . fmap (latex sub'space sub'space dict . token)
+> latexs                        :: (CToken tok) => Formats -> [tok] -> Doc
+> latexs dict                   =  catenate . fmap (latex sub'space sub'space dict . token)

@@ -20,14 +20,14 @@
 %% author: Jan de Wit (jwit@cs.uu.nl), Andres Loeh (andres@cs.uu.nl)
 
 > module FileNameUtils          ( extension
->			        , filename
->			        , basename
+>                               , filename
+>                               , basename
 >                               , dirname
 >                               , expandPath
 >                               , chaseFile
 >                               , searchPath
 >                               , modifySearchPath
->			        ) where
+>                               ) where
 >
 > import IO
 > import System

@@ -4,7 +4,7 @@
 
 %if codeOnly || showModuleHeader
 
-> module StateT			(  module StateT  )
+> module StateT                 (  module StateT  )
 > where
 >
 > import Auxiliaries
@@ -18,53 +18,53 @@
 %format unXIO (m) = m
 %endif
 
-> newtype XIO exc st a		=  MkXIO (st -> IO (Either exc a, st))
+> newtype XIO exc st a          =  MkXIO (st -> IO (Either exc a, st))
 
 %if style /= math
 
-> unXIO (MkXIO f)		=  f
+> unXIO (MkXIO f)               =  f
 
 %endif
 
 \NB The state is preserved upon failure.
 
 > instance Functor (XIO exc st) where
->     fmap f m			=  m >>= \a -> return (f a)
+>     fmap f m                  =  m >>= \a -> return (f a)
 >
 > instance Monad (XIO exc st) where
->     return a			=  MkXIO (\st -> return (Right a, st))
->     m >>= k			=  MkXIO (\st -> do (r, st') <- unXIO m st
->					            case r of
->				                      Left e  -> return (Left e, st')
->						      Right a -> unXIO (k a) st')
+>     return a                  =  MkXIO (\st -> return (Right a, st))
+>     m >>= k                   =  MkXIO (\st -> do (r, st') <- unXIO m st
+>                                                   case r of
+>                                                     Left e  -> return (Left e, st')
+>                                                     Right a -> unXIO (k a) st')
 
 \NB We cannot replace |return (Left e, st')| by |return (r, st')| since
 the type is not general enough then.
 
-> fetch				:: XIO exc st st
-> fetch				=  MkXIO (\st -> return (Right st, st))
+> fetch                         :: XIO exc st st
+> fetch                         =  MkXIO (\st -> return (Right st, st))
 >
-> store				:: st -> XIO exc st ()
-> store st'			=  MkXIO (\st -> return (Right (), st'))
+> store                         :: st -> XIO exc st ()
+> store st'                     =  MkXIO (\st -> return (Right (), st'))
 >
-> update			:: (st -> st) -> XIO exc st ()
-> update f			=  do st <- fetch; store (f st)
+> update                        :: (st -> st) -> XIO exc st ()
+> update f                      =  do st <- fetch; store (f st)
 >
-> toIO				:: XIO exc st a -> IO a
-> toIO m			=  do (a, _) <- unXIO m undefined; return (fromRight a)
+> toIO                          :: XIO exc st a -> IO a
+> toIO m                        =  do (a, _) <- unXIO m undefined; return (fromRight a)
 >
-> fromIO			:: IO a -> XIO exc st a
-> fromIO m			=  MkXIO (\st -> do a <- m; return (Right a, st))
+> fromIO                        :: IO a -> XIO exc st a
+> fromIO m                      =  MkXIO (\st -> do a <- m; return (Right a, st))
 >
-> raise				:: exc -> XIO exc st a
-> raise e			=  MkXIO (\st -> return (Left e, st))
+> raise                         :: exc -> XIO exc st a
+> raise e                       =  MkXIO (\st -> return (Left e, st))
 >
-> try				:: XIO exc st a -> XIO exc' st (Either exc a)
-> try m				=  MkXIO (\st -> do (r, st') <- unXIO m st; return (Right r, st'))
+> try                           :: XIO exc st a -> XIO exc' st (Either exc a)
+> try m                         =  MkXIO (\st -> do (r, st') <- unXIO m st; return (Right r, st'))
 >
 >
-> handle			:: XIO exc st a -> (exc -> XIO exc' st a) -> XIO exc' st a
-> handle m h			=  try m >>= either h return
+> handle                        :: XIO exc st a -> (exc -> XIO exc' st a) -> XIO exc' st a
+> handle m h                    =  try m >>= either h return
 >
-> fromEither			:: Either exc a -> XIO exc st a
-> fromEither			=  either raise return
+> fromEither                    :: Either exc a -> XIO exc st a
+> fromEither                    =  either raise return
