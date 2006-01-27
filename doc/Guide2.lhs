@@ -251,7 +251,7 @@
   \smaller \tabular{c}
            Institut f\"ur Informatik III, Universit\"at Bonn\\
            R\"omerstra\ss e 164, 53117 Bonn, Germany\\
-           \verb|{ralf,andres}@informatik.uni-bonn.de|
+           \verb|{ralf,loeh}@informatik.uni-bonn.de|
            \endtabular}%
 \date{\today}
 \maketitle
