@@ -18,7 +18,7 @@ LHS2TEX = ../lhs2TeX
 
 %.tex : %.lhs
 #	lhs2TeX -verb -i../lhs2TeX.fmt -l'meta = True' $< > $@
-	$(LHS2TEX) -v --math --align=33 -smeta -i../lhs2TeX.fmt $< > $@
+	$(LHS2TEX) -v --math --align=33 -smeta $< > $@
 
 %.ps : %.dvi
 	$(DVIPS) -D600 -o $@ $<

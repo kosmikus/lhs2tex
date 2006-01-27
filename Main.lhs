@@ -8,7 +8,7 @@
 > where
 >
 > import Char
-> import System.IO ( hClose, hPutStr, hPutStrLn, stderr, stdout, openFile, IOMode(..), Handle(..) )
+> import System.IO ( hClose, hPutStr, hPutStrLn, hFlush, hGetLine, stderr, stdout, openFile, IOMode(..), Handle(..) )
 > import System.Directory ( copyFile )
 > import System.Console.GetOpt
 > import Text.Regex ( matchRegex, mkRegexWithOpts )
@@ -16,7 +16,8 @@
 > import Version
 >
 > import Control.Monad
-> import Data.List ( isPrefixOf )
+>
+> import System.Process
 >
 > -- import IOExts
 > import TeXCommands
@@ -102,7 +103,8 @@ State.
 >                                          stacks     :: (Math.Stack, Math.Stack),      -- math: indentation stacks
 >                                          separation :: Int,           -- poly: separation
 >                                          latency    :: Int,           -- poly: latency
->                                          pstack     :: Poly.Stack     -- poly: indentation stack
+>                                          pstack     :: Poly.Stack,    -- poly: indentation stack
+>                                          externals  :: Externals      -- handles for external processes (hugs,ghci)
 >                                        }
 
 Initial state.
@@ -118,8 +120,8 @@ Initial state.
 >                                          opts       = "",
 >                                          files      = [],
 >                                          path       = "",
->                                          fmts       = FM.fromList [],
->                                          subst      = FM.fromList [],
+>                                          fmts       = FM.empty,
+>                                          subst      = FM.empty,
 >                                          stack      = [],
 >                                          conds      = [],
 >                                          align      = Nothing,
@@ -131,7 +133,8 @@ Initial state.
 >                                          style      = error "uninitialized style",
 >                                          file       = error "uninitialized filename",
 >                                          ofile      = error "uninitialized filename",
->                                          toggles    = error "uninitialized toggles"
+>                                          toggles    = error "uninitialized toggles",
+>                                          externals  = FM.empty
 >                                        }
 
 > initState			:: Style -> FilePath -> [FilePath] -> State -> State
@@ -170,7 +173,8 @@ Initial state.
 >                                     expandedpath <- expandPath (searchpath flags)
 >				      toIO (do store (initState s file expandedpath flags)
 >					       formats (map (No 0) dirs) `handle` abort
->				               formatStr (addEndEOF str))
+>				               formatStr (addEndEOF str)
+>                                              stopexternals)
 >   where   addEndEOF           =  (++"%EOF\n") . unlines . lines
 
 > input				:: [String] -> IO (String, FilePath)
@@ -280,15 +284,11 @@ We abort immediately if an error has occured.
 > format (Command (Vrb b) s)	=  out (Verbatim.inline b s)
 > format (Command Eval s)	=  do st <- fetch
 >                                     when (not (style st `elem` [CodeOnly,NewCode])) $
->                                       do fromIO $ when (verbose st) $ 
->                                             hPutStrLn stderr "Calling external command."
->				           result <- fromIO (hugs (file st) (opts st) (map unNL s))
+>                                       do result <- external (map unNL s)
 >				           inline result
 > format (Command Perform s)	=  do st <- fetch
 >                                     when (not (style st `elem` [CodeOnly,NewCode])) $
->                                       do fromIO $ when (verbose st) $ 
->                                             hPutStrLn stderr "Calling external command."
->				           result <- fromIO (hugs (file st) (opts st) s)
+>                                       do result <- external s
 >				           out (Text (trim result))
 >     where
 
@@ -307,7 +307,7 @@ Remove trailing blank line.
 >                                       display s
 > format (Environment Evaluate s )
 >				=  do st <- fetch
->				      result <- fromIO (hugs (file st) (opts st) (map unNL s))
+>				      result <- external (map unNL s)
 >				      --fromIO (hPutStrLn stderr result)	-- TEST
 >				      display result
 > format (Environment Hide s)	=  return ()
@@ -521,34 +521,83 @@ groups.
 \subsubsection{Active commands}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
-A simple here-script is used to call @hugs@. \NB @.script@ and @.out@
-are used as intermediate files.
-
 ks, 23.10.2003: extended to work with @ghci@, too.
 ks, 03.01.2004: fixed to work with @ghci-6.2@, hopefully without breaking
 @hugs@ or old @ghci@ compatibility.
 
-> hugs				:: FilePath -> String -> String -> IO String
-> hugs file opts expr		=  do writeFile ".script" (if ghcimode then ghciscript else hugsscript)
->				      system ("chmod u+x .script")
->				      system ("./.script > .out")
->				      result <- readFile ".out"
->				      return (extract result)
->     where ghcimode            =  "ghci" `isPrefixOf` opts
->           ghciscript          =  opts ++ " -ignore-dot-ghci " ++ file ++ " <<!\n"
->                               ++ "putStrLn " ++ show magic ++ "\n"
->                               ++ expr ++ "\n"
->                               ++ "putStrLn " ++ show magic ++ "\n"
->           hugsscript          =  (if null opts then "hugs " else opts) ++ " -p'" ++ magic ++ "' " ++ file ++ " <<!\n" -- |file| instead of |nondir file|
->				++ expr ++ "\n"
+New, 26.01.2006: we're now starting an external process @ghci@ or @hugs@
+using the System.Process library. The process is then reused for subsequent
+computations, which should dramatically improve compilation time for
+documents that make extensive use of @\eval@ and @\perform@.
 
-To extract hugs' answer we use a simple technique which should work in
-most cases. The hugs prompt is set to the string |magic|; Hugs's
-response then lies between the first two occurences of |magic|.
+> type Externals    =  FM.FiniteMap Char ProcessInfo
+> type ProcessInfo  =  (Handle, Handle, Handle, ProcessHandle)
+
+The function |external| can be used to call the process. It is discouraged
+to call any programs except @ghci@ or @hugs@, because we make a number of
+assumptions about the program being called. Input is the expression to evaluate.
+Output is the result in string form.
+
+> external                      :: String -> XIO Exc State String
+> external expr                 =  do st <- fetch
+>                                     let os  =  opts st
+>                                         f   =  file st
+>                                         ex  =  externals st
+>                                         ghcimode       =  "ghci" `isPrefix` os
+>                                         cmd
+>                                           | ghcimode   =  os ++ " -v0 -ignore-dot-ghci " ++ f
+>                                           | otherwise  =  (if null os then "hugs " else os ++ " ") ++ f
+>                                         script         =  "putStrLn " ++ show magic ++ "\n"
+>                                                             ++ expr ++ "\n"
+>                                                             ++ "putStrLn " ++ show magic ++ "\n"
+>                                     pi <- case FM.lookup f ex of
+>                                             Just pi  ->  return pi
+>                                             Nothing  ->  -- start new external process
+>                                                          fromIO $ do
+>                                                            when (verbose st) $
+>                                                              hPutStrLn stderr $ "Starting external process: " ++ cmd
+>                                                            runInteractiveCommand cmd
+>                                     store (st {externals = FM.add (f,pi) ex})
+>                                     let (pin,pout,_,_) = pi
+>                                     fromIO $ do
+>                                       hPutStr pin script
+>                                       hFlush pin
+>                                       extract' pout
+
+This function can be used to stop all external processes by sending the
+@:q@ command to them.
+
+> stopexternals                 :: Formatter
+> stopexternals                 =  do st <- fetch
+>                                     let ex   =  externals st
+>                                         pis  =  map (ex FM.!) (FM.keys ex)
+>                                     when (not . null $ pis) $ fromIO $ do
+>                                       when (verbose st) $
+>                                         hPutStrLn stderr $ "Stopping external processes."
+>                                       mapM_ (\(pin,_,_,pid) -> do  hPutStrLn pin ":q"
+>                                                                    hFlush pin
+>                                                                    waitForProcess pid) pis
+
+To extract the answer from @ghci@'s or @hugs@' output 
+we use a simple technique which should work in
+most cases: we print the string |magic| before and after
+the expression we are interested in. We assume that everything
+that appears before the first occurrence of |magic| on the same
+line is the prompt, and everything between the first |magic|
+and the second |magic| plus prompt is the result we look for.
 
 > magic				:: String
 > magic				=  "!@#$^&*"
 >
+> extract'                      :: Handle -> IO String
+> extract' h                    =  fmap (extract . unlines) (readMagic 2)
+>     where readMagic           :: Int -> IO [String]
+>           readMagic 0         =  return []
+>           readMagic n         =  do  l <- hGetLine h
+>                                      let n'  |  (null . snd . breaks (isPrefix magic)) l  =  n
+>                                              |  otherwise                                 =  n - 1
+>                                      fmap (l:) (readMagic n')
+
 > extract			:: String -> String
 > extract s			=  v
 >     where (t, u)		=  breaks (isPrefix magic) s
@@ -561,10 +610,6 @@ response then lies between the first two occurences of |magic|.
 >           -- we drop the magic string, plus the newline, plus the prefix
 >           (v, _)		=  breaks (isPrefix (pre ++ magic)) u'
 >           -- we look for the next occurrence of prefix plus magic
-
-\NB It is important that hugs does \emph{not} use the @readline@ library.
-Added |tail (dropWhile (/='\n') u)| to cope with this! [ks, 15.05.2003:
-This situation is unclear to me. It should be clarified.]
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Reading files}
