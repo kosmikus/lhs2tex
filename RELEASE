@@ -44,6 +44,11 @@ with some privately distributed versions.]
   LaTeX code, for Stefan Wehr's "adjust" tool. Based on a
   patch submitted by Stefan Wehr.
 
+* lhs2TeX can now replace ghc's literate preprocessor.
+
+* Improved efficiency of \eval and \perform (to call ghci
+  or hugs from lhs2TeX documents).
+
 Requirements and Download
 -------------------------
 
@@ -53,7 +58,7 @@ environments is available from
   http://www.cs.uu.nl/~andres/lhs2tex/
 
 It has been verified to build on Linux and MacOSX.
-For some platforms, there are binaries available.
+For some platforms, binaries are available.
 
 You need a recent version of GHC (6.X is tested) to build 
 lhs2TeX, and, of course, you need a TeX distribution 
