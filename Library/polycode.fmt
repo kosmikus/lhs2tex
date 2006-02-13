@@ -8,7 +8,7 @@
 % literally into other documents, regardless of the conditions or 
 % license applying to these documents.
 %
-% Andres Loeh, November 2005, ver 1.8
+% Andres Loeh, February 2006, ver 1.9
 %
 % TODO: use \[ \] in arrayhs (fleqn problem)
 %       think about penalties and better pagebreaks
@@ -52,6 +52,30 @@
 % command to \small or something alike
 \newcommand{\hscodestyle}{}
 
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+
 \newenvironment{plainhscode}%
   {\hsnewpar\abovedisplayskip
    \advance\leftskip\mathindent
@@ -61,14 +85,6 @@
   {\endpboxed\)%
    \hsnewpar\belowdisplayskip
    \ignorespacesafterend}
-
-% The command \sethscode can be used to switch the code formatting
-% behaviour by mapping the hscode environment in the subst directive
-% to a new LaTeX environment.
-
-\newcommand{\sethscode}[1]%
-  {\expandafter\let\expandafter\hscode\csname #1\endcsname
-   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
 
 % Here, we make plainhscode the default environment.
 

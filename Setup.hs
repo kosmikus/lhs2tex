@@ -1,4 +1,5 @@
-import Distribution.Setup (CopyDest(..))
+import Distribution.Setup (CopyDest(..),BuildFlags(..),
+                           CopyFlags(..),RegisterFlags(..),InstallFlags(..))
 import Distribution.Simple
 import Distribution.Simple.Configure (withPrograms)
 import Distribution.Simple.Utils (die,rawSystemExit,maybeExit,copyFileVerbose)
@@ -23,9 +24,9 @@ import System.Info (os)
 
 lhs2tex = "lhs2TeX"
 minPolytableVersion = [0,8,2]
-version = "1.11pre2"
+version = "1.11pre4"
 numversion = 111
-pre = 2
+pre = 4
 
 main = defaultMainWithHooks lhs2texHooks
 
@@ -100,18 +101,18 @@ lhs2texPostConf a cf pd lbi =
   where runKpseWhich v = runCommandProgramConf 0 "kpsewhich" (withPrograms lbi) [v]
         runKpseWhichVar v = runKpseWhich $ "-expand-var='$" ++ v ++ "'"
 
-lhs2texPostBuild a v pd lbi =
+lhs2texPostBuild a bf@(BuildFlags { buildVerbose = v }) pd lbi =
     do  ebi <- getPersistLhs2texBuildConfig
         let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
         let lhs2texBin = lhs2texDir `joinFileName` lhs2tex
         let lhs2texDocDir = lhs2texDir `joinFileName` "doc"
         callLhs2tex v lbi "--code lhs2TeX.sty.lit" (lhs2texDir `joinFileName` "lhs2TeX.sty")
         callLhs2tex v lbi "--code lhs2TeX.fmt.lit" (lhs2texDir `joinFileName` "lhs2TeX.fmt")
-        if rebuildDocumentation ebi then lhs2texBuildDocumentation a v pd lbi
+        if rebuildDocumentation ebi then lhs2texBuildDocumentation a bf pd lbi
                                     else copyFileVerbose v ("doc" `joinFileName` "Guide2.pdf") (lhs2texDocDir `joinFileName` "Guide2.pdf")
         return ExitSuccess
 
-lhs2texBuildDocumentation a v pd lbi =
+lhs2texBuildDocumentation a (BuildFlags { buildVerbose = v }) pd lbi =
     do  let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
         let lhs2texBin = lhs2texDir `joinFileName` lhs2tex
         let lhs2texDocDir = lhs2texDir `joinFileName` "doc"
@@ -151,7 +152,7 @@ lhs2texBuildDocumentation a v pd lbi =
         loop
         setCurrentDirectory d
 
-lhs2texPostCopy a (cd,v) pd lbi =
+lhs2texPostCopy a (CopyFlags { copyDest = cd, copyVerbose = v }) pd lbi =
     do  ebi <- getPersistLhs2texBuildConfig
         let dataPref = mkDataDir pd lbi cd
         createDirectoryIfMissing True dataPref
@@ -187,12 +188,12 @@ lhs2texPostCopy a (cd,v) pd lbi =
           Nothing    -> return ()
         return ExitSuccess
 
-lhs2texPostInst a (_,v) pd lbi =
-    do  lhs2texPostCopy a (NoCopyDest,v) pd lbi
-        lhs2texRegHook pd lbi (undefined,undefined,v)
+lhs2texPostInst a (InstallFlags { installVerbose = v }) pd lbi =
+    do  lhs2texPostCopy a (CopyFlags { copyDest = NoCopyDest, copyVerbose = v }) pd lbi
+        lhs2texRegHook pd lbi Nothing (RegisterFlags { regUserPackage = False, regGenScript = False, regVerbose = v })
         return ExitSuccess
 
-lhs2texRegHook pd lbi (_,_,v) =
+lhs2texRegHook pd lbi _ (RegisterFlags { regVerbose = v }) =
     do  ebi <- getPersistLhs2texBuildConfig
         when (isJust . installPolyTable $ ebi) $
           do  rawSystemProgramConf v "mktexlsr" (withPrograms lbi) []
