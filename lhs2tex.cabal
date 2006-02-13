@@ -1,8 +1,9 @@
+cabal-version:  >=1.1.4
 name:		lhs2tex
 version:	1.11
 license:	GPL
 license-file:	LICENSE
-author:		Ralf Hinze <ralf@informatik.uni-bonn.de>
+author:		Ralf Hinze <ralf@informatik.uni-bonn.de>, Andres Loeh <lhs2tex@andres-loeh.de>
 maintainer:	Andres Loeh <lhs2tex@andres-loeh.de>
 stability:	stable
 homepage:	http://www.andres-loeh.de/lhs2tex/

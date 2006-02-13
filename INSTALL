@@ -1,3 +1,26 @@
+There are two possibilities to install lhs2TeX:
+
+(A) Using Cabal.
+(B) Classic configure/make.
+
+=====================================================================
+
+(A) Using Cabal to install lhs2TeX:
+
+This is experimental *and* requires a recent darcs snapshot of
+Cabal (version number 1.1.4). The process is then as usual:
+
+runghc Setup configure
+runghc Setup build
+runghc Setup install
+
+The third step requires write access to the installation location and
+the LaTeX filename database.
+
+=====================================================================
+
+(B) configure/make:
+
 The following instructions apply to Unix-like environments.  However,
 lhs2TeX does run on Windows systems, too. (If you would like to add
 installation instructions or facilitate the installation procedure for

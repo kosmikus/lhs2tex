@@ -161,6 +161,7 @@ srcdist : doc
 	$(MKINSTDIR) $(DISTDIR)/Examples
 	$(MKINSTDIR) $(DISTDIR)/Library
 	$(INSTALL) -m 644 $(psources) Version.lhs.in $(snipssrc) $(DISTDIR)
+	$(INSTALL) -m 644 Setup.hs $(DISTDIR)
 	$(INSTALL) -m 644 lhs2TeX.fmt.lit lhs2TeX.sty.lit $(DISTDIR)
 	$(INSTALL) -m 644 Makefile common.mk config.mk.in $(DISTDIR)
 	$(INSTALL) -m 644 lhs2TeX.1.in $(DISTDIR)
@@ -174,7 +175,7 @@ srcdist : doc
 	$(INSTALL) -m 644 Testsuite/*.{lhs,snip} Makefile $(DISTDIR)/Testsuite
 	$(INSTALL) -m 644 Examples/*.lhs $(DISTDIR)/Examples
 	$(INSTALL) -m 755 Examples/lhs2TeXpre $(DISTDIR)/Examples
-	$(INSTALL) -m 644 Library/*.{fmt,sty} $(DISTDIR)/Library
+	$(INSTALL) -m 644 Library/*.fmt $(DISTDIR)/Library
 	tar cvjf $(DISTDIR).tar.bz2 $(DISTDIR)
 	chmod 644 $(DISTDIR).tar.bz2
 
@@ -204,7 +205,7 @@ bindist: lhs2TeX lhs2TeX.fmt lhs2TeX.sty doc
 	$(INSTALL) -m 644 Testsuite/*.{lhs,snip} Makefile $(DISTDIR)/Testsuite
 	$(INSTALL) -m 644 Examples/*.lhs $(DISTDIR)/Examples
 	$(INSTALL) -m 755 Examples/lhs2TeXpre $(DISTDIR)/Examples
-	$(INSTALL) -m 644 Library/*.{fmt,sty} $(DISTDIR)/Library
+	$(INSTALL) -m 644 Library/*.fmt $(DISTDIR)/Library
 	tar cvjf $(DISTDIR)-$(DISTTYPE).tar.bz2 $(DISTDIR)
 	chmod 644 $(DISTDIR)-$(DISTTYPE).tar.bz2
 
