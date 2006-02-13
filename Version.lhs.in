@@ -7,6 +7,9 @@
 
 > module Version where
 >
+> import FileNameUtils
+> import Data.List
+>
 > version                       :: String
 > version                       =  "@VERSION@"
 > numversion                    :: Int
@@ -16,5 +19,35 @@ Used internally to distinguish prereleases.
 
 > pre                           :: Int
 > pre                           =  @PRE@
+
+% - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
+\subsubsection{Search path}
+% - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
+
+> searchPath                    =  relPath ["."] :
+>                                  [  deep (relPath (env "HOME":[p ++ x]))
+>                                  |  p <- ["","."]
+>                                  ,  x <- lhs2TeXNames
+>                                  ] ++
+>                                  [deep (relPath [env "LHS2TEX"])] ++
+>                                  [  deep (path [dir])
+>                                  |  dir  <-  lhs2TeXNames
+>                                  ,  path <-  [\x -> relPath ([datadir] ++ x)
+>                                              ,\x -> absPath (["usr","local","share"] ++ x)
+>                                              ,\x -> absPath (["usr","local","lib"] ++ x)
+>                                              ,\x -> absPath (["usr","share"] ++ x)
+>                                              ,\x -> absPath (["usr","lib"] ++ x)
+>                                              ]
+>                                  ]
+>
+> lhs2TeXNames                  =  ["lhs2tex-@SHORTVERSION@"
+>                                  ,"lhs2tex"
+>                                  ,"lhs2TeX"
+>                                  ]
+>
+> datadir                       =  replace "@datadir@" "@prefix@"
+>   where replace x y  |  "$prefix" `isPrefixOf` x = y ++ drop 7 x
+>                      |  "${prefix}" `isPrefixOf` x = y ++ drop 9 x
+>                      |  otherwise = x
 
 %endif

@@ -1,32 +1,11 @@
-%% gh -- a compiler for Generic Haskell.
-%% Copyright (c) 2001  The Generic Haskell Team. Utrecht University
-%% 
-%% This library is free software; you can redistribute it and/or modify
-%% it under the terms of the GNU Lesser General Public License as
-%% published by the Free Software Foundation; either version 2.1 of the
-%% License, or (at your option) any later version.
-%% 
-%% This library is distributed in the hope that it will be useful, but
-%% WITHOUT ANY WARRANTY; without even the implied warranty of
-%% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-%% Lesser General Public License for more details.
-%% 
-%% You should have received a copy of the GNU Lesser General Public
-%% License along with this library; if not, write to the Free Software
-%% Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-%%
-%% $Id: FileNameUtils.lhs,v 1.2 2003/06/11 08:35:51 cvs-4 Exp $
-%% 
-%% author: Jan de Wit (jwit@cs.uu.nl), Andres Loeh (andres@cs.uu.nl)
-
 > module FileNameUtils          ( extension
 >                               , filename
 >                               , basename
 >                               , dirname
 >                               , expandPath
 >                               , chaseFile
->                               , searchPath
 >                               , modifySearchPath
+>                               , deep, absPath, relPath, env
 >                               ) where
 >
 > import IO
@@ -40,19 +19,6 @@
 > directorySeparators           =  "/"
 > directorySeparator            =  '/'
 > environmentSeparators         =  ";:"
-> searchPath                    =  [relPath ["."]
->                                  ,deep (relPath [env "HOME","lhs2TeX"])
->                                  ,deep (relPath [env "HOME",".lhs2TeX"])
->                                  ,deep (relPath [env "LHS2TEX"])
->                                  ,deep (absPath ["usr","local","share","lhs2tex"])
->                                  ,deep (absPath ["usr","local","share","lhs2TeX"])
->                                  ,deep (absPath ["usr","local","lib","lhs2tex"])
->                                  ,deep (absPath ["usr","local","lib","lhs2TeX"])
->                                  ,deep (absPath ["usr","share","lhs2tex"])
->                                  ,deep (absPath ["usr","share","lhs2TeX"])
->                                  ,deep (absPath ["usr","lib","lhs2tex"])
->                                  ,deep (absPath ["usr","lib","lhs2TeX"])
->                                  ]
 
 A searchpath can be added to the front or to the back of the current path
 by pre- or postfixing it with a path separator. Otherwise the new search

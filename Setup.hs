@@ -24,7 +24,8 @@ import System.Info (os)
 
 lhs2tex = "lhs2TeX"
 minPolytableVersion = [0,8,2]
-version = "1.11pre4"
+shortversion = show (numversion `div` 100) ++ "." ++ show (numversion `mod` 100)
+version = shortversion ++ if pre /= 0 then "pre" ++ show pre else ""
 numversion = 111
 pre = 4
 
@@ -93,7 +94,10 @@ lhs2texPostConf a cf pd lbi =
         writePersistLhs2texBuildConfig (Lhs2texBuildInfo { installPolyTable = i, rebuildDocumentation = r })
         mapM_ (\f -> do message $ "Creating " ++ f
                         readFile (f ++ ".in") >>= return .
+                                                  replace "@prefix@" (prefix lbi) .
+                                                  replace "@datadir@" (absolutePath pd lbi NoCopyDest (datadir lbi)) .
                                                   replace "@VERSION@" version .
+                                                  replace "@SHORTVERSION@" shortversion .
                                                   replace "@NUMVERSION@" (show numversion) .
                                                   replace "@PRE@" (show pre) >>= writeFile f)
               generatedFiles

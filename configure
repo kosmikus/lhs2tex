@@ -271,7 +271,7 @@ PACKAGE_VERSION='1.11pre4'
 PACKAGE_STRING='lhs2tex 1.11pre4'
 PACKAGE_BUGREPORT=''
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS VERSION NUMVERSION PRE GHC INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S MV CP RM MKDIR TOUCH DIFF GREP SED SORT UNIQ FIND LATEX PDFLATEX XDVI GV DVIPS KPSEWHICH texmf POLYTABLE_INSTALL MKTEXLSR docdir LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS VERSION SHORTVERSION NUMVERSION PRE GHC INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S MV CP RM MKDIR TOUCH DIFF GREP SED SORT UNIQ FIND LATEX PDFLATEX XDVI GV DVIPS KPSEWHICH texmf POLYTABLE_INSTALL MKTEXLSR docdir LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1238,8 +1238,10 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 VERSION="1.11pre4"
+SHORTVERSION="1.11"
 NUMVERSION=111
 PRE=4
+
 
 
 
@@ -2882,6 +2884,7 @@ s,@ECHO_N@,$ECHO_N,;t t
 s,@ECHO_T@,$ECHO_T,;t t
 s,@LIBS@,$LIBS,;t t
 s,@VERSION@,$VERSION,;t t
+s,@SHORTVERSION@,$SHORTVERSION,;t t
 s,@NUMVERSION@,$NUMVERSION,;t t
 s,@PRE@,$PRE,;t t
 s,@GHC@,$GHC,;t t
