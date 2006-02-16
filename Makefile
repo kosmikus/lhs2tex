@@ -161,7 +161,7 @@ srcdist : doc
 	$(MKINSTDIR) $(DISTDIR)/Examples
 	$(MKINSTDIR) $(DISTDIR)/Library
 	$(INSTALL) -m 644 $(psources) Version.lhs.in $(snipssrc) $(DISTDIR)
-	$(INSTALL) -m 644 Setup.hs $(DISTDIR)
+	$(INSTALL) -m 644 Setup.hs lhs2tex.cabal $(DISTDIR)
 	$(INSTALL) -m 644 lhs2TeX.fmt.lit lhs2TeX.sty.lit $(DISTDIR)
 	$(INSTALL) -m 644 Makefile common.mk config.mk.in $(DISTDIR)
 	$(INSTALL) -m 644 lhs2TeX.1.in $(DISTDIR)

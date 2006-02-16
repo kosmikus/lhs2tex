@@ -112,6 +112,7 @@ lhs2texPostBuild a bf@(BuildFlags { buildVerbose = v }) pd lbi =
         let lhs2texDocDir = lhs2texDir `joinFileName` "doc"
         callLhs2tex v lbi "--code lhs2TeX.sty.lit" (lhs2texDir `joinFileName` "lhs2TeX.sty")
         callLhs2tex v lbi "--code lhs2TeX.fmt.lit" (lhs2texDir `joinFileName` "lhs2TeX.fmt")
+        createDirectoryIfMissing True lhs2texDocDir
         if rebuildDocumentation ebi then lhs2texBuildDocumentation a bf pd lbi
                                     else copyFileVerbose v ("doc" `joinFileName` "Guide2.pdf") (lhs2texDocDir `joinFileName` "Guide2.pdf")
         return ExitSuccess
@@ -120,7 +121,6 @@ lhs2texBuildDocumentation a (BuildFlags { buildVerbose = v }) pd lbi =
     do  let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
         let lhs2texBin = lhs2texDir `joinFileName` lhs2tex
         let lhs2texDocDir = lhs2texDir `joinFileName` "doc"
-        createDirectoryIfMissing True lhs2texDocDir
         snippets <- do  guide <- readFile $ "doc" `joinFileName` "Guide2.lhs"
                         let s = matchRegexRepeatedly (mkRegexWithOpts "^.*input\\{(.*)\\}.*$" True True) guide
                         return s
@@ -172,7 +172,7 @@ lhs2texPostCopy a (CopyFlags { copyDest = cd, copyVerbose = v }) pd lbi =
                        else absolutePath pd lbi cd (datadir lbi `joinFileName` "doc" `joinFileName` datasubdir lbi)
         let manDir = if isWindows
                        then dataPref `joinFileName` "Documentation"
-                       else absolutePath pd lbi cd (datadir lbi `joinFileName` "man")
+                       else absolutePath pd lbi cd (datadir lbi `joinFileName` "man" `joinFileName` "man1")
         createDirectoryIfMissing True docDir
         copyFileVerbose v (lhs2texDocDir `joinFileName` "Guide2.pdf") (docDir `joinFileName` "Guide2.pdf")
         when (not isWindows) $
@@ -232,7 +232,7 @@ stripQuotes x              = x
 callLhs2tex v lbi str outf =
     do  let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
         let lhs2texBin = lhs2texDir `joinFileName` lhs2tex
-        let cmd_line   = "\"" ++ lhs2texBin ++ "\" " ++ (if v > 4 then "-v " else "") ++ str ++ " >" ++ outf
+        let cmd_line   = "\"" ++ lhs2texBin ++ "\" -P\"" ++ lhs2texDir ++ "\": " ++ (if v > 4 then "-v " else "") ++ str ++ " >" ++ outf
         when (v > 0) $ putStrLn cmd_line
         maybeExit $ system cmd_line
 

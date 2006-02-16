@@ -219,7 +219,7 @@ the original
 .BR lhs2TeX .
 
 .SH SEE ALSO
-.IR http://www.cs.uu.nl/~andres/lhs2tex ,
+.IR http://www.informatik.uni-bonn.de/~loeh/lhs2tex ,
 the 
 .B lhs2TeX 
 homepage
