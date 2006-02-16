@@ -160,12 +160,15 @@ lhs2texPostCopy a (CopyFlags { copyDest = cd, copyVerbose = v }) pd lbi =
     do  ebi <- getPersistLhs2texBuildConfig
         let dataPref = mkDataDir pd lbi cd
         createDirectoryIfMissing True dataPref
+        let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
+        -- lhs2TeX.{fmt,sty}
+        mapM_ (\f -> copyFileVerbose v (lhs2texDir `joinFileName` f) (dataPref `joinFileName` f))
+              ["lhs2TeX.fmt","lhs2TeX.sty"]
         -- lhs2TeX library
         fmts <- fmap (filter (".fmt" `isSuffixOf`)) (getDirectoryContents "Library")
         mapM_ (\f -> copyFileVerbose v ("Library" `joinFileName` f) (dataPref `joinFileName` f))
               fmts
         -- documentation difficult due to lack of docdir
-        let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
         let lhs2texDocDir = lhs2texDir `joinFileName` "doc"
         let docDir = if isWindows
                        then dataPref `joinFileName` "Documentation"
