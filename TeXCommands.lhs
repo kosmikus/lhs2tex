@@ -14,7 +14,7 @@
 
 %endif
 
-> data Style                    =  Version | Help | Copying | Warranty | CodeOnly | NewCode | Verb | Typewriter | Poly | Math | Pre
+> data Style                    =  Version | Help | SearchPath | Copying | Warranty | CodeOnly | NewCode | Verb | Typewriter | Poly | Math | Pre
 >                                  deriving (Eq, Show, Enum, Bounded)
 
 \Todo{Better name for |Class|.}
@@ -67,7 +67,7 @@ Encoding and decoding of commands, environments, and directives.
 >     representation            =  [ ("tt", Typewriter), ("math", Math), ("poly", Poly),
 >                                    ("verb", Verb), ("code", CodeOnly), ("newcode",NewCode),
 >                                    ("pre", Pre), ("version", Version),
->                                    ("copying", Copying), ("warranty", Warranty), ("help", Help) ]
+>                                    ("copying", Copying), ("warranty", Warranty), ("help", Help), ("searchpath", SearchPath) ]
 > instance Representation Command where
 >     representation            =  [ ("hs", Hs), ("eval", Eval),
 >                                    ("perform", Perform), ("verb*", Vrb True),

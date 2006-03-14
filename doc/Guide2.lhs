@@ -308,6 +308,22 @@ quite different tasks. Here is a brief overview:
 \section{Installing @lhs2TeX@}
 %---------------------------------------------------------------------------
 
+There are two possibilities to install @lhs2TeX@:
+\begin{compactitem}
+\item Using Cabal.
+\item Classic configure/make.
+\end{compactitem}
+
+\subsection{Using Cabal to install @lhs2TeX@}
+
+This is experimental \emph{and} requires a recent darcs snapshot of
+Cabal (version number 1.1.4). The process is then as usual:
+\input{CabalInstallation}%
+The third step requires write access to the installation location
+and the \LaTeX\ filename database.
+
+\subsection{configure/make}
+
 The following instructions apply to Unix-like environments.  However,
 @lhs2TeX@ does run on Windows systems, too. (If you would like to add
 installation instructions or facilitate the installation procedure for
@@ -326,10 +342,12 @@ With @lhs2TeX@ come a couple of library files (containing basic
 @lhs2TeX@ binary. The default search path is as follows:
 \input{SearchPath}%
 \label{defaultsearchpath}%
-Here, @$HOME@ and @$LHS2TEX@ denote the current values of
-these two environment variables. Thus, if @lhs2TeX@ is installed
+Here, @{HOME}@ and @{LHS2TEX}@ denote the current values of
+the environment variables @HOME@ and @LHS2TEX@. The double slash
+at the end of each dir means that subdirectories are also scanned.
+If @lhs2TeX@ is installed
 to a non-standard path, you might want to set the environment
-variable @$LHS2TEX@ to point to the directory where
+variable @LHS2TEX@ to point to the directory where
 @lhs2TeX.fmt@ and the other library files have been installed to.
 
 \begin{important}

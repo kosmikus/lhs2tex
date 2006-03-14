@@ -55,10 +55,11 @@
 >                                     case reverse styles of
 >                                       []  -> lhs2TeX Poly flags (reverse initdirs) n
 >                                           -- ks, 22.11.2005, changed default style to |Poly|
->                                       [Help]     -> quitSuccess (usageInfo uheader options)
->                                       [Version]  -> quitSuccess programInfo
->                                       [Copying]  -> quitSuccess (programInfo ++ "\n\n" ++ copying)
->                                       [Warranty] -> quitSuccess (programInfo ++ "\n\n" ++ warranty)
+>                                       [Help]        -> quitSuccess (usageInfo uheader options)
+>                                       [SearchPath]  -> quitSuccess (init . unlines $ searchPath)
+>                                       [Version]     -> quitSuccess programInfo
+>                                       [Copying]     -> quitSuccess (programInfo ++ "\n\n" ++ copying)
+>                                       [Warranty]    -> quitSuccess (programInfo ++ "\n\n" ++ warranty)
 >                                       [Pre] | length n >= 3 -> preprocess flags (reverse initdirs) False n  -- used as preprocessor -pgmF -F
 >                                       [Pre,Help] | length n >= 3 -> preprocess flags (reverse initdirs) True n  -- used as literate preprocessor -pgmL
 >                                       [s]    -> lhs2TeX s flags (reverse initdirs) n
@@ -219,6 +220,8 @@ because with some versions of GHC it triggers ambiguity errors with
 >   , Option ['u'] ["unset"]   (ReqArg (\s -> (return, (Directive Let (s ++ "=False"):), [])) "flag") "unset <flag>"
 >   , Option ['P'] ["path"]    (ReqArg (\p -> (\s -> return $ s { searchpath = modifySearchPath (searchpath s) p }, id , [])) "path") 
 >                                                                                       "modify search path"
+>   , Option []    ["searchpath"]
+>                              (NoArg (return, id, [SearchPath]))                           "show searchpath"
 >   , Option []    ["copying"] (NoArg (return, id, [Copying]))                              "display license"
 >   , Option []    ["warranty"](NoArg (return, id, [Warranty]))                             "info about warranty"
 >   ]

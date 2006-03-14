@@ -45,23 +45,35 @@ lhs2TeX formatting directives) that need to be found by the
 lhs2TeX binary. The default search path is as follows:
 
 .
-$HOME/lhs2TeX
-$HOME/.lhs2TeX
-$LHS2TEX
-/usr/local/share/lhs2tex
-/usr/local/share/lhs2TeX
-/usr/local/lib/lhs2tex
-/usr/local/lib/lhs2TeX
-/usr/share/lhs2tex
-/usr/share/lhs2TeX
-/usr/lib/lhs2tex
-/usr/lib/lhs2TeX
+{HOME}/lhs2tex-1.11//
+{HOME}/lhs2tex//
+{HOME}/lhs2TeX//
+{HOME}/.lhs2tex-1.11//
+{HOME}/.lhs2tex//
+{HOME}/.lhs2TeX//
+{LHS2TEX}//
+/usr/local/share/lhs2tex-1.11//
+/usr/local/share/lhs2tex-1.11//
+/usr/local/lib/lhs2tex-1.11//
+/usr/share/lhs2tex-1.11//
+/usr/lib/lhs2tex-1.11//
+/usr/local/share/lhs2tex//
+/usr/local/share/lhs2tex//
+/usr/local/lib/lhs2tex//
+/usr/share/lhs2tex//
+/usr/lib/lhs2tex//
+/usr/local/share/lhs2TeX//
+/usr/local/share/lhs2TeX//
+/usr/local/lib/lhs2TeX//
+/usr/share/lhs2TeX//
+/usr/lib/lhs2TeX//
 
-Here, "$HOME" and "$LHS2TEX" denote the current values of these two
-environment variables. Thus, if lhs2TeX is installed to a non-standard
-path, you might want to set the environment variable "$LHS2TEX" to
-point to the directory where the files "lhs2TeX.sty" and "lhs2TeX.fmt"
-have been installed to.
+Here, {HOME} and {LHS2TEX} denote the current values of these two
+environment variables HOME and LHS2TEX. The double slash at the end of
+each dir means that subdirectories are also scanned. If lhs2TeX is
+installed to a non-standard path, you might want to set the
+environment variable "LHS2TEX" to point to the directory where
+"lhs2TeX.fmt" and the other library files have been installed to.
 
 IMPORTANT:
 To be able to use ``poly'' style, the two LaTeX 

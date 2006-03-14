@@ -18,6 +18,14 @@ polytable.sty :
 	$(LN_S) ../polytable/polytable.sty .
 	$(LN_S) ../polytable/lazylist.sty .
 
+RawSearchPath.lhs : ../Version.lhs
+	echo '\begin{code}' > $@
+	$(LHS2TEX) --searchpath >> $@
+	echo '\end{code}' >> $@
+
+SearchPath.lhs : RawSearchPath.lhs
+	touch $@
+
 srcdist :
 	$(INSTALL) -m 644 $(SNIPPETSGD:.tex=.lhs) ../$(DISTDIR)/doc
 	$(INSTALL) -m 644 $(wildcard *.fmt) ../$(DISTDIR)/doc

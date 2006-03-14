@@ -107,9 +107,14 @@ lhs2TeX.fmt: lhs2TeX.fmt.lit lhs2TeX
 lhs2TeX : $(sources)
 	$(GHC) $(GHCFLAGS) --make -o lhs2TeX $(sources)
 
-doc : bin
+doc : bin INSTALL
 	cd doc; $(MAKE)
 #	cd Guide; $(MAKE) Guide.pdf
+
+INSTALL : lhs2TeX INSTALL0 INSTALL1
+	cp INSTALL0 $@
+	./lhs2TeX --searchpath >> $@
+	cat INSTALL1 >> $@
 
 depend:
 	$(GHC) -M -optdep-f -optdeplhs2TeX.d $(GHCFLAGS) $(sources)

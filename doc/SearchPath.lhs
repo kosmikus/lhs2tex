@@ -2,18 +2,5 @@
 \begingroup
 \let\origtt=\tt
 \def\tt#1{\origtt}
-\begin{code}
-.
-$HOME/lhs2TeX
-$HOME/.lhs2TeX
-$LHS2TEX
-/usr/local/share/lhs2tex
-/usr/local/share/lhs2TeX
-/usr/local/lib/lhs2tex
-/usr/local/lib/lhs2TeX
-/usr/share/lhs2tex
-/usr/share/lhs2TeX
-/usr/lib/lhs2tex
-/usr/lib/lhs2TeX
-\end{code}
+%include RawSearchPath.lhs
 \endgroup

@@ -145,4 +145,3 @@ more than one directory separator, all subpaths are added ...
 >                               $  userError $ "File `" ++ fn ++ "' not found in search path:\n" ++ showpath
 >   s (x:xs)                    =  catch x (\_ -> s xs)
 >   showpath                    =  concatMap (\x -> "   " ++ x ++ "\n") p
-

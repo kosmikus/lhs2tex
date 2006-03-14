@@ -1,0 +1,30 @@
+
+Here, {HOME} and {LHS2TEX} denote the current values of these two
+environment variables HOME and LHS2TEX. The double slash at the end of
+each dir means that subdirectories are also scanned. If lhs2TeX is
+installed to a non-standard path, you might want to set the
+environment variable "LHS2TEX" to point to the directory where
+"lhs2TeX.fmt" and the other library files have been installed to.
+
+IMPORTANT:
+To be able to use ``poly'' style, the two LaTeX 
+packages "polytable.sty" and "lazylist.sty" are required!
+
+Both are included in the lhs2TeX distribution (they are not part of
+standard LaTeX distributions, although they are available from
+CTAN), and are usually installed during the normal procedure. The
+configure script will determine whether a suitably recent version of
+polytable is installed on your system, and if necessary, install
+both "polytable.sty" and "lazylist.sty" to your TeX system. If this
+is not desired or fails (because the script cannot detect your TeX
+installation properly), the installation of these files can be
+disabled by passing the option "--disable-polytable" to
+"configure". In this case, the two files must be manually installed to
+a location where your TeX distribution will find them.  Assuming
+that you have a local TeX tree at "/usr/local/share/texmf", this can
+usually be avhieved by placing the files in the directory
+"/usr/local/share/texmf/tex/latex/polytable" and subsequently running
+
+mktexlsr 
+
+to update the TeX filename database.
