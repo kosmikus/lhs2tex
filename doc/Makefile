@@ -28,6 +28,7 @@ SearchPath.lhs : RawSearchPath.lhs
 
 srcdist :
 	$(INSTALL) -m 644 $(SNIPPETSGD:.tex=.lhs) ../$(DISTDIR)/doc
+	$(INSTALL) -m 644 RawSearchPath.lhs ../$(DISTDIR)/doc
 	$(INSTALL) -m 644 $(wildcard *.fmt) ../$(DISTDIR)/doc
 	$(INSTALL) -m 644 Guide2.lhs Guide2.pdf Makefile ../$(DISTDIR)/doc
 	$(INSTALL) -m 755 lhs2TeXpre ../$(DISTDIR)/doc
