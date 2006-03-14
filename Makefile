@@ -107,7 +107,7 @@ lhs2TeX.fmt: lhs2TeX.fmt.lit lhs2TeX
 lhs2TeX : $(sources)
 	$(GHC) $(GHCFLAGS) --make -o lhs2TeX $(sources)
 
-doc : bin INSTALL
+doc : bin
 	cd doc; $(MAKE)
 #	cd Guide; $(MAKE) Guide.pdf
 
@@ -157,7 +157,7 @@ else
 	echo "Please update the TeX filename database."
 endif
 
-srcdist : doc
+srcdist : INSTALL doc
 	if test -d $(DISTDIR); then $(RM) -rf $(DISTDIR); fi
 	$(MKINSTDIR) $(DISTDIR)
 	$(MKINSTDIR) $(DISTDIR)/doc
