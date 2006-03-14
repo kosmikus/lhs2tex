@@ -1215,7 +1215,7 @@ The syntax of the @\aligncolumn@ command is:
 \input{AlignColumnSyntax}%
 % The above file also contains some additional documentation.
 
-ADD EXAMPLE!!
+TODO: ADD EXAMPLE!!
 
 %%%
 %%%
@@ -1495,9 +1495,9 @@ The output will look similar to this:
 \end{colorsurround}
 Note that it is possible to pass interpreter commands such
 as @:t@ to the external program. 
-(ADAPT EXAMPLE TO SHOW THIS:)
-Note furthermore the difference
-in output between an @\eval@ and a @\perform@ command.
+%(ADAPT EXAMPLE TO SHOW THIS:)
+%Note furthermore the difference
+%in output between an @\eval@ and a @\perform@ command.
 
 %%%
 %%%
@@ -1674,6 +1674,43 @@ use of each of the categories.
 %---------------------------------------------------------------------------
 \section{Pitfalls/FAQ}
 %---------------------------------------------------------------------------
+
+\begin{problem}
+The document consists of multiple files. Can @lhs2TeX@ be used?
+\end{problem}
+One option is to use @%include@ rather than \LaTeX\ commands
+to include all files in the master file. The other is to process
+all files that contain code \emph{and} the master file with @lhs2TeX@.
+All files to be processed with @lhs2TeX@ must contain an
+@%include lhs2TeX.fmt@ (or @%include polycode.fmt@) statement. 
+From version 1.11 on, including @lhs2TeX.sty@ is no longer necessary.
+
+\begin{problem}
+Yes, but the master file should be pure \LaTeX.
+\end{problem}
+Create a file @mylhs2tex.lhs@ with just one line, namely
+@%include lhs2TeX.fmt@. Process that file with @lhs2TeX@, using the
+options you also use for the other included files. Call the resulting
+file @mylhs2tex.sty@ and say @\usepackage{mylhs2tex}@ at the beginning
+of your master file.
+
+\begin{problem}
+The spacing around my code blocks is bad (nonexistent) in ``\textbf{poly}''
+style.
+\end{problem}
+Add the line @%include polycode.fmt@ to the preamble of your document.
+
+\begin{problem}
+\LaTeX\ complains when using @lhs2TeX@ in ``\textbf{poly}'' style
+with the @beamer@ package.
+\end{problem}
+Add the line @%include polycode.fmt@ to the preamble of your document.
+
+\begin{problem}
+\LaTeX\ complains when using @lhs2TeX@ in ``\textbf{poly}'' style
+with the @jfp@ class.
+\end{problem}
+Add the line @%include jfpcompat.fmt@ to the preamble of your document.
 
 \begin{problem}
 \LaTeX\ claims that the package @polytable@ (or @lazylist@) 

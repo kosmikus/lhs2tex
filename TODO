@@ -3,6 +3,8 @@ Features planned for 2.0
 
 * Finish the manual.
 
+* Formatting directives parameterized by arity.
+
 * Facilitate Windows installation.
 
 Features planned for post-2.0
@@ -10,9 +12,9 @@ Features planned for post-2.0
 
 * Configurable lexer.
 
-* Restructure lhs2TeX.{fmt,sty} into libraries.
-
 Features planned for future versions of polytable
 =================================================
 
-* Private columns are not shared with save-/restorecolumns.
+* Private columns are not shared with save-/restorecolumns. (?)
+
+* Support for rules.

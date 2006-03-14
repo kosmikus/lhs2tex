@@ -55,13 +55,13 @@ Requirements and Download
 A source distribution that should be suitable for Unix-based
 environments is available from
 
-  http://www.cs.uu.nl/~andres/lhs2tex/
+  http://www.iai.uni-bonn.de/~aloeh/lhs2tex/
 
 It has been verified to build on Linux and MacOSX.
-For some platforms, binaries are available.
+Binaries will be made available on request.
 
-You need a recent version of GHC (6.X is tested) to build 
-lhs2TeX, and, of course, you need a TeX distribution 
+You need a recent version of GHC (6.4.1 is tested, 6.2.2 might
+work) to build lhs2TeX, and, of course, you need a TeX distribution 
 to make use of lhs2TeX's output. The program includes a 
 configuration that is suitable for use with LaTeX. In theory, 
 there should be no problem to generate code for other TeX 
@@ -69,7 +69,7 @@ flavors, such as plainTeX or ConTeXt.
 
 
   Happy lhs2TeXing,
-  Ralf Hinze and Andres Loeh
+  Andres Loeh and Ralf Hinze
 
-  ralf@informatik.uni-bonn.de
   lhs2TeX@andres-loeh.de
+  ralf@informatik.uni-bonn.de
