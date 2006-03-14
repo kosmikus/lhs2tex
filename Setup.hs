@@ -25,9 +25,10 @@ import System.Info (os)
 lhs2tex = "lhs2TeX"
 minPolytableVersion = [0,8,2]
 shortversion = show (numversion `div` 100) ++ "." ++ show (numversion `mod` 100)
-version = shortversion ++ if pre /= 0 then "pre" ++ show pre else ""
+version = shortversion ++ if ispre then "pre" ++ show pre else ""
 numversion = 111
-pre = 4
+ispre = False
+pre = 6
 
 main = defaultMainWithHooks lhs2texHooks
 
