@@ -10,8 +10,14 @@ SNIPPETSTLL = $(shell $(GREP) "\\\\input{" TLL.lhs | $(SED) "s/^.*input{\(.*\)}.
 STCFLAGS="--let=stc=True"
 endif
 
+DONTBUILD = $(shell test -f Guide2.dontbuild && echo yes)
+
 # default target
+ifeq ($(DONTBUILD),yes)
+all : dontbuildwarning
+else
 all : Guide2.pdf
+endif
 
 # in-place polytable.sty
 polytable.sty :
@@ -34,18 +40,17 @@ srcdist :
 	$(INSTALL) -m 755 lhs2TeXpre ../$(DISTDIR)/doc
 	touch ../$(DISTDIR)/doc/Guide2.dontbuild
 
+dontbuildwarning :
+	echo "----------------------------------------------"; \
+	echo "To rebuild Guide2.pdf, remove Guide2.dontbuild"; \
+	echo "and call make again."; \
+	echo "----------------------------------------------"; \
+
 %.pdf : %.tex polytable.sty
-	@if test -f $(<:.tex=.dontbuild); then \
-		echo "----------------------------------------------"; \
-		echo "To rebuild $@, remove $(<:.tex=.dontbuild)"; \
-		echo "and call make again."; \
-		echo "----------------------------------------------"; \
-	else \
-		$(SHELL) -c ' \
-			$(PDFLATEX) $(PDFLATEX_OPTS) $<; \
-			while $(GREP) -c "Warning.*Rerun" $(<:.tex=.log); \
-				do $(PDFLATEX) $(PDFLATEX_OPTS) $<; done;'; \
-	fi
+	$(SHELL) -c ' \
+		$(PDFLATEX) $(PDFLATEX_OPTS) $<; \
+		while $(GREP) -c "Warning.*Rerun" $(<:.tex=.log); \
+			do $(PDFLATEX) $(PDFLATEX_OPTS) $<; done;'; \
 
 Guide2.tex : Guide2.lhs $(SNIPPETSGD)
 	$(LHS2TEX) --poly -P.:.. $< > $@
