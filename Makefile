@@ -1,7 +1,8 @@
 
 include config.mk
 
-psources        := Main.lhs TeXCommands.lhs TeXParser.lhs \
+main            := Main.lhs
+psources        := $(main) TeXCommands.lhs TeXParser.lhs \
 		   Typewriter.lhs Math.lhs MathPoly.lhs \
                    MathCommon.lhs NewCode.lhs \
 		   Directives.lhs HsLexer.lhs FileNameUtils.lhs \
@@ -105,7 +106,7 @@ lhs2TeX.fmt: lhs2TeX.fmt.lit lhs2TeX
 	./lhs2TeX --code lhs2TeX.fmt.lit > lhs2TeX.fmt
 
 lhs2TeX : $(sources)
-	$(GHC) $(GHCFLAGS) --make -o lhs2TeX $(sources)
+	$(GHC) $(GHCFLAGS) --make -o lhs2TeX $(main)
 
 doc : bin
 	cd doc; $(MAKE)

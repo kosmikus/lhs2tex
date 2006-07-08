@@ -14,8 +14,8 @@ exec_prefix     = @exec_prefix@
 # binpath	:= $(HOME)/bin
 
 GHC		= @GHC@
-# GHCFLAGS	:= -Wall -O -recomp -package lang
-GHCFLAGS        = -O -package lang
+# GHCFLAGS	:= -Wall -O -recomp
+GHCFLAGS        = -O
 
 INSTALL         = @INSTALL@
 MV              = @MV@
