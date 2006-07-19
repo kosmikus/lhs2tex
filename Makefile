@@ -135,7 +135,7 @@ gv : Lhs2TeX.ps
 print : Lhs2TeX.dvi
 	$(DVIPS) -D600 -f Lhs2TeX.dvi | lpr -Pa -Zl
 
-install : bin
+install : bin doc
 	$(MKINSTDIR) $(DESTDIR)$(bindir)
 	$(INSTALL) -m 755 lhs2TeX $(DESTDIR)$(bindir)
 	$(MKINSTDIR) $(DESTDIR)$(stydir)

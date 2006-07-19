@@ -17,6 +17,8 @@ GHC		= @GHC@
 # GHCFLAGS	:= -Wall -O -recomp
 GHCFLAGS        = -O
 
+HUGS            = @HUGS@
+
 INSTALL         = @INSTALL@
 MV              = @MV@
 CP              = @CP@

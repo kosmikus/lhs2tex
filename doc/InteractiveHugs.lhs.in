@@ -12,6 +12,16 @@
 > fix    ::  forall a. (a -> a) -> a
 > fix f  =   f (fix f)
 
-This function is of type \eval{:t fix},
+This function is of type 
+%if "@HUGS@" /= ""
+\eval{:t fix},
+%else
+\textbf{?hugs not found?},
+%endif
 and |take 10 (fix ('x':))| 
-evaluates to \eval{take 10 (fix ('x':))}.
+evaluates to
+%if "@HUGS@" /= ""
+\eval{take 10 (fix ('x':))}.
+%else
+\textbf{?hugs not found?}.
+%endif

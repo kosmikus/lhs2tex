@@ -16,6 +16,8 @@ AC_SUBST(PRE)
 
 # check for Haskell compiler
 AC_PATH_PROG(GHC,ghc)
+# check for Hugs (only for documentation)
+AC_PATH_PROG(HUGS,hugs)
 
 # install command
 AC_PROG_INSTALL
@@ -67,7 +69,7 @@ AC_PATH_PROG(MKTEXLSR,mktexlsr)
 docdir="$datadir/doc/$PACKAGE_TARNAME-$PACKAGE_VERSION"
 AC_SUBST(docdir)
 
-AC_CONFIG_FILES(config.mk Version.lhs lhs2TeX.1)
+AC_CONFIG_FILES(config.mk Version.lhs lhs2TeX.1 doc/InteractiveHugs.lhs)
 AC_OUTPUT
 
 echo "Configuration succesfully completed."

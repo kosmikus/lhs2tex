@@ -9,6 +9,8 @@ Known bugs or problems
    - for instance, document --path=:bla and --path=bla:
    [ This is at least in the manpage now. ]
 
+*  non-presence of hugs shouldn't cause any inconvenience
+
 *  add @@ and || quoting with typical errors as FAQ
 
 *  operator sections involving `infix` operators don't render nicely
