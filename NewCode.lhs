@@ -13,16 +13,16 @@ way that is compatible with the @poly@ or @math@ formatters.
 > module NewCode                (  module NewCode  )
 > where
 >
-> import Char
+> import Data.Char
+> import Data.List              (  partition )
 >
-> import Verbatim ( trim, expand )
+> import Verbatim               (  trim, expand )
 > import Document
 > import Directives
 > import HsLexer
 > import qualified FiniteMap as FM
-> import List ( partition )
 > import Auxiliaries
-> import MathPoly ( exprParse, substitute, number )
+> import MathPoly               (  exprParse, substitute, number )
 
 %endif
 

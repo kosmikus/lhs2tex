@@ -7,7 +7,7 @@
 > module FiniteMap              (  FiniteMap, empty, fromList, add, lookup, (!), keys)
 > where
 > import Prelude hiding         (  lookup  )
-> import Maybe
+> import Data.Maybe
 
 %endif
 

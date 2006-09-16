@@ -7,8 +7,8 @@
 > module Auxiliaries            (  module Auxiliaries  )
 > where
 >
-> import Char                   (  isSpace  )
-> import Monad                  (  MonadPlus(..)  )
+> import Data.Char              (  isSpace  )
+> import Control.Monad          (  MonadPlus(..)  )
 
 %endif
 

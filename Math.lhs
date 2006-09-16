@@ -7,13 +7,13 @@
 > module Math                   (  module Math, substitute, number  )
 > where
 >
-> import Prelude hiding ( lines )
-> import List ( partition )
-> import Numeric ( showFFloat )
-> import Monad ( MonadPlus(..) )
+> import Prelude hiding         (  lines )
+> import Data.List              (  partition )
+> import Numeric                (  showFFloat )
+> import Control.Monad          (  MonadPlus(..) )
 >
-> import Verbatim ( expand, trim )
-> import Typewriter ( latex )
+> import Verbatim               (  expand, trim )
+> import Typewriter             (  latex )
 > import MathCommon
 > import Document
 > import Directives

@@ -7,17 +7,16 @@
 > module Main ( main )
 > where
 >
-> import Char
+> import Data.Char
 > import System.IO ( hClose, hPutStr, hPutStrLn, hFlush, hGetLine, stderr, stdout, openFile, IOMode(..), Handle(..) )
 > import System.Directory ( copyFile )
 > import System.Console.GetOpt
 > import Text.Regex ( matchRegex, mkRegexWithOpts )
-> import System
-> import Version
->
-> import Control.Monad
->
+> import System.Environment
+> import System.Exit
 > import System.Process
+> import Version
+> import Control.Monad
 >
 > -- import IOExts
 > import TeXCommands

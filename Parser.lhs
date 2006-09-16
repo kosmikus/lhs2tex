@@ -7,9 +7,9 @@
 > module Parser                 (  Parser, run, satisfy, lit, lits, wrap, nonnull, eof  )
 > where
 >
-> import Char                   (  isSpace  )
+> import Data.Char              (  isSpace  )
 > import Auxiliaries
-> import Monad                  (  MonadPlus(..), filterM  )
+> import Control.Monad          (  MonadPlus(..), filterM  )
 
 %endif
 Deterministische Mini-Parser.

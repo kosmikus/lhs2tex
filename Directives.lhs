@@ -7,8 +7,8 @@
 > module Directives             (  Formats, parseFormat, Equation, Substs, Subst, parseSubst, Toggles, eval, define, value, nrargs  )
 > where
 >
-> import Char                   (  isSpace, isAlpha, isDigit  )
-> import Monad
+> import Data.Char              (  isSpace, isAlpha, isDigit  )
+> import Control.Monad
 > import Parser
 > import TeXCommands
 > import TeXParser

@@ -1,19 +1,20 @@
 import Distribution.Setup (CopyDest(..),BuildFlags(..),
                            CopyFlags(..),RegisterFlags(..),InstallFlags(..))
 import Distribution.Simple
-import Distribution.Simple.Configure (withPrograms)
+-- import Distribution.Simple.Configure (withPrograms)
 import Distribution.Simple.Utils (die,rawSystemExit,maybeExit,copyFileVerbose)
-import Distribution.Simple.LocalBuildInfo (LocalBuildInfo(..),mkDataDir,substDir)
+import Distribution.Simple.LocalBuildInfo (LocalBuildInfo(..),mkDataDir,substDir,absolutePath)
 import Distribution.Program (Program(..),ProgramConfiguration(..),
                              ProgramLocation(..),simpleProgram,lookupProgram,
                              rawSystemProgramConf)
-import Distribution.Compat.ReadP (readP_to_S)
-import Distribution.Compat.FilePath (joinFileName,dropAbsolutePrefix)
+-- import Distribution.Compat.ReadP (readP_to_S)
+import Distribution.Compat.FilePath (joinFileName)
 import Data.Char (isSpace)
 import Data.List (isSuffixOf,isPrefixOf)
 import Data.Maybe (listToMaybe,isJust)
 import Control.Monad (when,unless)
 import Text.Regex (matchRegex,matchRegexAll,mkRegex,mkRegexWithOpts,subRegex)
+import Text.ParserCombinators.ReadP (readP_to_S)
 import System.Cmd (system)
 import System.Exit
 import System.IO (hGetContents,hClose,hPutStrLn,stderr)
@@ -21,6 +22,8 @@ import System.IO.Error (try)
 import System.Process (runInteractiveProcess,waitForProcess)
 import System.Directory
 import System.Info (os)
+
+-- withPrograms = undefined -- was in Distribution.Simple.Configure
 
 lhs2tex = "lhs2TeX"
 minPolytableVersion = [0,8,2]
@@ -196,9 +199,9 @@ lhs2texPostCopy a (CopyFlags { copyDest = cd, copyVerbose = v }) pd lbi =
           Nothing    -> return ()
         return ExitSuccess
 
-lhs2texPostInst a (InstallFlags { installVerbose = v }) pd lbi =
+lhs2texPostInst a (InstallFlags { installUserFlags = u, installVerbose = v }) pd lbi =
     do  lhs2texPostCopy a (CopyFlags { copyDest = NoCopyDest, copyVerbose = v }) pd lbi
-        lhs2texRegHook pd lbi Nothing (RegisterFlags { regUserPackage = False, regGenScript = False, regVerbose = v })
+        lhs2texRegHook pd lbi Nothing (RegisterFlags { regUser = u, regInPlace = False, regWithHcPkg = Nothing, regGenScript = False, regVerbose = v })
         return ExitSuccess
 
 lhs2texRegHook pd lbi _ (RegisterFlags { regVerbose = v }) =
@@ -316,11 +319,4 @@ writePersistLhs2texBuildConfig lbi = do
 
 -- would be nice if there'd be a predefined way to detect this
 isWindows = "mingw" `isPrefixOf` os || "win" `isPrefixOf` os 
-
--- should really be exported by LocalBuildInfo
-absolutePath pkg_descr lbi copydest s =
-  case copydest of
-    NoCopyDest   -> substDir pkg_descr lbi s
-    CopyPrefix d -> substDir pkg_descr lbi{prefix=d} s
-    CopyTo     p -> p `joinFileName` (dropAbsolutePrefix (substDir pkg_descr lbi s))
 

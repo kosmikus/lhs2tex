@@ -13,13 +13,13 @@ are subtle differences, and they will grow over time \dots
 > module MathPoly               (  module MathPoly, substitute, number  )
 > where
 >
-> import Prelude hiding ( lines )
-> import List ( partition, nub, insert, sort, transpose )
-> import Numeric ( showFFloat )
-> import Monad ( MonadPlus(..) )
+> import Prelude hiding         (  lines )
+> import Data.List              (  partition, nub, insert, sort, transpose )
+> import Numeric                (  showFFloat )
+> import Control.Monad          (  MonadPlus(..) )
 >
-> import Verbatim ( expand, trim )
-> import Typewriter ( latex )
+> import Verbatim               (  expand, trim )
+> import Typewriter             (  latex )
 > import MathCommon
 > import Document
 > import Directives

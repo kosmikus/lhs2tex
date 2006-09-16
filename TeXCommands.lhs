@@ -7,7 +7,7 @@
 > module TeXCommands            (  module TeXCommands  )
 > where
 >
-> import Maybe
+> import Data.Maybe
 > import FiniteMap              (  FiniteMap  )
 > import qualified FiniteMap as FM
 > import Auxiliaries

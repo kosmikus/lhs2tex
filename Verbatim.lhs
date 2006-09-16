@@ -7,7 +7,7 @@
 > module Verbatim               (  module Verbatim  )
 > where
 >
-> import Char
+> import Data.Char
 >
 > import Document
 > import Auxiliaries

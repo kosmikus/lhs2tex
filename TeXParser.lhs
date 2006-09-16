@@ -6,7 +6,7 @@
 
 > module TeXParser              (  texparse  )
 > where
-> import Char                   (  isSpace, isAlpha  )
+> import Data.Char              (  isSpace, isAlpha  )
 > import TeXCommands
 > import Auxiliaries hiding     (  breaks  )
 

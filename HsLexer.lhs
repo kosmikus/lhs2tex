@@ -6,8 +6,8 @@
 
 > module HsLexer                (  module HsLexer ) --Token(..), isVarid, isConid, isNotSpace, string, tokenize  )
 > where
-> import Char hiding            (  lexLitChar  )
-> import Monad
+> import Data.Char hiding       (  lexLitChar  )
+> import Control.Monad
 > import Document
 > import Auxiliaries
 

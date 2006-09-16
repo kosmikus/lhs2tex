@@ -8,11 +8,13 @@
 >                               , deep, absPath, relPath, env
 >                               ) where
 >
-> import IO
-> import System
-> import Directory
-> import List
-> import Monad (filterM)
+> import Prelude hiding         (  catch )
+> import System.IO
+> import System.Directory
+> import System.Environment
+> import Data.List
+> import Control.Monad (filterM)
+> import Control.Exception      (  try, catch )
 
 > type FileName                 =  String
 
