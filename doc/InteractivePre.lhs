@@ -14,7 +14,7 @@
 %format ^^     = "\; "
 %endif
 
-%options ghci -fglasgow-exts -pgmL ../lhs2TeX -optL--pre
+%options ghci -fglasgow-exts -pgmL "../lhs2TeX" -optL-Pdoc: -optL--pre
 
 This is a rather stupid way of computing |42| using
 Template Haskell:

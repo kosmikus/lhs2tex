@@ -1,44 +1,44 @@
-import Distribution.Setup (CopyDest(..),BuildFlags(..),
+import Distribution.Setup (CopyDest(..),ConfigFlags(..),BuildFlags(..),
                            CopyFlags(..),RegisterFlags(..),InstallFlags(..))
 import Distribution.Simple
--- import Distribution.Simple.Configure (withPrograms)
 import Distribution.Simple.Utils (die,rawSystemExit,maybeExit,copyFileVerbose)
 import Distribution.Simple.LocalBuildInfo (LocalBuildInfo(..),mkDataDir,substDir,absolutePath)
+import Distribution.Simple.Configure (configCompilerAux)
+import Distribution.PackageDescription (PackageDescription(..),setupMessage)
 import Distribution.Program (Program(..),ProgramConfiguration(..),
                              ProgramLocation(..),simpleProgram,lookupProgram,
                              rawSystemProgramConf)
 -- import Distribution.Compat.ReadP (readP_to_S)
-import Distribution.Compat.FilePath (joinFileName)
-import Data.Char (isSpace)
+import Data.Char (isSpace, showLitChar)
 import Data.List (isSuffixOf,isPrefixOf)
 import Data.Maybe (listToMaybe,isJust)
 import Control.Monad (when,unless)
 import Text.Regex (matchRegex,matchRegexAll,mkRegex,mkRegexWithOpts,subRegex)
 import Text.ParserCombinators.ReadP (readP_to_S)
-import System.Cmd (system)
 import System.Exit
-import System.IO (hGetContents,hClose,hPutStrLn,stderr)
+import System.IO (hGetContents,hClose,hPutStr,stderr)
 import System.IO.Error (try)
 import System.Process (runInteractiveProcess,waitForProcess)
 import System.Directory
 import System.Info (os)
-
--- withPrograms = undefined -- was in Distribution.Simple.Configure
+  
 
 lhs2tex = "lhs2TeX"
 minPolytableVersion = [0,8,2]
 shortversion = show (numversion `div` 100) ++ "." ++ show (numversion `mod` 100)
 version = shortversion ++ if ispre then "pre" ++ show pre else ""
-numversion = 111
-ispre = False
-pre = 6
+numversion = 112
+ispre = True
+pre = 1
 
 main = defaultMainWithHooks lhs2texHooks
 
 lhs2texBuildInfoFile :: FilePath
 lhs2texBuildInfoFile = "." `joinFileName` ".setup-lhs2tex-config"
 
-generatedFiles = ["Version.lhs","lhs2TeX.1"]
+generatedFiles = ["Version.lhs","lhs2TeX.1",
+                  "doc" `joinFileName` "InteractiveHugs.lhs",
+                  "doc" `joinFileName` "InteractivePre.lhs"]
 
 data Lhs2texBuildInfo =
   Lhs2texBuildInfo { installPolyTable      ::  Maybe String,
@@ -46,9 +46,11 @@ data Lhs2texBuildInfo =
   deriving (Show, Read)
 
 lhs2texHooks = defaultUserHooks
-                 { hookedPrograms = [simpleProgram "kpsewhich",
+                 { hookedPrograms = [simpleProgram "hugs",
+                                     simpleProgram "kpsewhich",
                                      simpleProgram "pdflatex",
                                      simpleProgram "mktexlsr"],
+                   confHook       = lhs2texConfHook,
                    postConf       = lhs2texPostConf,
                    postBuild      = lhs2texPostBuild,
                    postCopy       = lhs2texPostCopy,
@@ -57,15 +59,30 @@ lhs2texHooks = defaultUserHooks
                    cleanHook      = lhs2texCleanHook
                  }
 
+lhs2texConfHook pd cf =
+    do  -- give status message
+        setupMessage "Pre-Configuring" pd
+        comp <- configCompilerAux (cf { configVerbose = 0 })
+        let flavor = compilerFlavor comp
+        let ver = compilerVersion comp
+        pd <- if flavor == GHC && 
+                 withinRange ver (EarlierVersion (Version [6,5] []))
+              then do
+                     when (configVerbose cf > 0) $ putStrLn "configure: adapting for ghc < 6.5"
+                     return (pd { buildDepends =
+                                  filter (\ (Dependency d _) -> d /= "regex-compat") (buildDepends pd) })
+              else return pd
+        confHook defaultUserHooks pd cf
+
 lhs2texPostConf a cf pd lbi =
     do  -- check polytable
         (_,b,_) <- runKpseWhichVar "TEXMFLOCAL"
-	b       <- return . stripQuotes . stripNewlines $ b
-	ex      <- return (not . all isSpace $ b) -- or check if directory exists?
+        b       <- return . stripQuotes . stripNewlines $ b
+        ex      <- return (not . all isSpace $ b) -- or check if directory exists?
         b       <- if ex then return b
                          else do  (_,b,_) <- (runKpseWhichVar "TEXMFMAIN")
-	                          return . stripQuotes . stripNewlines $ b
-	ex      <- return (not . all isSpace $ b) -- or check if directory exists?
+                                  return . stripQuotes . stripNewlines $ b
+        ex      <- return (not . all isSpace $ b) -- or check if directory exists?
         i       <- if ex then 
                    do  (_,p,_) <- runKpseWhich "polytable.sty"
                        p       <- return . stripNewlines $ p
@@ -97,9 +114,19 @@ lhs2texPostConf a cf pd lbi =
         unless r $ message $ "Using pre-built documentation"
         writePersistLhs2texBuildConfig (Lhs2texBuildInfo { installPolyTable = i, rebuildDocumentation = r })
         mapM_ (\f -> do message $ "Creating " ++ f
+                        hugsExists <- lookupProgram "hugs" (withPrograms lbi)
+                        hugs <- case hugsExists of
+                                  Nothing -> return ""
+                                  Just _  -> fmap fst (getProgram "hugs" (withPrograms lbi))
+                        let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
+                        let lhs2texBin = lhs2texDir `joinFileName` lhs2tex
                         readFile (f ++ ".in") >>= return .
-                                                  replace "@prefix@" (prefix lbi) .
-                                                  replace "@datadir@" (absolutePath pd lbi NoCopyDest (datadir lbi)) .
+                                                  -- these paths could contain backslashes, so we
+                                                  -- need to escape them.
+                                                  replace "@prefix@"  (escapeChars $ prefix lbi) .
+                                                  replace "@datadir@" (escapeChars $ absolutePath pd lbi NoCopyDest (datadir lbi)) .
+                                                  replace "@LHS2TEX@" lhs2texBin .
+                                                  replace "@HUGS@" hugs .
                                                   replace "@VERSION@" version .
                                                   replace "@SHORTVERSION@" shortversion .
                                                   replace "@NUMVERSION@" (show numversion) .
@@ -114,8 +141,8 @@ lhs2texPostBuild a bf@(BuildFlags { buildVerbose = v }) pd lbi =
         let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
         let lhs2texBin = lhs2texDir `joinFileName` lhs2tex
         let lhs2texDocDir = lhs2texDir `joinFileName` "doc"
-        callLhs2tex v lbi "--code lhs2TeX.sty.lit" (lhs2texDir `joinFileName` "lhs2TeX.sty")
-        callLhs2tex v lbi "--code lhs2TeX.fmt.lit" (lhs2texDir `joinFileName` "lhs2TeX.fmt")
+        callLhs2tex v lbi ["--code", "lhs2TeX.sty.lit"] (lhs2texDir `joinFileName` "lhs2TeX.sty")
+        callLhs2tex v lbi ["--code", "lhs2TeX.fmt.lit"] (lhs2texDir `joinFileName` "lhs2TeX.fmt")
         createDirectoryIfMissing True lhs2texDocDir
         if rebuildDocumentation ebi then lhs2texBuildDocumentation a bf pd lbi
                                     else copyFileVerbose v ("doc" `joinFileName` "Guide2.pdf") (lhs2texDocDir `joinFileName` "Guide2.pdf")
@@ -135,6 +162,7 @@ lhs2texBuildDocumentation a (BuildFlags { buildVerbose = v }) pd lbi =
                          writeFile (lhs2texDir `joinFileName` snippet)
                                    ( -- replace "^%options ghc"        "%options ghc" .
                                      -- replace "^%options hugs"       "%options hugs" .
+                                     -- TODO: replace or replaceEscaped
                                      replace "-pgmF \\.\\./lhs2TeX" ("-pgmF " ++ lhs2texBin ++ " -optF-Pdoc:") $ c )
                          let incToStyle ["verbatim"]   = "verb"
                              incToStyle ["stupid"]     = "math"
@@ -143,10 +171,11 @@ lhs2texBuildDocumentation a (BuildFlags { buildVerbose = v }) pd lbi =
                              incToStyle ["typewriter"] = "tt"
                              incToStyle [x]            = x
                              incToStyle []             = "poly"
-                         callLhs2tex v lbi ("--" ++ incToStyle inc ++ " -Pdoc: " ++ lhs2texDir `joinFileName` snippet)
-                                           (lhs2texDocDir `joinFileName` s ++ ".tex"))
-              snippets
-        callLhs2tex v lbi ("--poly -Pdoc: " ++ "doc" `joinFileName` "Guide2.lhs") (lhs2texDocDir `joinFileName` "Guide2.tex")
+                         callLhs2tex v lbi ["--" ++ incToStyle inc , "-Pdoc:", lhs2texDir `joinFileName` snippet]
+                                           (lhs2texDocDir `joinFileName` s ++ ".tex")
+                ) snippets
+        callLhs2tex v lbi ["--poly" , "-Pdoc:", "doc" `joinFileName` "Guide2.lhs"]
+                          (lhs2texDocDir `joinFileName` "Guide2.tex")
         copyFileVerbose v ("polytable" `joinFileName` "polytable.sty") (lhs2texDocDir `joinFileName` "polytable.sty")
         copyFileVerbose v ("polytable" `joinFileName` "lazylist.sty")  (lhs2texDocDir `joinFileName` "lazylist.sty")
         d <- getCurrentDirectory
@@ -220,7 +249,16 @@ matchRegexRepeatedly re str =
       Just (_,_,r,[s]) -> s : matchRegexRepeatedly re r
       Nothing          -> []
 
-replace re t x = subRegex (mkRegexWithOpts re True True) x t
+
+replace re t x = subRegex (mkRegexWithOpts re True True) x (escapeRegex t)
+    where
+    -- subRegex requires us to escape backslashes
+    escapeRegex []        = []
+    escapeRegex ('\\':xs) = '\\':'\\': escapeRegex xs
+    escapeRegex (x:xs)    = x : escapeRegex xs
+    
+escapeChars :: String -> String
+escapeChars t = foldr showLitChar [] t
 
 showYesNo :: Bool -> String
 showYesNo p | p          =  "yes"
@@ -236,12 +274,13 @@ stripQuotes :: String -> String
 stripQuotes ('\'':s@(_:_)) = init s
 stripQuotes x              = x
 
-callLhs2tex v lbi str outf =
+callLhs2tex v lbi params outf =
     do  let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
         let lhs2texBin = lhs2texDir `joinFileName` lhs2tex
-        let cmd_line   = "\"" ++ lhs2texBin ++ "\" -P\"" ++ lhs2texDir ++ "\": " ++ (if v > 4 then "-v " else "") ++ str ++ " >" ++ outf
-        when (v > 0) $ putStrLn cmd_line
-        maybeExit $ system cmd_line
+        let args    =  [ "-P" ++ lhs2texDir ++ ":" ]
+                     ++ (if v > 4 then ["-v"] else [])
+                     ++ params
+        maybeExit $ runCommandRedirect v lhs2texBin args outf 
 
 runCommandRedirect  ::  Int                       -- ^ verbosity
                     ->  String                    -- ^ the command
@@ -251,7 +290,7 @@ runCommandRedirect  ::  Int                       -- ^ verbosity
 runCommandRedirect v cmd args f =
     do  (ex,out,err) <- runCommand v cmd args
         writeFile f out
-        hPutStrLn stderr err
+        hPutStr stderr (unlines . lines $ err)
         return ex
 
 runCommandProgramConf  ::  Int                    -- ^ verbosity
@@ -317,6 +356,24 @@ writePersistLhs2texBuildConfig :: Lhs2texBuildInfo -> IO ()
 writePersistLhs2texBuildConfig lbi = do
   writeFile lhs2texBuildInfoFile (show lbi)
 
--- would be nice if there'd be a predefined way to detect this
-isWindows = "mingw" `isPrefixOf` os || "win" `isPrefixOf` os 
 
+-- HACKS because the Cabal API isn't sufficient:
+
+-- Distribution.Compat.FilePath is supposed to be hidden in future
+-- versions, so we need our own version of it:
+joinFileName :: String -> String -> FilePath
+joinFileName ""  fname = fname
+joinFileName "." fname = fname
+joinFileName dir ""    = dir
+joinFileName dir fname
+  | isPathSeparator (last dir) = dir++fname
+  | otherwise                  = dir++pathSeparator:fname
+  where 
+ isPathSeparator :: Char -> Bool
+ isPathSeparator | isWindows = ( `elem` "/\\" )
+                 | otherwise = ( == '/' )
+ pathSeparator   | isWindows = '\\'
+                 | otherwise = '/'
+
+-- It would be nice if there'd be a predefined way to detect this
+isWindows = "mingw" `isPrefixOf` os || "win" `isPrefixOf` os 

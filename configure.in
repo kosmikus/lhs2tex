@@ -3,12 +3,12 @@ dnl Generic Haskell configure script
 dnl
 
 # Is it there?
-AC_INIT(lhs2tex,1.11)
+AC_INIT(lhs2tex,1.12pre1)
 
-VERSION="1.11"
-SHORTVERSION="1.11"
-NUMVERSION=111
-PRE=6
+VERSION="1.12"
+SHORTVERSION="1.12"
+NUMVERSION=112
+PRE=1
 AC_SUBST(VERSION)
 AC_SUBST(SHORTVERSION)
 AC_SUBST(NUMVERSION)
@@ -69,7 +69,11 @@ AC_PATH_PROG(MKTEXLSR,mktexlsr)
 docdir="$datadir/doc/$PACKAGE_TARNAME-$PACKAGE_VERSION"
 AC_SUBST(docdir)
 
-AC_CONFIG_FILES(config.mk Version.lhs lhs2TeX.1 doc/InteractiveHugs.lhs)
+# lhs2TeX binary path relative to docdir
+LHS2TEX="../lhs2TeX"
+AC_SUBST(LHS2TEX)
+
+AC_CONFIG_FILES(config.mk Version.lhs lhs2TeX.1 doc/InteractiveHugs.lhs doc/InteractivePre.lhs)
 AC_OUTPUT
 
 echo "Configuration succesfully completed."

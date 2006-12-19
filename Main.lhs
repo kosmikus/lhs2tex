@@ -7,7 +7,7 @@
 > module Main ( main )
 > where
 >
-> import Data.Char
+> import Data.Char ( isSpace )
 > import System.IO ( hClose, hPutStr, hPutStrLn, hFlush, hGetLine, stderr, stdout, openFile, IOMode(..), Handle(..) )
 > import System.Directory ( copyFile )
 > import System.Console.GetOpt

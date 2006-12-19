@@ -10,6 +10,9 @@ SNIPPETSTLL = $(shell $(GREP) "\\\\input{" TLL.lhs | $(SED) "s/^.*input{\(.*\)}.
 STCFLAGS="--let=stc=True"
 endif
 
+SNIPPETSIN    = $(wildcard *.lhs.in)
+SNIPPETSLHS   = $(filter-out $(SNIPPETSIN:.in=), $(SNIPPETSGD:.tex=.lhs))
+
 DONTBUILD = $(shell test -f Guide2.dontbuild && echo yes)
 
 # default target
@@ -33,7 +36,8 @@ SearchPath.lhs : RawSearchPath.lhs
 	touch $@
 
 srcdist :
-	$(INSTALL) -m 644 $(SNIPPETSGD:.tex=.lhs) ../$(DISTDIR)/doc
+	$(INSTALL) -m 644 $(SNIPPETSIN) ../$(DISTDIR)/doc
+	$(INSTALL) -m 644 $(SNIPPETSLHS) ../$(DISTDIR)/doc
 	$(INSTALL) -m 644 RawSearchPath.lhs ../$(DISTDIR)/doc
 	$(INSTALL) -m 644 $(wildcard *.fmt) ../$(DISTDIR)/doc
 	$(INSTALL) -m 644 Guide2.lhs Guide2.pdf Makefile ../$(DISTDIR)/doc

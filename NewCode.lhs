@@ -13,7 +13,6 @@ way that is compatible with the @poly@ or @math@ formatters.
 > module NewCode                (  module NewCode  )
 > where
 >
-> import Data.Char
 > import Data.List              (  partition )
 >
 > import Verbatim               (  trim, expand )

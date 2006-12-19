@@ -1,6 +1,6 @@
-cabal-version:  >=1.1.4
+cabal-version:  >=1.1.6
 name:		lhs2tex
-version:	1.11
+version:	1.12
 license:	GPL
 license-file:	LICENSE
 author:		Ralf Hinze <ralf@informatik.uni-bonn.de>, Andres Loeh <lhs2tex@andres-loeh.de>
@@ -9,7 +9,7 @@ stability:	stable
 homepage:	http://www.andres-loeh.de/lhs2tex/
 package-url:	http://www.andres-loeh.de/lhs2tex/lhs2tex-1.11.tar.gz
 synopsis:	Preprocessor for typesetting Haskell sources with LaTeX
-build-depends:	base
+build-depends:	base, regex-compat
 
 executable:	lhs2TeX
 main-is:	Main.lhs

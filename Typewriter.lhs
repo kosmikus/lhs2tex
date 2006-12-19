@@ -7,8 +7,6 @@
 > module Typewriter             (  module Typewriter  )
 > where
 >
-> import Data.Char
->
 > import Verbatim ( trim, expand )
 > import Document
 > import Directives
