@@ -5,7 +5,9 @@ Features planned for 2.0
 
 * Formatting directives parameterized by arity.
 
-* Facilitate Windows installation.
+* Facilitate Windows use.
+
+* Use ndm's FilePath library.
 
 Features planned for post-2.0
 =============================
