@@ -172,7 +172,7 @@ srcdist : INSTALL doc
 	$(INSTALL) -m 644 Makefile common.mk config.mk.in $(DISTDIR)
 	$(INSTALL) -m 644 lhs2TeX.1.in $(DISTDIR)
 	$(INSTALL) -m 755 configure mkinstalldirs install-sh $(DISTDIR)
-	$(INSTALL) -m 644 TODO LICENSE RELEASE $(DISTDIR)
+	$(INSTALL) -m 644 TODO AUTHORS LICENSE RELEASE $(DISTDIR)
 	cat INSTALL | sed -e "s/@ProgramVersion@/$(PACKAGE_VERSION)/" \
 		> $(DISTDIR)/INSTALL
 	chmod 644 $(DISTDIR)/INSTALL
@@ -202,7 +202,7 @@ bindist: lhs2TeX lhs2TeX.fmt lhs2TeX.sty doc
 	$(INSTALL) -m 644 Makefile common.mk config.mk.in $(DISTDIR)
 	$(INSTALL) -m 644 lhs2TeX.1.in $(DISTDIR)
 	$(INSTALL) -m 755 configure mkinstalldirs install-sh $(DISTDIR)
-	$(INSTALL) -m 644 TODO LICENSE RELEASE $(DISTDIR)
+	$(INSTALL) -m 644 TODO AUTHORS LICENSE RELEASE $(DISTDIR)
 	cat INSTALL | sed -e "s/@ProgramVersion@/$(PACKAGE_VERSION)/" \
 		> $(DISTDIR)/INSTALL
 	chmod 644 $(DISTDIR)/INSTALL

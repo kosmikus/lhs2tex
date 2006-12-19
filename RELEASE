@@ -1,5 +1,5 @@
 
-                     lhs2TeX version 1.11
+                     lhs2TeX version 1.12
                      ====================
 
 We are pleased to announce a new release of lhs2TeX, 
@@ -20,34 +20,15 @@ lhs2TeX includes the following features:
 
 * A manual explaining all the important aspects of lhs2TeX.
 
-Changes (w.r.t. lhs2TeX 1.9)
-----------------------------
+Changes (w.r.t. lhs2TeX 1.11)
+-----------------------------
 
-[Note that 1.10 has never been released to avoid confusion
-with some privately distributed versions.] 
+* Compatible with ghc-6.6 and ghc-6.4.2.
 
-* Specification code is now handled correctly (that is, ignored) 
-  in the "code" and "newcode" styles.
-
-* Comments and Pragmas are handled in a better way by 
-  the "newcode" style.
-
-* There are some new forms of implicit formatting directives.
-
-* The LaTeX code produced in the poly style looks slightly
-  more beautiful.
-
-* There is a new Library section, containing some frequently
-  used formatting directives.
-
-* Generation of file/linenumber directives in the produced
-  LaTeX code, for Stefan Wehr's "adjust" tool. Based on a
-  patch submitted by Stefan Wehr.
-
-* lhs2TeX can now replace ghc's literate preprocessor.
-
-* Improved efficiency of \eval and \perform (to call ghci
-  or hugs from lhs2TeX documents).
+* Compatible with cabal-1.1.6; traditional configure/make
+  installation should still work. Thanks to Brian Smith
+  for submitting a patch to improve the Cabal experience
+  on Windows.
 
 Requirements and Download
 -------------------------
@@ -60,10 +41,10 @@ environments is available from
 It has been verified to build on Linux and MacOSX.
 Binaries will be made available on request.
 
-You need a recent version of GHC (6.4.1 is tested, 6.2.2 might
-work) to build lhs2TeX, and, of course, you need a TeX distribution 
-to make use of lhs2TeX's output. The program includes a 
-configuration that is suitable for use with LaTeX. In theory, 
+You need a recent version of GHC (6.4.2 is tested, older versions
+might work) to build lhs2TeX, and, of course, you need a TeX
+distribution to make use of lhs2TeX's output. The program includes
+a configuration that is suitable for use with LaTeX. In theory, 
 there should be no problem to generate code for other TeX 
 flavors, such as plainTeX or ConTeXt.
 
