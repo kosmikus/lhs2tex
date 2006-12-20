@@ -19,7 +19,7 @@ module InteractivePre where
 %format ^^     = "\; "
 %endif
 
-%options ghci -fglasgow-exts -pgmL ../lhs2TeX -optL--pre
+%options ghci -fth -pgmL ../lhs2TeX -optL--pre
 
 This is a rather stupid way of computing |42| using
 Template Haskell:

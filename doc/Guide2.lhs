@@ -316,8 +316,7 @@ There are two possibilities to install @lhs2TeX@:
 
 \subsection{Using Cabal to install @lhs2TeX@}
 
-This is experimental \emph{and} requires a recent darcs snapshot of
-Cabal (version number 1.1.4). The process is then as usual:
+This requires Cabal 1.1.6 or later. The process is then as usual:
 \input{CabalInstallation}%
 The third step requires write access to the installation location
 and the \LaTeX\ filename database.
