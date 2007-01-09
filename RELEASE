@@ -23,7 +23,7 @@ lhs2TeX includes the following features:
 Changes (w.r.t. lhs2TeX 1.11)
 -----------------------------
 
-* Compatible with ghc-6.6 and ghc-6.4.2.
+* Compatible with ghc-6.6.
 
 * Compatible with cabal-1.1.6; traditional configure/make
   installation should still work. Thanks to Brian Smith
@@ -33,13 +33,13 @@ Changes (w.r.t. lhs2TeX 1.11)
 Requirements and Download
 -------------------------
 
-A source distribution that should be suitable for Unix-based
-environments is available from
+A source distribution is available from
 
   http://www.iai.uni-bonn.de/~loeh/lhs2tex/
 
-It has been verified to build on Linux and MacOSX.
-Binaries will be made available on request.
+It has been verified to build on Linux and MacOSX, but
+should also work on Windows. Binaries will be made available
+on request.
 
 You need a recent version of GHC (6.4.2 is tested, older versions
 might work) to build lhs2TeX, and, of course, you need a TeX
