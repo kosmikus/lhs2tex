@@ -7,8 +7,7 @@ There are two possibilities to install lhs2TeX:
 
 (A) Using Cabal to install lhs2TeX:
 
-This is experimental *and* requires a recent darcs snapshot of
-Cabal (version number 1.1.4). The process is then as usual:
+This requires Cabal 1.1.6 or later. The process is then as usual:
 
 runghc Setup configure
 runghc Setup build
