@@ -631,7 +631,7 @@ and the second |magic| plus prompt is the result we look for.
 
 > programInfo                   :: String
 > programInfo                   =
->     "lhs2TeX " ++ version ++ ", Copyright (C) 1997-2006 Ralf Hinze, Andres Loeh\n\n\
+>     "lhs2TeX " ++ version ++ ", Copyright (C) 1997-2007 Ralf Hinze, Andres Loeh\n\n\
 >     \lhs2TeX comes with ABSOLUTELY NO WARRANTY;\n\
 >     \for details type `lhs2TeX --warranty'.\n\
 >     \This is free software, and you are welcome to redistribute it\n\
