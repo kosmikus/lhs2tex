@@ -1,6 +1,15 @@
 Known bugs or problems
 ======================
 
+*  backquotes in operators don't render nicely and should at least
+   be configurable
+
+*  special characters in string literals are formatted in a way
+   that assumes the font used is tt; same holds for verbatim; make
+   configurable
+
+*  \perform { ... } (with space) doesn't seem to work
+
 *  opening %{ parenthesis without closing %} 
    causes (Fail: Main.lhs:186: Non-exhaustive patterns in lambda)
    [ I think this is fixed. ]
@@ -8,8 +17,6 @@ Known bugs or problems
 *  document command line options more systematically
    - for instance, document --path=:bla and --path=bla:
    [ This is at least in the manpage now. ]
-
-*  non-presence of hugs shouldn't cause any inconvenience
 
 *  add @@ and || quoting with typical errors as FAQ
 
