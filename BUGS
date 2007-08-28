@@ -1,6 +1,12 @@
 Known bugs or problems
 ======================
 
+*  --> is an operator, not a comment
+   (reported by Neil Mitchell)
+
+*  catcode of @ is wrong after including standard files 
+   (reported by Jeremy Gibbons)
+
 *  backquotes in operators don't render nicely and should at least
    be configurable
 
