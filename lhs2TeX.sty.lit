@@ -118,6 +118,7 @@ included for math or poly mode.
 %endif
 \newcommand{\plus}{\mathbin{+\!\!\!+}}
 \newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
 \newcommand{\sequ}{\mathbin{>\!\!\!>}}
 %if not standardsymbols
 \renewcommand{\leq}{\leqslant}

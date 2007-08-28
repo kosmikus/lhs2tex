@@ -331,6 +331,7 @@ in a conditional checking |anyMath|.
 %format ||         = "\mathrel{\vee}"
 %format >>         = "\sequ "
 %format >>=        = "\bind "
+%format =<<        = "\rbind "
 %format $          = "\mathbin{\$}"
 %format `seq`      = "\mathbin{\Varid{`seq`}}"
 %format !          = "\mathbin{!}"
