@@ -566,7 +566,7 @@ Output is the result in string form.
 >                                     store (st {externals = FM.add (f,pi) ex})
 >                                     let (pin,pout,_,_) = pi
 >                                     fromIO $ do
->                                       hPutStrLn stderr ("sending: " ++ script)
+>                                       -- hPutStrLn stderr ("sending: " ++ script)
 >                                       hPutStr pin script
 >                                       hFlush pin
 >                                       extract' pout
@@ -601,7 +601,7 @@ and the second |magic| plus prompt is the result we look for.
 >     where readMagic           :: Int -> IO [String]
 >           readMagic 0         =  return []
 >           readMagic n         =  do  l <- hGetLine h
->                                      hPutStrLn stderr ("received: " ++ l)
+>                                      -- hPutStrLn stderr ("received: " ++ l)
 >                                      let n'  |  (null . snd . breaks (isPrefix magic)) l  =  n
 >                                              |  otherwise                                 =  n - 1
 >                                      fmap (l:) (readMagic n')
