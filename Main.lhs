@@ -90,6 +90,7 @@ State.
 >                                          olineno    :: LineNo,
 >                                          atnewline  :: Bool,
 >                                          fldir      :: Bool,          -- file/linenumber directives
+>                                          pragmas    :: Bool,          -- generate LINE pragmas?
 >                                          output     :: Handle,
 >                                          opts       :: String,        -- options for `hugs'
 >                                          files      :: [(FilePath, LineNo)], -- includees (?)
@@ -116,6 +117,7 @@ Initial state.
 >                                          olineno    = 0,
 >                                          atnewline  = True,
 >                                          fldir      = False,
+>                                          pragmas    = True,
 >                                          output     = stdout,
 >                                          opts       = "",
 >                                          files      = [],
@@ -212,6 +214,8 @@ because with some versions of GHC it triggers ambiguity errors with
 >                                                       return $ s { output = h }, id, [])) "file") "specify output file"
 >   , Option []    ["file-directives"]
 >                              (NoArg (\s -> return $ s { fldir = True }, id, []))          "generate %file directives"
+>   , Option []    ["no-pragmas"]
+>                              (NoArg (\s -> return $ s { pragmas = False }, id, []))       "no LINE pragmas"
 >   , Option ['A'] ["align"]   (ReqArg (\c -> (return, (Directive Align c:), [])) "col")    "align at <col>"
 >   , Option ['i'] ["include"] (ReqArg (\f -> (return, (Directive Include f:), [])) "file") "include <file>"
 >   , Option ['l'] ["let"]     (ReqArg (\s -> (return, (Directive Let s:), [])) "equation") "assume <equation>"
@@ -456,7 +460,7 @@ Printing documents.
 >                                     return (d, st{pstack = pstack'})
 >         select NewCode st     =  do d <- NewCode.display (fmts st) s
 >                                     let p = sub'pragma $ Text ("LINE " ++ show (lineno st + 1) ++ " " ++ show (filename $ file st))
->                                     return (p <> sub'nl <> d, st)
+>                                     return ((if pragmas st then ((p <> sub'nl) <>) else id) d, st)
 >         select CodeOnly st    =  return (Text (trim s), st)
 
 > auto                          =  "autoSpacing"
@@ -562,6 +566,7 @@ Output is the result in string form.
 >                                     store (st {externals = FM.add (f,pi) ex})
 >                                     let (pin,pout,_,_) = pi
 >                                     fromIO $ do
+>                                       hPutStrLn stderr ("sending: " ++ script)
 >                                       hPutStr pin script
 >                                       hFlush pin
 >                                       extract' pout
@@ -596,6 +601,7 @@ and the second |magic| plus prompt is the result we look for.
 >     where readMagic           :: Int -> IO [String]
 >           readMagic 0         =  return []
 >           readMagic n         =  do  l <- hGetLine h
+>                                      hPutStrLn stderr ("received: " ++ l)
 >                                      let n'  |  (null . snd . breaks (isPrefix magic)) l  =  n
 >                                              |  otherwise                                 =  n - 1
 >                                      fmap (l:) (readMagic n')
