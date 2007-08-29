@@ -94,6 +94,7 @@ Commands.
 >         Just cmd              -> case nested maxChar 0 t of
 >             (a, '}' : u)      -> Command cmd a : classify u
 >             _                 -> notFound "matching `}'" str : cont
+>     ([], '%' : t)             -> Many "\\%" : classify t
 >     _                         -> cont
 >     where
 >     cont                      =  One '\\' : classify s
