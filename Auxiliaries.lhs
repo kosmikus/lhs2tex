@@ -9,6 +9,7 @@
 >
 > import Data.Char              (  isSpace  )
 > import Control.Monad          (  MonadPlus(..)  )
+> import Control.Monad.Error
 
 %endif
 
@@ -109,6 +110,7 @@ Kleisli and reverse Kleisli composition.
 
 |Either| as an exception monad.
 
+> {-
 > instance Functor (Either a) where
 >     fmap f (Left  a)          =  Left  a
 >     fmap f (Right b)          =  Right (f b)
@@ -117,6 +119,8 @@ Kleisli and reverse Kleisli composition.
 >     Left  a >>= k             =  Left a
 >     Right b >>= k             =  k b
 >     return                    =  Right
+> -}
+> instance (Error a, Error b) => Error (a,b) where
 >
 > fromRight                     :: Either a b -> b
 > fromRight (Left _)            =  error "fromRight"

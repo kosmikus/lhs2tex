@@ -8,6 +8,7 @@
 > where
 > import Data.Char 	(  isSpace, isUpper, isLower, isDigit, isAlphaNum  )
 > import Control.Monad
+> import Control.Monad.Error ()
 > import Document
 > import Auxiliaries
 

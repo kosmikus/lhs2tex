@@ -9,7 +9,7 @@ stability:	stable
 homepage:	http://www.andres-loeh.de/lhs2tex/
 package-url:	http://www.andres-loeh.de/lhs2tex/lhs2tex-1.11.tar.gz
 synopsis:	Preprocessor for typesetting Haskell sources with LaTeX
-build-depends:	base, regex-compat
+build-depends:	base, regex-compat, mtl
 
 executable:	lhs2TeX
 main-is:	Main.lhs
