@@ -9,6 +9,7 @@
 >
 > import FileNameUtils
 > import Data.List
+> import System.Info
 >
 > version                       :: String
 > version                       =  "@VERSION@"
@@ -20,26 +21,30 @@ Used internally to distinguish prereleases.
 > pre                           :: Int
 > pre                           =  @PRE@
 
+> isWindows = "win" `isPrefixOf` os || "Win" `isPrefixOf` os
+
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Search path}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
-> searchPath                    =  relPath ["."] :
->                                  [  deep (relPath (env "HOME":[p ++ x]))
+> searchPath                    =  "." :
+>                                  [  deep (joinPath (env "HOME" : [p ++ x]))
 >                                  |  p <- ["","."]
 >                                  ,  x <- lhs2TeXNames
 >                                  ] ++
->                                  [deep (relPath [env "LHS2TEX"])] ++
+>                                  [deep (joinPath [env "LHS2TEX"])] ++
 >                                  [  deep (path [dir])
 >                                  |  dir  <-  lhs2TeXNames
->                                  ,  path <-  [\x -> relPath ([datadir] ++ x)
->                                              ,\x -> absPath (["usr","local","share"] ++ x)
->                                              ,\x -> absPath (["usr","local","lib"] ++ x)
->                                              ,\x -> absPath (["usr","share"] ++ x)
->                                              ,\x -> absPath (["usr","lib"] ++ x)
+>                                  ,  path <-  [\x -> joinPath ([datadir] ++ x)]
+>                                              ++ if isWindows then [] else
+>                                              [\x -> absPath (joinPath $ ["usr","local","share"] ++ x)
+>                                              ,\x -> absPath (joinPath $ ["usr","local","lib"] ++ x)
+>                                              ,\x -> absPath (joinPath $ ["usr","share"] ++ x)
+>                                              ,\x -> absPath (joinPath $ ["usr","lib"] ++ x)
 >                                              ]
 >                                  ]
 >
+> lhs2TeXNames                  :: [FilePath]
 > lhs2TeXNames                  =  ["lhs2tex-@SHORTVERSION@"
 >                                  ,"lhs2tex"
 >                                  ,"lhs2TeX"

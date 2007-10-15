@@ -1581,6 +1581,7 @@ use of each of the categories.
                 character |a| \\
 @consym@ |a|  & how to format a constructor symbol |a| \\
 @varsym@ |a|  & how to format a variable symbol |a| \\
+@backquoted@ |a| & how to format a backquoted operator |a| \\
 @numeral@ |a| & how to format a numeral |a| \\
 @char@ |a|    & how to format a character literal |a| \\
 @string@ |a|  & how to format a literal string |a| \\

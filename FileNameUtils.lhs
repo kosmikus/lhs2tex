@@ -1,11 +1,10 @@
 > module FileNameUtils          ( extension
->                               , filename
->                               , basename
->                               , dirname
 >                               , expandPath
 >                               , chaseFile
 >                               , modifySearchPath
->                               , deep, absPath, relPath, env
+>                               , deep, env
+>                               , absPath
+>                               , module System.FilePath
 >                               ) where
 >
 > import Prelude hiding         (  catch )
@@ -15,86 +14,61 @@
 > import Data.List
 > import Control.Monad (filterM)
 > import Control.Exception      (  try, catch )
-
-> type FileName                 =  String
-
-> directorySeparators           =  "/"
-> directorySeparator            =  '/'
-> environmentSeparators         =  ";:"
+> import System.FilePath
+> import System.Info
 
 A searchpath can be added to the front or to the back of the current path
 by pre- or postfixing it with a path separator. Otherwise the new search
 path replaces the current one.
 
-> modifySearchPath              :: [FileName] -> String -> [FileName]
+> modifySearchPath              :: [FilePath] -> String -> [FilePath]
 > modifySearchPath p np
->   | any (\x -> x == head np) environmentSeparators = p ++ split
->   | any (\x -> x == last np) environmentSeparators = split ++ p
+>   | isSearchPathSeparator (head np)                = p ++ split
+>   | isSearchPathSeparator (last np)                = split ++ p
 >   | otherwise                                      = split
->   where split = splitOn environmentSeparators np
+>   where split = splitOn isSearchPathSeparator np
 
-> relPath                       :: [String] -> FileName
-> relPath ps                    =  concat (intersperse [directorySeparator] ps)
+> -- relPath =  joinpath
 
-> absPath                       :: [String] -> FileName
-> absPath ps                    =  directorySeparator : relPath ps
+> -- absPath ps  =  directorySeparator : relPath ps
 
-> isAbsolute                    :: FileName -> Bool
-> isAbsolute []                 =  False
-> isAbsolute xs                 =  head xs `elem` directorySeparators
+> isWindows = "win" `isPrefixOf` os || "Win" `isPrefixOf` os
 
-> isRelative                    :: FileName -> Bool
-> isRelative                    =  not . isAbsolute
+> absPath                       :: FilePath -> FilePath
+> absPath                       =  if isWindows then
+>                                    (("C:" ++ [pathSeparator]) ++)
+>                                  else
+>                                    (pathSeparator :)
 
-> deep                          :: FileName -> FileName
-> deep                          =  (++(replicate 2 directorySeparator))
+> deep                          :: FilePath -> FilePath
+> deep                          =  (++(replicate 2 pathSeparator))
 
-> env                           :: String -> FileName
+> env                           :: String -> FilePath
 > env x                         =  "{" ++ x ++ "}"
 
-> extension                     :: FileName -> Maybe String
-> extension fn                  =  f False [] fn 
->   where
->   f found acc [] | found      =  Just (reverse acc)
->                  | not found  =  Nothing 
->   f found acc ('.':cs)        =  f True  []      cs
->   f found acc (c  :cs)        =  f found (c:acc) cs
+> extension                     :: FilePath -> Maybe String
+> extension fn                  =  case takeExtension fn of
+>                                    ""       ->  Nothing
+>                                    (_:ext)  ->  Just ext
 
-> dirname                       :: FileName -> String
-> dirname fn                    =  f [] [] fn
->   where
->   f res acc []                =  reverse res
->   f res acc (c:cs) 
->     | c `elem` directorySeparators 
->                               =  f (c : acc ++ res) [] cs
->     | otherwise               =  f res       (c : acc) cs
-
-> filename                      :: FileName -> String
-> filename fn                   =  f [] fn 
->   where
->   f acc []                    =  reverse acc 
->   f acc (c:cs)
->     | c `elem` directorySeparators
->                               =  f []      cs
->     | otherwise               =  f (c:acc) cs
-
-> basename                      :: FileName -> String
-> basename fn                   =  takeWhile (/= '.') (filename fn)  
+> -- dirname = takeDirectory
+> -- filename = takeFilePath
+> -- basename = takeBaseName
 
 |expandPath| does two things: it replaces curly braced strings with
 environment entries, if present; furthermore, if the path ends with
 more than one directory separator, all subpaths are added ...
 
 > expandPath                    :: [String] -> IO [String]
-> expandPath s                  =  do let s' = concatMap (splitOn environmentSeparators) s
->                                     s'' <- mapM expandEnvironment s'
+> expandPath s                  =  do let s' = concatMap splitSearchPath s
+>                                     s''  <- mapM expandEnvironment s'
 >                                     s''' <- mapM findSubPaths (concat s'')
 >                                     return (nub $ concat s''')
 
 > findSubPaths                  :: String -> IO [String]
 > findSubPaths ""               =  return []
 > findSubPaths s                =  let rs = reverse s
->                                      (sep,rs') = span (`elem` directorySeparators) rs
+>                                      (sep,rs') = span isPathSeparator rs
 >                                      s'   = reverse rs'
 >                                      sep' = reverse sep
 >                                  in  if   null s' 
@@ -106,7 +80,7 @@ more than one directory separator, all subpaths are added ...
 > descendFrom                   :: String -> IO [String]
 > descendFrom s                 =  catch (do  d <- getDirectoryContents s
 >                                             {- no hidden files, no parents -}
->                                             let d' = map (\x -> s ++ [directorySeparator] ++ x)
+>                                             let d' = map (\x -> s </> x)
 >                                                    . filter ((/='.') . head) . filter (not . null) $ d
 >                                             d'' <- filterM doesDirectoryExist d'
 >                                             d''' <- mapM descendFrom d''
@@ -123,24 +97,24 @@ more than one directory separator, all subpaths are added ...
 >   where findEnvironment       :: String -> String -> String -> IO [String]
 >         findEnvironment e a o =  do er <- try (getEnv e)
 >                                     return $ either (const [])
->                                                     (map (\x -> a ++ x ++ o) . splitOn environmentSeparators)
+>                                                     (map (\x -> a ++ x ++ o) . splitOn isSearchPathSeparator)
 >                                                     er
 
-> splitOn                       :: String -> String -> [String]
-> splitOn b s                   =  case dropWhile (`elem` b) s of
+> splitOn                       :: (Char -> Bool) -> String -> [String]
+> splitOn p s                   =  case dropWhile p s of
 >                                    "" -> []
->                                    s' -> w : splitOn b s''
->                                            where (w,s'') = break (`elem` b) s'
+>                                    s' -> w : splitOn p s''
+>                                            where (w,s'') = break p s'
 
 > chaseFile                     :: [String]    {- search path -}
->                               -> FileName -> IO (String,FileName)
+>                               -> FilePath -> IO (String,FilePath)
 > chaseFile p fn | isAbsolute fn=  t fn
 >                | p == []      =  chaseFile ["."] fn
 >                | otherwise    =  s $ map (\d -> t (md d ++ fn)) p
 >   where
->   md cs | last cs `elem` directorySeparators
+>   md cs | isPathSeparator (last cs)
 >                               =  cs
->         | otherwise           =  cs ++ [directorySeparator]
+>         | otherwise           =  addTrailingPathSeparator cs
 >   t f                         =  catch (readFile f >>= \x -> return (x,f))
 >                                        (\_ -> ioError $ userError $ "File `" ++ fn ++ "' not found.\n")
 >   s []                        =  ioError 

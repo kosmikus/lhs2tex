@@ -459,7 +459,7 @@ Printing documents.
 >         select Poly st        =  do (d, pstack') <- Poly.display (fmts st) (isTrue (toggles st) auto) (separation st) (latency st) (pstack st) s
 >                                     return (d, st{pstack = pstack'})
 >         select NewCode st     =  do d <- NewCode.display (fmts st) s
->                                     let p = sub'pragma $ Text ("LINE " ++ show (lineno st + 1) ++ " " ++ show (filename $ file st))
+>                                     let p = sub'pragma $ Text ("LINE " ++ show (lineno st + 1) ++ " " ++ show (takeFileName $ file st))
 >                                     return ((if pragmas st then ((p <> sub'nl) <>) else id) d, st)
 >         select CodeOnly st    =  return (Text (trim s), st)
 

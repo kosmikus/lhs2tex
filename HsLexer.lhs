@@ -103,8 +103,6 @@ This should probably be either documented better or be removed again.
 >   | otherwise                 =  return (Comment t, u)
 >   where (d, s') = span (== '-') s
 >         (t, u)  = break (== '\n') s'
-> lex' ('-' : '-' : s)          =  let (t, u) = break (== '\n') s
->                                  in  return (Comment t, u)
 > lex' ('{' : '-' : '"' : s)    =  do let (t, u) = inlineTeX s
 >                                     v <- match "\"-}" u
 >                                     return (TeX (Text t), v)
