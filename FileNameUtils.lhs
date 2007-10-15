@@ -32,7 +32,7 @@ path replaces the current one.
 
 > -- absPath ps  =  directorySeparator : relPath ps
 
-> isWindows = "win" `isPrefixOf` os || "Win" `isPrefixOf` os
+> isWindows = "win" `isPrefixOf` os || "Win" `isPrefixOf` os || "mingw" `isPrefixOf` os
 
 > absPath                       :: FilePath -> FilePath
 > absPath                       =  if isWindows then
