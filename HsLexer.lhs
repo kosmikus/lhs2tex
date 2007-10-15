@@ -96,6 +96,13 @@ This should probably be either documented better or be removed again.
 > lex' ('"' : s)                =  do let (t, u) = lexLitStr s
 >                                     v <- match "\"" u
 >                                     return (String ("\"" ++ t ++ "\""), v)
+> lex' ('-' : '-' : s)
+>   | not (null s') && isSymbol (head s')
+>                               =  case s' of
+>                                    (c : s'') -> return (Varsym ("--" ++ d ++ [c]), s'')
+>   | otherwise                 =  return (Comment t, u)
+>   where (d, s') = span (== '-') s
+>         (t, u)  = break (== '\n') s'
 > lex' ('-' : '-' : s)          =  let (t, u) = break (== '\n') s
 >                                  in  return (Comment t, u)
 > lex' ('{' : '-' : '"' : s)    =  do let (t, u) = inlineTeX s

@@ -50,6 +50,7 @@ Substitution strings.
 > sub'varid a                   =  Sub "varid" [a]
 > sub'consym a                  =  Sub "consym" [a]
 > sub'varsym a                  =  Sub "varsym" [a]
+> sub'backquoted a              =  Sub "backquoted" [a]
 > sub'numeral a                 =  Sub "numeral" [a]
 > sub'char a                    =  Sub "char" [a]
 > sub'string a                  =  Sub "string" [a]

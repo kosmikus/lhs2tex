@@ -57,7 +57,7 @@
 >     tex _ (Keyword s)         =  replace Empty s (sub'keyword (convert s))
 >     tex _ (TeX d)             =  d
 >     tex _ t@(Qual ms t')      =  replace Empty (string t) (tex (catenate (map (\m -> tex Empty (Conid m) <> Text ".") ms)) t')
->     tex _ t@(Op t')           =  replace Empty (string t) (cmd (conv '`' <> tex Empty t' <> conv '`'))
+>     tex _ t@(Op t')           =  replace Empty (string t) (sub'backquoted (tex Empty t'))
 >         where cmd | isConid t'=  sub'consym
 >                   | otherwise =  sub'varsym
 >

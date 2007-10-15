@@ -27,9 +27,9 @@ lhs2tex = "lhs2TeX"
 minPolytableVersion = [0,8,2]
 shortversion = show (numversion `div` 100) ++ "." ++ show (numversion `mod` 100)
 version = shortversion ++ if ispre then "pre" ++ show pre else ""
-numversion = 112
-ispre = False
-pre = 3
+numversion = 113
+ispre = True
+pre = 1
 
 main = defaultMainWithHooks lhs2texHooks
 

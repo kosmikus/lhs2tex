@@ -187,8 +187,8 @@ column specifiers. It only works for @poly@ style.
 \newcommand{\NB}{\textbf{NB}}
 \newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
 
-\makeatother
 \EndFmtInput
+\makeatother
 \end{code}
 
 \begin{code}

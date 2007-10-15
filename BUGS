@@ -3,12 +3,15 @@ Known bugs or problems
 
 *  --> is an operator, not a comment
    (reported by Neil Mitchell)
+   [ Fixed on 15 Nov 2007. ]
 
 *  catcode of @ is wrong after including standard files 
    (reported by Jeremy Gibbons)
+   [ Hopefully fixed on 15 Nov 2007. ]
 
 *  backquotes in operators don't render nicely and should at least
    be configurable
+   [ Made configurable 15 Nov 2007, behaviour unchanged though. ]
 
 *  special characters in string literals are formatted in a way
    that assumes the font used is tt; same holds for verbatim; make
@@ -30,6 +33,7 @@ Known bugs or problems
 
 *  "default" style, i.e. if no style is selected, seems to be --tt;
    this isn't a good choice -- should there be a default style at all?
+   [ This is --poly now. ]
 
 *  in --tt mode, the <- is formatted as the \in-symbol of the tt
    symbol font, where the \leftarrow would seem more appropriate;
