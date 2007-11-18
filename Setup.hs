@@ -1,14 +1,18 @@
-import Distribution.Setup (CopyDest(..),ConfigFlags(..),BuildFlags(..),
-                           CopyFlags(..),RegisterFlags(..),InstallFlags(..))
+import Distribution.Simple.Setup (CopyDest(..),ConfigFlags(..),BuildFlags(..),
+                                  CopyFlags(..),RegisterFlags(..),InstallFlags(..),
+                                  emptyRegisterFlags)
 import Distribution.Simple
 import Distribution.Simple.Utils (die,rawSystemExit,maybeExit,copyFileVerbose)
-import Distribution.Simple.LocalBuildInfo (LocalBuildInfo(..),mkDataDir,substDir,absolutePath)
+import Distribution.Simple.LocalBuildInfo (LocalBuildInfo(..),mkDataDir,absoluteInstallDirs)
 import Distribution.Simple.Configure (configCompilerAux)
 import Distribution.PackageDescription (PackageDescription(..),setupMessage)
-import Distribution.Program (Program(..),ProgramConfiguration(..),
+import Distribution.Simple.InstallDirs (InstallDirs(..))
+import Distribution.Simple.Program 
+                            (Program(..),ConfiguredProgram(..),ProgramConfiguration(..),
                              ProgramLocation(..),simpleProgram,lookupProgram,
                              rawSystemProgramConf)
--- import Distribution.Compat.ReadP (readP_to_S)
+import Distribution.Simple.Utils
+import Distribution.Verbosity
 import Data.Char (isSpace, showLitChar)
 import Data.List (isSuffixOf,isPrefixOf)
 import Data.Maybe (listToMaybe,isJust)
@@ -50,7 +54,6 @@ lhs2texHooks = defaultUserHooks
                                      simpleProgram "kpsewhich",
                                      simpleProgram "pdflatex",
                                      simpleProgram "mktexlsr"],
-                   confHook       = lhs2texConfHook,
                    postConf       = lhs2texPostConf,
                    postBuild      = lhs2texPostBuild,
                    postCopy       = lhs2texPostCopy,
@@ -59,23 +62,9 @@ lhs2texHooks = defaultUserHooks
                    cleanHook      = lhs2texCleanHook
                  }
 
-lhs2texConfHook pd cf =
-    do  -- give status message
-        setupMessage "Pre-Configuring" pd
-        comp <- configCompilerAux (cf { configVerbose = 0 })
-        let flavor = compilerFlavor comp
-        let ver = compilerVersion comp
-        pd <- if flavor == GHC && 
-                 withinRange ver (EarlierVersion (Version [6,5] []))
-              then do
-                     when (configVerbose cf > 0) $ putStrLn "configure: adapting for ghc < 6.5"
-                     return (pd { buildDepends =
-                                  filter (\ (Dependency d _) -> d /= "regex-compat") (buildDepends pd) })
-              else return pd
-        confHook defaultUserHooks pd cf
-
 lhs2texPostConf a cf pd lbi =
-    do  -- check polytable
+    do  let v = configVerbose cf
+        -- check polytable
         (_,b,_) <- runKpseWhichVar "TEXMFLOCAL"
         b       <- return . stripQuotes . stripNewlines $ b
         ex      <- return (not . all isSpace $ b) -- or check if directory exists?
@@ -87,46 +76,44 @@ lhs2texPostConf a cf pd lbi =
                    do  (_,p,_) <- runKpseWhich "polytable.sty"
                        p       <- return . stripNewlines $ p
                        ex      <- doesFileExist p
-                       nec     <- if ex then do  message $ "Found polytable package at: " ++ p
+                       nec     <- if ex then do  info v $ "Found polytable package at: " ++ p
                                                  x  <- readFile p
                                                  let vp = do  vs <- matchRegex (mkRegexWithOpts " v(.*) .polytable. package" True True) x
                                                               listToMaybe [ r | v <- vs, (r,"") <- readP_to_S parseVersion v ]
                                                  let (sv,nec) = case vp of
                                                                   Just n  -> (showVersion n,versionBranch n < minPolytableVersion)
                                                                   Nothing -> ("unknown",True)
-                                                 message $ "Package polytable version: " ++ sv
+                                                 info v $ "Package polytable version: " ++ sv
                                                  return nec
                                         else return True
-                       message $ "Package polytable installation necessary: " ++ showYesNo nec
+                       info v $ "Package polytable installation necessary: " ++ showYesNo nec
                        when nec $ message $ "Using texmf tree at: " ++ b
                        return (if nec then Just b else Nothing)
                    else
-                   do  message "No texmf tree found, polytable package cannot be installed"
+                   do  warn v "No texmf tree found, polytable package cannot be installed"
                        return Nothing
         -- check documentation
         ex      <- doesFileExist $ "doc" `joinFileName` "Guide2.dontbuild"
         r       <- if ex then do message "Documentation will not be rebuilt unless you remove the file \"doc/Guide2.dontbuild\""
                                  return False
-                         else do mProg <- lookupProgram "pdflatex" (withPrograms lbi)
+                         else do let mProg = lookupProgram (simpleProgram "pdflatex") (withPrograms lbi)
                                  case mProg of
                                    Nothing  -> message "Documentation cannot be rebuilt without pdflatex" >> return False
                                    Just _   -> return True
         unless r $ message $ "Using pre-built documentation"
         writePersistLhs2texBuildConfig (Lhs2texBuildInfo { installPolyTable = i, rebuildDocumentation = r })
         mapM_ (\f -> do message $ "Creating " ++ f
-                        hugsExists <- lookupProgram "hugs" (withPrograms lbi)
+                        let hugsExists = lookupProgram (simpleProgram "hugs") (withPrograms lbi)
                         hugs <- case hugsExists of
                                   Nothing -> return ""
-                                  Just (Program { programLocation = EmptyLocation })
-                                          -> return ""
                                   Just _  -> fmap fst (getProgram "hugs" (withPrograms lbi))
                         let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
                         let lhs2texBin = lhs2texDir `joinFileName` lhs2tex
                         readFile (f ++ ".in") >>= return .
                                                   -- these paths could contain backslashes, so we
                                                   -- need to escape them.
-                                                  replace "@prefix@"  (escapeChars $ prefix lbi) .
-                                                  replace "@datadir@" (escapeChars $ absolutePath pd lbi NoCopyDest (datadir lbi)) .
+                                                  replace "@prefix@"  (escapeChars $ prefix (absoluteInstallDirs pd lbi NoCopyDest)) .
+                                                  replace "@datadir@" (escapeChars $ datadir (absoluteInstallDirs pd lbi NoCopyDest)) .
                                                   replace "@LHS2TEX@" lhs2texBin .
                                                   replace "@HUGS@" hugs .
                                                   replace "@VERSION@" version .
@@ -134,8 +121,7 @@ lhs2texPostConf a cf pd lbi =
                                                   replace "@NUMVERSION@" (show numversion) .
                                                   replace "@PRE@" (show pre) >>= writeFile f)
               generatedFiles
-        return ExitSuccess
-  where runKpseWhich v = runCommandProgramConf 0 "kpsewhich" (withPrograms lbi) [v]
+  where runKpseWhich v = runCommandProgramConf silent "kpsewhich" (withPrograms lbi) [v]
         runKpseWhichVar v = runKpseWhich $ "-expand-var='$" ++ v ++ "'"
 
 lhs2texPostBuild a bf@(BuildFlags { buildVerbose = v }) pd lbi =
@@ -148,7 +134,6 @@ lhs2texPostBuild a bf@(BuildFlags { buildVerbose = v }) pd lbi =
         createDirectoryIfMissing True lhs2texDocDir
         if rebuildDocumentation ebi then lhs2texBuildDocumentation a bf pd lbi
                                     else copyFileVerbose v ("doc" `joinFileName` "Guide2.pdf") (lhs2texDocDir `joinFileName` "Guide2.pdf")
-        return ExitSuccess
 
 lhs2texBuildDocumentation a (BuildFlags { buildVerbose = v }) pd lbi =
     do  let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
@@ -183,7 +168,7 @@ lhs2texBuildDocumentation a (BuildFlags { buildVerbose = v }) pd lbi =
         d <- getCurrentDirectory
         setCurrentDirectory lhs2texDocDir
         -- call pdflatex as long as necessary
-        let loop = do rawSystemProgramConf v "pdflatex" (withPrograms lbi) ["Guide2.tex"]
+        let loop = do rawSystemProgramConf v (simpleProgram "pdflatex") (withPrograms lbi) ["Guide2.tex"]
                       x <- readFile "Guide2.log"
                       case matchRegex (mkRegexWithOpts "Warning.*Rerun" True True) x of
                         Just _  -> loop
@@ -193,7 +178,7 @@ lhs2texBuildDocumentation a (BuildFlags { buildVerbose = v }) pd lbi =
 
 lhs2texPostCopy a (CopyFlags { copyDest = cd, copyVerbose = v }) pd lbi =
     do  ebi <- getPersistLhs2texBuildConfig
-        let dataPref = mkDataDir pd lbi cd
+        let dataPref = datadir (absoluteInstallDirs pd lbi cd)
         createDirectoryIfMissing True dataPref
         let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
         -- lhs2TeX.{fmt,sty}
@@ -207,10 +192,10 @@ lhs2texPostCopy a (CopyFlags { copyDest = cd, copyVerbose = v }) pd lbi =
         let lhs2texDocDir = lhs2texDir `joinFileName` "doc"
         let docDir = if isWindows
                        then dataPref `joinFileName` "Documentation"
-                       else absolutePath pd lbi cd (datadir lbi `joinFileName` "doc" `joinFileName` datasubdir lbi)
+                       else docdir (absoluteInstallDirs pd lbi cd) `joinFileName` "doc"
         let manDir = if isWindows
                        then dataPref `joinFileName` "Documentation"
-                       else absolutePath pd lbi cd (datadir lbi `joinFileName` "man" `joinFileName` "man1")
+                       else datadir (absoluteInstallDirs pd lbi cd) `joinFileName` "man" `joinFileName` "man1"
         createDirectoryIfMissing True docDir
         copyFileVerbose v (lhs2texDocDir `joinFileName` "Guide2.pdf") (docDir `joinFileName` "Guide2.pdf")
         when (not isWindows) $
@@ -218,7 +203,7 @@ lhs2texPostCopy a (CopyFlags { copyDest = cd, copyVerbose = v }) pd lbi =
              copyFileVerbose v ("lhs2TeX.1") (manDir `joinFileName` "lhs2TeX.1")
         -- polytable
         case (installPolyTable ebi) of
-          Just texmf -> do  let texmfDir = absolutePath pd lbi cd texmf
+          Just texmf -> do  let texmfDir = texmf
                                 ptDir = texmfDir `joinFileName` "tex" `joinFileName` "latex"
                                                  `joinFileName` "polytable"
                             createDirectoryIfMissing True ptDir
@@ -228,17 +213,15 @@ lhs2texPostCopy a (CopyFlags { copyDest = cd, copyVerbose = v }) pd lbi =
                                                            (ptDir `joinFileName` f))
                                   stys
           Nothing    -> return ()
-        return ExitSuccess
 
-lhs2texPostInst a (InstallFlags { installUserFlags = u, installVerbose = v }) pd lbi =
+lhs2texPostInst a (InstallFlags { installPackageDB = db, installVerbose = v }) pd lbi =
     do  lhs2texPostCopy a (CopyFlags { copyDest = NoCopyDest, copyVerbose = v }) pd lbi
-        lhs2texRegHook pd lbi Nothing (RegisterFlags { regUser = u, regInPlace = False, regWithHcPkg = Nothing, regGenScript = False, regVerbose = v })
-        return ExitSuccess
+        lhs2texRegHook pd lbi Nothing (emptyRegisterFlags { regPackageDB = db, regVerbose = v })
 
 lhs2texRegHook pd lbi _ (RegisterFlags { regVerbose = v }) =
     do  ebi <- getPersistLhs2texBuildConfig
         when (isJust . installPolyTable $ ebi) $
-          do  rawSystemProgramConf v "mktexlsr" (withPrograms lbi) []
+          do  rawSystemProgramConf v (simpleProgram "mktexlsr") (withPrograms lbi) []
               return ()
 
 lhs2texCleanHook pd lbi v pshs =
@@ -281,13 +264,13 @@ callLhs2tex v lbi params outf =
         let lhs2texBin = lhs2texDir `joinFileName` lhs2tex
         let args    =  [ "-P" ++ lhs2texDir ++ ":" ]
                      ++ [ "-o" ++ outf ]
-                     ++ (if v > 4 then ["-v"] else [])
+                     ++ (if v == deafening then ["-v"] else [])
                      ++ params
 	(ex,_,err) <- runCommand v lhs2texBin args
 	hPutStr stderr (unlines . lines $ err)
 	maybeExit (return ex)
 
-runCommandProgramConf  ::  Int                    -- ^ verbosity
+runCommandProgramConf  ::  Verbosity              -- ^ verbosity
                        ->  String                 -- ^ program name
                        ->  ProgramConfiguration   -- ^ lookup up the program here
                        ->  [String]               -- ^ args
@@ -298,22 +281,22 @@ runCommandProgramConf v progName programConf extraArgs =
 
 getProgram :: String -> ProgramConfiguration -> IO (String, [String])
 getProgram progName programConf = 
-             do  mProg <- lookupProgram progName programConf
+             do  let mProg = lookupProgram (simpleProgram progName) programConf
                  case mProg of
-                   Just (Program { programLocation = UserSpecified p,
-                                   programArgs = args })  -> return (p,args)
-                   Just (Program { programLocation = FoundOnSystem p,
-                                   programArgs = args })  -> return (p,args)
+                   Just (ConfiguredProgram { programLocation = UserSpecified p,
+                                             programArgs = args })  -> return (p,args)
+                   Just (ConfiguredProgram { programLocation = FoundOnSystem p,
+                                             programArgs = args })  -> return (p,args)
                    _ -> (die (progName ++ " command not found"))
 
 -- | Run a command in a specific environment and return the output and errors.
-runCommandInEnv  ::  Int                   -- ^ verbosity
+runCommandInEnv  ::  Verbosity             -- ^ verbosity
                  ->  String                -- ^ the command
                  ->  [String]              -- ^ args
                  ->  [(String,String)]     -- ^ the environment
                  ->  IO (ExitCode,String,String)
 runCommandInEnv v cmd args env = 
-                 do  when (v > 0) $ putStrLn (cmd ++ concatMap (' ':) args)
+                 do  when (v >= verbose) $ putStrLn (cmd ++ concatMap (' ':) args)
                      let env' = if null env then Nothing else Just env
                      (cin,cout,cerr,pid) <- runInteractiveProcess cmd args Nothing env'
                      hClose cin
@@ -325,7 +308,7 @@ runCommandInEnv v cmd args env =
                      return (exit,out,err)
 
 -- | Run a command and return the output and errors.
-runCommand  ::  Int                    -- ^ verbosity
+runCommand  ::  Verbosity              -- ^ verbosity
             ->  String                 -- ^ the command
             ->  [String]               -- ^ args
             ->  IO (ExitCode,String,String)
