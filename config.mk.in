@@ -4,8 +4,9 @@ PACKAGE_VERSION := @PACKAGE_VERSION@
 DISTDIR         := $(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
 
 bindir          = @bindir@
+datarootdir     = @datarootdir@
 datadir         = @datadir@
-stydir          = @datadir@/@PACKAGE_TARNAME@
+stydir          = @stydir@
 docdir          = @docdir@
 mandir          = @mandir@
 prefix          = @prefix@

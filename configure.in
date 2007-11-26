@@ -3,9 +3,9 @@ dnl Generic Haskell configure script
 dnl
 
 # Is it there?
-AC_INIT(lhs2tex,1.13)
+AC_INIT(lhs2tex,1.13pre1)
 
-VERSION="1.13"
+VERSION="1.13pre1"
 SHORTVERSION="1.13"
 NUMVERSION=113
 PRE=1
@@ -68,6 +68,8 @@ AC_PATH_PROG(MKTEXLSR,mktexlsr)
 # docdir and expansion
 docdir="$datadir/doc/$PACKAGE_TARNAME-$PACKAGE_VERSION"
 AC_SUBST(docdir)
+stydir="$datadir/$PACKAGE_TARNAME-$PACKAGE_VERSION"
+AC_SUBST(stydir)
 
 # lhs2TeX binary path relative to docdir
 LHS2TEX="../lhs2TeX"

@@ -33,10 +33,10 @@ Used internally to distinguish prereleases.
 >                                  ,  x <- lhs2TeXNames
 >                                  ] ++
 >                                  [deep (joinPath [env "LHS2TEX"])] ++
+>                                  [deep stydir] ++
 >                                  [  deep (path [dir])
 >                                  |  dir  <-  lhs2TeXNames
->                                  ,  path <-  [\x -> joinPath ([datadir] ++ x)]
->                                              ++ if isWindows then [] else
+>                                  ,  path <-  if isWindows then [] else
 >                                              [\x -> absPath (joinPath $ ["usr","local","share"] ++ x)
 >                                              ,\x -> absPath (joinPath $ ["usr","local","lib"] ++ x)
 >                                              ,\x -> absPath (joinPath $ ["usr","share"] ++ x)
@@ -50,9 +50,9 @@ Used internally to distinguish prereleases.
 >                                  ,"lhs2TeX"
 >                                  ]
 >
-> datadir                       =  replace "@datadir@" "@prefix@"
->   where replace x y  |  "$prefix" `isPrefixOf` x = y ++ drop 7 x
->                      |  "${prefix}" `isPrefixOf` x = y ++ drop 9 x
->                      |  otherwise = x
+> stydir                        =  replace (replace "@stydir@" "datarootdir" "@datarootdir@") "prefix" "@prefix@"
+>   where replace x w y  |  ("$" ++ w) `isPrefixOf` x = y ++ drop (length w + 1) x
+>                        |  ("${" ++ w ++ "}") `isPrefixOf` x = y ++ drop (length w + 3) x
+>                        |  otherwise = x
 
 %endif

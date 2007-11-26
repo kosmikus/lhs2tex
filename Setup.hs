@@ -3,10 +3,12 @@ import Distribution.Simple.Setup (CopyDest(..),ConfigFlags(..),BuildFlags(..),
                                   emptyRegisterFlags)
 import Distribution.Simple
 import Distribution.Simple.Utils (die,rawSystemExit,maybeExit,copyFileVerbose)
-import Distribution.Simple.LocalBuildInfo (LocalBuildInfo(..),mkDataDir,absoluteInstallDirs)
+import Distribution.Simple.LocalBuildInfo
+                            (LocalBuildInfo(..),mkDataDir,absoluteInstallDirs)
 import Distribution.Simple.Configure (configCompilerAux)
 import Distribution.PackageDescription (PackageDescription(..),setupMessage)
-import Distribution.Simple.InstallDirs (InstallDirs(..))
+import Distribution.Simple.InstallDirs
+                            (InstallDirs(..))
 import Distribution.Simple.Program 
                             (Program(..),ConfiguredProgram(..),ProgramConfiguration(..),
                              ProgramLocation(..),simpleProgram,lookupProgram,
@@ -113,7 +115,7 @@ lhs2texPostConf a cf pd lbi =
                                                   -- these paths could contain backslashes, so we
                                                   -- need to escape them.
                                                   replace "@prefix@"  (escapeChars $ prefix (absoluteInstallDirs pd lbi NoCopyDest)) .
-                                                  replace "@datadir@" (escapeChars $ datadir (absoluteInstallDirs pd lbi NoCopyDest)) .
+                                                  replace "@stydir@" (escapeChars $ datadir (absoluteInstallDirs pd lbi NoCopyDest)) .
                                                   replace "@LHS2TEX@" lhs2texBin .
                                                   replace "@HUGS@" hugs .
                                                   replace "@VERSION@" version .
@@ -195,7 +197,7 @@ lhs2texPostCopy a (CopyFlags { copyDest = cd, copyVerbose = v }) pd lbi =
                        else docdir (absoluteInstallDirs pd lbi cd) `joinFileName` "doc"
         let manDir = if isWindows
                        then dataPref `joinFileName` "Documentation"
-                       else datadir (absoluteInstallDirs pd lbi cd) `joinFileName` "man" `joinFileName` "man1"
+                       else datadir (absoluteInstallDirs pd lbi cd) `joinFileName` ".." `joinFileName` "man" `joinFileName` "man1"
         createDirectoryIfMissing True docDir
         copyFileVerbose v (lhs2texDocDir `joinFileName` "Guide2.pdf") (docDir `joinFileName` "Guide2.pdf")
         when (not isWindows) $
@@ -262,7 +264,8 @@ stripQuotes x              = x
 callLhs2tex v lbi params outf =
     do  let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
         let lhs2texBin = lhs2texDir `joinFileName` lhs2tex
-        let args    =  [ "-P" ++ lhs2texDir ++ ":" ]
+        let sep     =  if isWindows then ";" else ":"
+        let args    =  [ "-P" ++ lhs2texDir ++ sep ]
                      ++ [ "-o" ++ outf ]
                      ++ (if v == deafening then ["-v"] else [])
                      ++ params
