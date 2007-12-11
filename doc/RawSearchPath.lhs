@@ -7,7 +7,7 @@
 {HOME}/.lhs2tex//
 {HOME}/.lhs2TeX//
 {LHS2TEX}//
-/usr/local/share/lhs2tex-1.13pre1//
+/usr/local/share/lhs2tex-1.13pre2//
 /usr/local/share/lhs2tex-1.13//
 /usr/local/lib/lhs2tex-1.13//
 /usr/share/lhs2tex-1.13//

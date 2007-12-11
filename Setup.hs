@@ -39,6 +39,8 @@ pre = 2
 
 main = defaultMainWithHooks lhs2texHooks
 
+sep =  if isWindows then ";" else ":"
+
 lhs2texBuildInfoFile :: FilePath
 lhs2texBuildInfoFile = "." `joinFileName` ".setup-lhs2tex-config"
 
@@ -152,7 +154,7 @@ lhs2texBuildDocumentation a (BuildFlags { buildVerbose = v }) pd lbi =
                                    ( -- replace "^%options ghc"        "%options ghc" .
                                      -- replace "^%options hugs"       "%options hugs" .
                                      -- TODO: replace or replaceEscaped
-                                     replace "-pgmF \\.\\./lhs2TeX" ("-pgmF " ++ lhs2texBin ++ " -optF-Pdoc:") $ c )
+                                     replace "-pgmF \\.\\./lhs2TeX" ("-pgmF " ++ lhs2texBin ++ " -optF-Pdoc" ++ sep) $ c )
                          let incToStyle ["verbatim"]   = "verb"
                              incToStyle ["stupid"]     = "math"
                              incToStyle ["tex"]        = "poly"
@@ -160,10 +162,10 @@ lhs2texBuildDocumentation a (BuildFlags { buildVerbose = v }) pd lbi =
                              incToStyle ["typewriter"] = "tt"
                              incToStyle [x]            = x
                              incToStyle []             = "poly"
-                         callLhs2tex v lbi ["--" ++ incToStyle inc , "-Pdoc:", lhs2texDir `joinFileName` snippet]
+                         callLhs2tex v lbi ["--" ++ incToStyle inc , "-Pdoc" ++ sep, lhs2texDir `joinFileName` snippet]
                                            (lhs2texDocDir `joinFileName` s ++ ".tex")
                 ) snippets
-        callLhs2tex v lbi ["--poly" , "-Pdoc:", "doc" `joinFileName` "Guide2.lhs"]
+        callLhs2tex v lbi ["--poly" , "-Pdoc" ++ sep, "doc" `joinFileName` "Guide2.lhs"]
                           (lhs2texDocDir `joinFileName` "Guide2.tex")
         copyFileVerbose v ("polytable" `joinFileName` "polytable.sty") (lhs2texDocDir `joinFileName` "polytable.sty")
         copyFileVerbose v ("polytable" `joinFileName` "lazylist.sty")  (lhs2texDocDir `joinFileName` "lazylist.sty")
@@ -264,7 +266,6 @@ stripQuotes x              = x
 callLhs2tex v lbi params outf =
     do  let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
         let lhs2texBin = lhs2texDir `joinFileName` lhs2tex
-        let sep     =  if isWindows then ";" else ":"
         let args    =  [ "-P" ++ lhs2texDir ++ sep ]
                      ++ [ "-o" ++ outf ]
                      ++ (if v == deafening then ["-v"] else [])

@@ -1,4 +1,4 @@
-.TH LHS2TEX "1" "January 2006" "lhs2TeX" "User Commands"
+.TH LHS2TEX "1" "December 2007" "lhs2TeX" "User Commands"
 .SH NAME
 lhs2TeX \- a literate Haskell to (La)TeX code translator
 
@@ -219,7 +219,7 @@ the original
 .BR lhs2TeX .
 
 .SH SEE ALSO
-.IR http://www.informatik.uni-bonn.de/~loeh/lhs2tex ,
+.IR http://www.cs.uu.nl/~andres/lhs2tex ,
 the 
 .B lhs2TeX 
 homepage
