@@ -9,7 +9,15 @@ stability:	stable
 homepage:	http://www.andres-loeh.de/lhs2tex/
 package-url:	http://www.andres-loeh.de/lhs2tex/lhs2tex-1.11.tar.gz
 synopsis:	Preprocessor for typesetting Haskell sources with LaTeX
-build-depends:	base, regex-compat, mtl, filepath
+build-type:     Custom
 
-executable:	lhs2TeX
-main-is:	Main.lhs
+flag splitBase
+  description:	Choose the new smaller, split-up base package.
+
+executable lhs2TeX
+  main-is:	Main.lhs
+  if flag(splitBase)
+    build-depends:	base >= 3, regex-compat, mtl, filepath, directory, process
+  else
+    build-depends:	base < 3, regex-compat, mtl, filepath
+
