@@ -35,7 +35,7 @@ shortversion = show (numversion `div` 100) ++ "." ++ show (numversion `mod` 100)
 version = shortversion ++ if ispre then "pre" ++ show pre else ""
 numversion = 113
 ispre = True
-pre = 2
+pre = 3
 
 main = defaultMainWithHooks lhs2texHooks
 

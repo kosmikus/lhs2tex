@@ -2,16 +2,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % colorcode.fmt
 %
-% code in a colored box for poly style in lhs2TeX;
-% very experimental
+% colored code for poly style in lhs2TeX
 %
 % Permission is granted to include this file (or parts of this file) 
 % literally into other documents, regardless of the conditions or 
 % license applying to these documents.
 %
-% Andres Loeh, November 2005, ver 1.6
-%
-% TODO: fix spacing behaviour for other environments
+% Andres Loeh, January 2007, ver 1.7
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %endif
 %if not lhs2tex_colorcode_fmt_read
@@ -24,18 +21,26 @@
 \RequirePackage{colortbl}
 \RequirePackage{calc}
 
-% The color environment displays each code block in a colored box.
-
 \makeatletter
 \newenvironment{colorhscode}%
-  {{\parskip=0pt\parindent=0pt\par\vskip\abovedisplayskip\noindent}%
+  {\hsnewpar\abovedisplayskip
    \hscodestyle
    \tabular{@@{}>{\columncolor{codecolor}}p{\linewidth}@@{}}%
    \let\\=\@@normalcr
    \(\pboxed}%
   {\endpboxed\)%
    \endtabular
-   {\parskip=0pt\parindent=0pt\par\vskip\belowdisplayskip\noindent}%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{tightcolorhscode}%
+  {\hsnewpar\abovedisplayskip
+   \hscodestyle
+   \tabular{@@{}>{\columncolor{codecolor}\(}l<{\)}@@{}}%
+   \pmboxed}%
+  {\endpmboxed%
+   \endtabular
+   \hsnewpar\belowdisplayskip
    \ignorespacesafterend}
 
 \newenvironment{barhscode}%
@@ -58,6 +63,7 @@
 \setlength{\coderulewidth}{3pt}
 
 \newcommand{\colorhs}{\sethscode{colorhscode}}
+\newcommand{\tightcolorhs}{\sethscode{tightcolorhscode}}
 \newcommand{\barhs}{\sethscode{barhscode}}
 
 \EndFmtInput

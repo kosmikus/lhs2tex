@@ -176,6 +176,8 @@ column specifiers. It only works for @poly@ style.
 \setlength{\blanklineskip}{1mm}
 
 \newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
 %endif
 \end{code}
 

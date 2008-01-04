@@ -261,10 +261,10 @@ in a conditional checking |anyMath|.
 %else
 %subst code a    	= "\begingroup\par\noindent\advance\leftskip\mathindent\('n\begin{pboxed}\SaveRestoreHook'n" a "\ColumnHook'n\end{pboxed}'n\)\par\noindent\endgroup\resethooks'n"
 %endif
-%subst column c a       = "\column{" c "}{" a "}'n"
-%subst fromto b e t     = "\>[" b "]{}" t "{}\<[" e "]'n"
-%subst left             = "@{}l@{}"
-%subst centered         = "@{}c@{}"
+%subst column c a       = "\column{" c "}{" a "}%'n"
+%subst fromto b e t     = "\>[" b "]{}" t "{}\<[" e "]%'n"
+%subst left             = "@{}>{\hspre}l<{\hspost}@{}"
+%subst centered         = "@{}>{\hspre}c<{\hspost}@{}"
 %subst dummycol         = "@{}l@{}"
 %subst newline   	= "\\'n"
 %subst blankline        = "\\[\blanklineskip]'n"

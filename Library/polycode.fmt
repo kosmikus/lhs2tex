@@ -75,8 +75,21 @@
 \newcommand{\compaths}{\sethscode{compathscode}}
 
 % "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
 
 \newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
   {\hsnewpar\abovedisplayskip
    \advance\leftskip\mathindent
    \hscodestyle
@@ -89,6 +102,7 @@
 % Here, we make plainhscode the default environment.
 
 \newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
 \plainhs
 
 % The arrayhscode is like plain, but makes use of polytable's
