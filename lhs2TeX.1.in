@@ -1,4 +1,4 @@
-.TH LHS2TEX "1" "December 2007" "lhs2TeX" "User Commands"
+.TH LHS2TEX "1" "February 2008" "lhs2TeX" "User Commands"
 .SH NAME
 lhs2TeX \- a literate Haskell to (La)TeX code translator
 

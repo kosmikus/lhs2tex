@@ -8,6 +8,7 @@
 > where
 > import Data.Char              (  isSpace, isAlpha  )
 > import TeXCommands
+> import Data.List              (  isPrefixOf  )
 > import Auxiliaries hiding     (  breaks  )
 
 %endif
@@ -75,7 +76,7 @@ Environments.
 >                 | otherwise   -> notFound end str :  cont
 >                 where
 >                 end           =  "\\end{" ++ env ++ "}"
->                 pred          =  isPrefix end
+>                 pred          =  isPrefixOf end
 >                 (arg, v)      =  breaks maxLine pred u
 >                 (w, x)        =  blank (drop (length end) v)
 >         _                     -> cont

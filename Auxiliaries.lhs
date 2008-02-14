@@ -61,8 +61,8 @@ i], [sub a (i+1),..,sub a n])| such that |p (sub a i) = True| and |p
 >     | p as                    =  ([], as)
 >     | otherwise               =  a <| breaks p as'
 
-> isPrefix                      :: (Eq a) => [a] -> [a] -> Bool
-> p `isPrefix` as               =  p == take (length p) as
+> -- isPrefix                      :: (Eq a) => [a] -> [a] -> Bool
+> -- p `isPrefix` as               =  p == take (length p) as
  
 > withoutSpaces                 :: String -> String
 > withoutSpaces s               =  filter (not . isSpace) s

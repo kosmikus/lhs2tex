@@ -247,11 +247,19 @@
 
 \title{@Guide2lhs2TeX@\\
   \smaller (for version \ProgramVersion)}
-\author{{Ralf Hinze and Andres L\"oh}\\
+\author{{Ralf Hinze}\\
   \smaller \tabular{c}
            Institut f\"ur Informatik III, Universit\"at Bonn\\
            R\"omerstra\ss e 164, 53117 Bonn, Germany\\
-           \verb|{ralf,loeh}@informatik.uni-bonn.de|
+           \verb|ralf@informatik.uni-bonn.de|
+           \endtabular
+  \and
+  {Andres L\"oh}\\
+  \smaller \tabular{c}
+           Institute of Information and Computing Sciences\\
+           Utrecht University, P.O.~Box 80.089\\
+           3508 TB Utrecht, The Netherlands\\
+           \verb|andres@cs.uu.nl|
            \endtabular}%
 \date{\today}
 \maketitle
@@ -316,7 +324,7 @@ There are two possibilities to install @lhs2TeX@:
 
 \subsection{Using Cabal to install @lhs2TeX@}
 
-This requires Cabal 1.1.6 or later. The process is then as usual:
+This requires Cabal 1.2 or later. The process is then as usual:
 \input{CabalInstallation}%
 The third step requires write access to the installation location
 and the \LaTeX\ filename database.

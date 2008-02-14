@@ -251,7 +251,7 @@ in a conditional checking |anyMath|.
 %subst column1 a	= "${" a "}$"
 %endif
 %subst newline   	= "\\'n"
-%subst blankline 	= "\\[1mm]'n"
+%subst blankline 	= "\\[1mm]%'n"
 %let anyMath            = True
 %elif style == poly
 %subst comment a	= "\mbox{\onelinecomment " a "}"
@@ -267,7 +267,7 @@ in a conditional checking |anyMath|.
 %subst centered         = "@{}>{\hspre}c<{\hspost}@{}"
 %subst dummycol         = "@{}l@{}"
 %subst newline   	= "\\'n"
-%subst blankline        = "\\[\blanklineskip]'n"
+%subst blankline        = "\\[\blanklineskip]%'n"
 %subst indent n         = "\hsindent{" n "}"
 %let anyMath            = True
 %endif

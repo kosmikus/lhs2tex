@@ -7,7 +7,7 @@ There are two possibilities to install lhs2TeX:
 
 (A) Using Cabal to install lhs2TeX:
 
-This requires Cabal 1.1.6 or later. The process is then as usual:
+This requires Cabal 1.2 or later. The process is then as usual:
 
 runghc Setup configure
 runghc Setup build
@@ -51,7 +51,7 @@ lhs2TeX binary. The default search path is as follows:
 {HOME}/.lhs2tex//
 {HOME}/.lhs2TeX//
 {LHS2TEX}//
-/usr/local/share/lhs2tex-1.13pre3//
+/usr/local/share/lhs2tex-1.13//
 /usr/local/share/lhs2tex-1.13//
 /usr/local/lib/lhs2tex-1.13//
 /usr/share/lhs2tex-1.13//

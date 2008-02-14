@@ -8,6 +8,7 @@
 > where
 >
 > import Data.Char ( isSpace )
+> import Data.List ( isPrefixOf )
 > import System.IO ( hClose, hPutStr, hPutStrLn, hFlush, hGetLine, stderr, stdout, openFile, IOMode(..), Handle(..) )
 > import System.Directory ( copyFile )
 > import System.Console.GetOpt
@@ -549,7 +550,7 @@ Output is the result in string form.
 >                                     let os  =  opts st
 >                                         f   =  file st
 >                                         ex  =  externals st
->                                         ghcimode       =  "ghci" `isPrefix` os
+>                                         ghcimode       =  "ghci" `isPrefixOf` os
 >                                         cmd
 >                                           | ghcimode   =  os ++ " -v0 -ignore-dot-ghci " ++ f
 >                                           | otherwise  =  (if null os then "hugs " else os ++ " ") ++ f
@@ -602,13 +603,13 @@ and the second |magic| plus prompt is the result we look for.
 >           readMagic 0         =  return []
 >           readMagic n         =  do  l <- hGetLine h
 >                                      -- hPutStrLn stderr ("received: " ++ l)
->                                      let n'  |  (null . snd . breaks (isPrefix magic)) l  =  n
->                                              |  otherwise                                 =  n - 1
+>                                      let n'  |  (null . snd . breaks (isPrefixOf magic)) l  =  n
+>                                              |  otherwise                                   =  n - 1
 >                                      fmap (l:) (readMagic n')
 
 > extract                       :: String -> String
 > extract s                     =  v
->     where (t, u)              =  breaks (isPrefix magic) s
+>     where (t, u)              =  breaks (isPrefixOf magic) s
 >           -- t contains everything up to magic, u starts with magic
 >           -- |u'                      =  tail (dropWhile (/='\n') u)|
 >           pre                 =  reverse . takeWhile (/='\n') . reverse $ t
@@ -616,7 +617,7 @@ and the second |magic| plus prompt is the result we look for.
 >           -- pre contains the prefix of magic on the same line
 >           u'                  =  drop (length magic + prelength) u
 >           -- we drop the magic string, plus the newline, plus the prefix
->           (v, _)              =  breaks (isPrefix (pre ++ magic)) u'
+>           (v, _)              =  breaks (isPrefixOf (pre ++ magic)) u'
 >           -- we look for the next occurrence of prefix plus magic
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
@@ -637,7 +638,7 @@ and the second |magic| plus prompt is the result we look for.
 
 > programInfo                   :: String
 > programInfo                   =
->     "lhs2TeX " ++ version ++ ", Copyright (C) 1997-2007 Ralf Hinze, Andres Loeh\n\n\
+>     "lhs2TeX " ++ version ++ ", Copyright (C) 1997-2008 Ralf Hinze, Andres Loeh\n\n\
 >     \lhs2TeX comes with ABSOLUTELY NO WARRANTY;\n\
 >     \for details type `lhs2TeX --warranty'.\n\
 >     \This is free software, and you are welcome to redistribute it\n\
