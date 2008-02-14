@@ -91,22 +91,22 @@ lhs2texPostConf a cf pd lbi =
                                                  return nec
                                         else return True
                        info v $ "Package polytable installation necessary: " ++ showYesNo nec
-                       when nec $ message $ "Using texmf tree at: " ++ b
+                       when nec $ info v $ "Using texmf tree at: " ++ b
                        return (if nec then Just b else Nothing)
                    else
                    do  warn v "No texmf tree found, polytable package cannot be installed"
                        return Nothing
         -- check documentation
         ex      <- doesFileExist $ "doc" `joinFileName` "Guide2.dontbuild"
-        r       <- if ex then do message "Documentation will not be rebuilt unless you remove the file \"doc/Guide2.dontbuild\""
+        r       <- if ex then do info v "Documentation will not be rebuilt unless you remove the file \"doc/Guide2.dontbuild\""
                                  return False
                          else do let mProg = lookupProgram (simpleProgram "pdflatex") (withPrograms lbi)
                                  case mProg of
-                                   Nothing  -> message "Documentation cannot be rebuilt without pdflatex" >> return False
+                                   Nothing  -> info v "Documentation cannot be rebuilt without pdflatex" >> return False
                                    Just _   -> return True
-        unless r $ message $ "Using pre-built documentation"
+        unless r $ info v $ "Using pre-built documentation"
         writePersistLhs2texBuildConfig (Lhs2texBuildInfo { installPolyTable = i, rebuildDocumentation = r })
-        mapM_ (\f -> do message $ "Creating " ++ f
+        mapM_ (\f -> do info v $ "Creating " ++ f
                         let hugsExists = lookupProgram (simpleProgram "hugs") (withPrograms lbi)
                         hugs <- case hugsExists of
                                   Nothing -> return ""
@@ -252,9 +252,6 @@ escapeChars t = foldr showLitChar [] t
 showYesNo :: Bool -> String
 showYesNo p | p          =  "yes"
             | otherwise  =  "no"
-
-message :: String -> IO ()
-message s = putStrLn $ "configure: " ++ s
 
 stripNewlines :: String -> String
 stripNewlines = filter (/='\n')
