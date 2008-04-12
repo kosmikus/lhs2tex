@@ -1,12 +1,11 @@
 import Distribution.Simple.Setup (CopyDest(..),ConfigFlags(..),BuildFlags(..),
                                   CopyFlags(..),RegisterFlags(..),InstallFlags(..),
-                                  emptyRegisterFlags)
+                                  emptyRegisterFlags,fromFlagOrDefault,Flag(..))
 import Distribution.Simple
-import Distribution.Simple.Utils (die,rawSystemExit,maybeExit,copyFileVerbose)
 import Distribution.Simple.LocalBuildInfo
-                            (LocalBuildInfo(..),mkDataDir,absoluteInstallDirs)
+                            (LocalBuildInfo(..),absoluteInstallDirs)
 import Distribution.Simple.Configure (configCompilerAux)
-import Distribution.PackageDescription (PackageDescription(..),setupMessage)
+import Distribution.PackageDescription (PackageDescription(..))
 import Distribution.Simple.InstallDirs
                             (InstallDirs(..))
 import Distribution.Simple.Program 
@@ -18,6 +17,7 @@ import Distribution.Verbosity
 import Data.Char (isSpace, showLitChar)
 import Data.List (isSuffixOf,isPrefixOf)
 import Data.Maybe (listToMaybe,isJust)
+import Data.Version
 import Control.Monad (when,unless)
 import Text.Regex (matchRegex,matchRegexAll,mkRegex,mkRegexWithOpts,subRegex)
 import Text.ParserCombinators.ReadP (readP_to_S)
@@ -53,7 +53,7 @@ data Lhs2texBuildInfo =
                      rebuildDocumentation  ::  Bool }
   deriving (Show, Read)
 
-lhs2texHooks = defaultUserHooks
+lhs2texHooks = simpleUserHooks
                  { hookedPrograms = [simpleProgram "hugs",
                                      simpleProgram "kpsewhich",
                                      simpleProgram "pdflatex",
@@ -67,7 +67,7 @@ lhs2texHooks = defaultUserHooks
                  }
 
 lhs2texPostConf a cf pd lbi =
-    do  let v = configVerbose cf
+    do  let v = fromFlagOrDefault normal (configVerbosity cf)
         -- check polytable
         (_,b,_) <- runKpseWhichVar "TEXMFLOCAL"
         b       <- return . stripQuotes . stripNewlines $ b
@@ -128,8 +128,9 @@ lhs2texPostConf a cf pd lbi =
   where runKpseWhich v = runCommandProgramConf silent "kpsewhich" (withPrograms lbi) [v]
         runKpseWhichVar v = runKpseWhich $ "-expand-var='$" ++ v ++ "'"
 
-lhs2texPostBuild a bf@(BuildFlags { buildVerbose = v }) pd lbi =
-    do  ebi <- getPersistLhs2texBuildConfig
+lhs2texPostBuild a bf@(BuildFlags { buildVerbosity = vf }) pd lbi =
+    do  let v = fromFlagOrDefault normal vf
+        ebi <- getPersistLhs2texBuildConfig
         let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
         let lhs2texBin = lhs2texDir `joinFileName` lhs2tex
         let lhs2texDocDir = lhs2texDir `joinFileName` "doc"
@@ -139,8 +140,9 @@ lhs2texPostBuild a bf@(BuildFlags { buildVerbose = v }) pd lbi =
         if rebuildDocumentation ebi then lhs2texBuildDocumentation a bf pd lbi
                                     else copyFileVerbose v ("doc" `joinFileName` "Guide2.pdf") (lhs2texDocDir `joinFileName` "Guide2.pdf")
 
-lhs2texBuildDocumentation a (BuildFlags { buildVerbose = v }) pd lbi =
-    do  let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
+lhs2texBuildDocumentation a (BuildFlags { buildVerbosity = vf }) pd lbi =
+    do  let v = fromFlagOrDefault normal vf
+        let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
         let lhs2texBin = lhs2texDir `joinFileName` lhs2tex
         let lhs2texDocDir = lhs2texDir `joinFileName` "doc"
         snippets <- do  guide <- readFile $ "doc" `joinFileName` "Guide2.lhs"
@@ -180,8 +182,10 @@ lhs2texBuildDocumentation a (BuildFlags { buildVerbose = v }) pd lbi =
         loop
         setCurrentDirectory d
 
-lhs2texPostCopy a (CopyFlags { copyDest = cd, copyVerbose = v }) pd lbi =
-    do  ebi <- getPersistLhs2texBuildConfig
+lhs2texPostCopy a (CopyFlags { copyDest = cdf, copyVerbosity = vf }) pd lbi =
+    do  let v = fromFlagOrDefault normal vf
+        let cd = fromFlagOrDefault NoCopyDest cdf
+        ebi <- getPersistLhs2texBuildConfig
         let dataPref = datadir (absoluteInstallDirs pd lbi cd)
         createDirectoryIfMissing True dataPref
         let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
@@ -218,18 +222,19 @@ lhs2texPostCopy a (CopyFlags { copyDest = cd, copyVerbose = v }) pd lbi =
                                   stys
           Nothing    -> return ()
 
-lhs2texPostInst a (InstallFlags { installPackageDB = db, installVerbose = v }) pd lbi =
-    do  lhs2texPostCopy a (CopyFlags { copyDest = NoCopyDest, copyVerbose = v }) pd lbi
-        lhs2texRegHook pd lbi Nothing (emptyRegisterFlags { regPackageDB = db, regVerbose = v })
+lhs2texPostInst a (InstallFlags { installPackageDB = db, installVerbosity = v }) pd lbi =
+    do  lhs2texPostCopy a (CopyFlags { copyDest = Flag NoCopyDest, copyVerbosity = v }) pd lbi
+        lhs2texRegHook pd lbi Nothing (emptyRegisterFlags { regPackageDB = db, regVerbosity = v })
 
-lhs2texRegHook pd lbi _ (RegisterFlags { regVerbose = v }) =
-    do  ebi <- getPersistLhs2texBuildConfig
+lhs2texRegHook pd lbi _ (RegisterFlags { regVerbosity = vf }) =
+    do  let v = fromFlagOrDefault normal vf
+        ebi <- getPersistLhs2texBuildConfig
         when (isJust . installPolyTable $ ebi) $
           do  rawSystemProgramConf v (simpleProgram "mktexlsr") (withPrograms lbi) []
               return ()
 
 lhs2texCleanHook pd lbi v pshs =
-    do  cleanHook defaultUserHooks pd lbi v pshs
+    do  cleanHook simpleUserHooks pd lbi v pshs
         try $ removeFile lhs2texBuildInfoFile
         mapM_ (try . removeFile) generatedFiles
 

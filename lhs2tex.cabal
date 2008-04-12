@@ -1,4 +1,4 @@
-cabal-version:  >=1.2
+cabal-version:  >=1.4
 name:		lhs2tex
 version:	1.13
 license:	GPL
@@ -7,7 +7,6 @@ author:		Ralf Hinze <ralf@informatik.uni-bonn.de>, Andres Loeh <lhs2tex@andres-l
 maintainer:	Andres Loeh <lhs2tex@andres-loeh.de>
 stability:	stable
 homepage:	http://www.andres-loeh.de/lhs2tex/
-package-url:	http://www.andres-loeh.de/lhs2tex/lhs2tex-1.11.tar.gz
 synopsis:	Preprocessor for typesetting Haskell sources with LaTeX
 description:	Preprocessor for typesetting Haskell sources with LaTeX
 category:       Development, Language
