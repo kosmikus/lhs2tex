@@ -764,7 +764,8 @@ include mechanisms such as @\input@ or @\usepackage@.
 Using the @%format@ directive, tokens can be given a different
 appearance. The complete syntax that is supported by @lhs2TeX@ is
 quite complex, but we will look at many different cases in detail.
-\input{FormatSyntax}% There are three different forms of the
+\input{FormatSyntax}%
+There are three different forms of the
 formatting statement.  The first one can be used to change the
 appearance of most functions and operators and a few other
 symbols. The second form is restricted to named identifiers (both
@@ -880,7 +881,7 @@ produces output similar to
 \begin{colorsurround}
 \input{Card}
 \end{colorsurround}
-If the function is used with two few arguments as in the text,
+If the function is used with too few arguments as in the text,
 a default symbol is substituted (usually a @\cdot@, but that is
 customizable, cf. Section~\ref{subst}).
 
