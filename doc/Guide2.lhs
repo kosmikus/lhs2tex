@@ -1597,6 +1597,7 @@ use of each of the categories.
 @comment@ |a| & how to format an (already translated) one-line comment |a| \\
 @nested@ |a|  & how to format an (already translated) nested comment |a| \\
 @pragma@ |a|  & how to format an (already translated) compiler pragma |a| \\
+@tex@ |a|     & how to format inlines \TeX\ code \\
 @keyword@ |a| & how to format the Haskell keyword |a| \\
 @column1@ |a| & how to format an (already translated) line |a| 
                 in one column in \textbf{math} style \\
