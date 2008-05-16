@@ -39,6 +39,7 @@ conditionals at work here.
 %subst comment a = "{\rmfamily-{}- " a "}"
 %subst nested a  = "{\rmfamily\enskip\{- " a " -\}\enskip}"
 %subst pragma a  = "{\rmfamily\enskip\{-\#" a " \#-\}\enskip}"
+%subst tex a     = a
 %subst spaces a  = a
 %subst special a = a
 %subst space     = "~"
@@ -213,6 +214,7 @@ etc~(for all lower and upper case greek letters).
 %subst newline          = "'n"
 %subst dummy            =
 %subst pragma a         = "{-# " a " #-}"
+%subst tex a            =
 %subst numeral a        = a
 %subst keyword a        = a
 %subst spaces a         = a
@@ -277,6 +279,7 @@ in a conditional checking |anyMath|.
 %subst inline a  	= "\ensuremath{" a "}"
 %subst hskip a	        = "\hskip" a "em\relax"
 %subst pragma a         = "\mbox{\enskip\{-\#" a " \#-\}\enskip}"
+%subst tex a            = a
 %if latex209
 %subst numeral a 	= "{\mathrm " a "}"
 %subst keyword a 	= "{\mathbf " a "}"
