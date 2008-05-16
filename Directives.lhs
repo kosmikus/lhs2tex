@@ -74,7 +74,8 @@ Format directives. \NB @%format ( = "(\;"@ is legal.
 >       | null t && not (null w) && (null v || head w == '_')
 >                               =  underscore f s
 >       | otherwise             =  [f (reverse w)
->                                  , TeX (Text ((if   not (null v)
+>                                  , TeX False
+>                                        (Text ((if   not (null v)
 >                                                then "_{" ++ reverse v ++ "}" 
 >                                                else ""
 >                                               ) ++ reverse t))
@@ -93,11 +94,11 @@ substitution directive should be invoked here.
 >     underscore f s
 >                               =  [f t]
 >                                  ++ if null u then []
->                                               else [TeX (Text ("_{"))]
+>                                               else [TeX False (Text ("_{"))]
 >                                                    ++
 >                                                    proc_u
 >                                                    ++
->                                                    [TeX (Text ("}"))]
+>                                                    [TeX False (Text ("}"))]
 >         where (t, u)          =  break (== '_') s
 >               tok_u           =  tokenize (tail u)
 >               proc_u          =  case tok_u of
@@ -143,7 +144,7 @@ substitution directive should be invoked here.
 >                                     return (s, subst args rhs)
 >   where
 >   subst args rhs ds           =  catenate (map sub rhs)
->       where sub (TeX d)       =  d
+>       where sub (TeX _ d)     =  d
 >             sub (Varid x)     =  FM.fromList (zip args ds) ! x
 
 \Todo{unbound variables behandeln.}
@@ -152,7 +153,7 @@ substitution directive should be invoked here.
 > conid                         =  do x <- satisfy isConid; return (string x)
 > varsym s                      =  satisfy (== (Varsym s))
 >
-> isTeX (TeX _)                 =  True
+> isTeX (TeX _ _)               =  True
 > isTeX _                       =  False
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
@@ -231,7 +232,8 @@ Hilfsfunktionen.
 
 > parse                         :: Parser Token a -> [Char] -> Either Exc a
 > parse p str                   =  do ts <- tokenize str
->                                     let ts' = filter (\t -> catCode t /= White || isTeX t) ts
+>                                     let ts' = map (\t -> case t of TeX _ x -> TeX False x; _ -> t) .
+>                                               filter (\t -> catCode t /= White || isTeX t) $ ts
 >                                     maybe (Left msg) Right (run p ts')
 >     where msg                 =  ("syntax error in directive", str)
 

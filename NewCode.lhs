@@ -77,7 +77,8 @@ functionality is actually desired.
 >     tex _ (Nested s)          =  sub'nested (convert s)
 >     tex _ (Pragma s)          =  sub'pragma (convert s)
 >     tex _ (Keyword s)         =  replace Empty s (sub'keyword (convert s))
->     tex _ (TeX d)             =  sub'tex d
+>     tex _ (TeX False d)       =  d
+>     tex _ (TeX True d)        =  sub'tex d
 >     tex _ t@(Qual ms t')      =  replace Empty (string t) (tex (catenate (map (\m -> tex Empty (Conid m) <> Text ".") ms)) t')
 >     tex _ t@(Op t')           =  replace Empty (string t) (sub'backquoted (tex Empty t'))
 >         where cmd | isConid t'=  sub'consym

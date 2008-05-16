@@ -112,7 +112,7 @@ This variant can handle unbalanced parentheses in some cases (see below).
 >                                          r <- right l
 >                                          return (Paren l e r)
 >                               `mplus` if d == 0 then do r <- anyright
->                                                         return (Paren (fromToken $ TeX Empty) [] r)
+>                                                         return (Paren (fromToken $ TeX False Empty) [] r)
 >                                                 else mzero
 
 ks, 09.09.2003: Added handling of unbalanced parentheses, surely not in the
@@ -132,7 +132,7 @@ Primitive parser.
 >                                       (Del o, Del c) -> (o,c) `elem` zip "([" ")]" 
 >                                       _     -> False)
 >                                  ) `mplus` do eof
->                                               return (fromToken $ TeX Empty)
+>                                               return (fromToken $ TeX False Empty)
 
 ks, 06.09.2003: Modified the |right| parser to accept the end of file,
 to allow for unbalanced parentheses. This behaviour is not (yet) backported
@@ -271,7 +271,7 @@ after a keyword (hence |before b| really means not immediately after).
 >           | selfSpacing u     -> t : before False ts
 >         Special c
 >           | c `elem` ",;([{"  -> t : before False ts
->         Keyword _             -> [ fromToken (TeX sub'space) | b ] ++ t : after ts
+>         Keyword _             -> [ fromToken (TeX False sub'space) | b ] ++ t : after ts
 >         _                     -> t : before True ts
 > 
 >     after []                  =  []
@@ -279,9 +279,9 @@ after a keyword (hence |before b| really means not immediately after).
 >         u | not (isNotSpace u)-> t : after ts
 >           | selfSpacing u     -> t : before False ts
 >         Special c
->           | c `elem` ",;([{"  -> fromToken (TeX sub'space) : t : before False ts
->         Keyword _             -> fromToken (TeX sub'space) : t : after ts
->         _                     -> fromToken (TeX sub'space) : t : before True ts
+>           | c `elem` ",;([{"  -> fromToken (TeX False sub'space) : t : before False ts
+>         Keyword _             -> fromToken (TeX False sub'space) : t : after ts
+>         _                     -> fromToken (TeX False sub'space) : t : before True ts
 
 Operators are `self spacing'.
 
@@ -356,7 +356,7 @@ Letztlich wird die augenblickliche Zeile auf den Stack gelegt.
 >                                      (rn,rc) = findrel (n,c) rstack
 >                                      -- Schritt 3: Zeile auf Stack legen
 >                                      fstack  = (c,l) : rstack
->                                  in mkFromTo fstack rn n rc [fromToken $ TeX (indent (rn,rc) (n,c))] p ls
+>                                  in mkFromTo fstack rn n rc [fromToken $ TeX False (indent (rn,rc) (n,c))] p ls
 >                                              
 >
 >         | c `elem` z          -> mkFromTo stack n (n ++ "E") c ts rs ls
