@@ -6,6 +6,7 @@
 %subst thinspace = "\Sp "
 %subst code a    = "\begin{tabbing}\texfamily'n" a "'n\end{tabbing}'n"
 %subst comment a = "{\rmfamily-{}- " a "}"
+%subst tex a     = a
 %subst nested a  = "{\rmfamily\enskip\{- " a " -\}\enskip}"
 %subst pragma a  = "{\rmfamily\enskip\{-\#" a " \#-\}\enskip}"
 %subst spaces a  = a
@@ -155,6 +156,7 @@
 %subst newline          = "'n"
 %subst dummy            =
 %subst pragma a         = "{-# " a " #-}"
+%subst tex a            =
 %subst numeral a        = a
 %subst keyword a        = a
 %subst spaces a         = a
@@ -211,6 +213,7 @@
 %subst inline a  	= "\ensuremath{" a "}"
 %subst hskip a	        = "\hskip" a "em\relax"
 %subst pragma a         = "\mbox{\enskip\{-\#" a " \#-\}\enskip}"
+%subst tex a            = a
 %if latex209
 %subst numeral a 	= "{\mathrm " a "}"
 %subst keyword a 	= "{\mathbf " a "}"
