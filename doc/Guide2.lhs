@@ -398,7 +398,10 @@ into different blocks:
       statements, are considered as \defined{code blocks}. (Note that
       @lhs2TeX@ does not care if both styles of a literate program are
       mixed in one file. In this sense, it is more liberal than
-      Haskell.)
+      Haskell. However, in @code@ and @newcode@ mode, the initial
+      characters @>@ and @<@ will be replaced by spaces, so you have
+      to indent @code@ environments in order to create a properly indented
+      Haskell module.)
 \item Text between two \verb+@+ characters that is not in a code block
       is considered \defined{inline verbatim}. If a \verb+@+ is desired
       to appear in text, it needs to be escaped: \verb+@@+. There is no
