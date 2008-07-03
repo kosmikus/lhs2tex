@@ -7,8 +7,8 @@
 >                               , module System.FilePath
 >                               ) where
 >
-> import Prelude hiding         (  catch )
-> import System.IO
+> import Prelude hiding         (  catch, readFile )
+> import System.IO.UTF8
 > import System.Directory
 > import System.Environment
 > import Data.List

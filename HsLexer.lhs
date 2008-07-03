@@ -7,6 +7,7 @@
 > module HsLexer                (  module HsLexer ) --Token(..), isVarid, isConid, isNotSpace, string, tokenize  )
 > where
 > import Data.Char 	(  isSpace, isUpper, isLower, isDigit, isAlphaNum  )
+> import qualified Data.Char ( isSymbol )
 > import Control.Monad
 > import Control.Monad.Error ()
 > import Document
@@ -192,7 +193,7 @@ patterns"'. [ks: This is no longer true (with GHC 5.04.3).]
 
 > isSpecial, isSymbol, isIdChar :: Char -> Bool
 > isSpecial c                   =  c `elem` ",;()[]{}`"
-> isSymbol c                    =  c `elem` "!@#$%&*+./<=>?\\^|:-~"
+> isSymbol c                    =  c `elem` "!@#$%&*+./<=>?\\^|:-~" || Data.Char.isSymbol c
 > isIdChar c                    =  isAlphaNum c || c `elem` "_'"
 
 > match                         :: String -> String -> Maybe String

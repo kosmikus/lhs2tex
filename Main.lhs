@@ -9,7 +9,8 @@
 >
 > import Data.Char ( isSpace )
 > import Data.List ( isPrefixOf )
-> import System.IO ( hClose, hPutStr, hPutStrLn, hFlush, hGetLine, stderr, stdout, openFile, IOMode(..), Handle(..) )
+> import System.IO ( hClose, hFlush, stderr, stdout, openFile, IOMode(..), Handle(..) )
+> import System.IO.UTF8 ( hPutStr, hPutStrLn, hGetLine )
 > import System.Directory ( copyFile )
 > import System.Console.GetOpt
 > import Text.Regex ( matchRegex, mkRegexWithOpts )
