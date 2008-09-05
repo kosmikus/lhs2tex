@@ -13,6 +13,7 @@
 > import HsLexer
 > import qualified FiniteMap as FM
 > import Auxiliaries
+> import TeXCommands ( Lang (..) )
 
 %endif
 
@@ -20,14 +21,14 @@
 \subsubsection{Inline and display code}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
-> inline, display               :: Formats -> String -> Either Exc Doc
-> inline dict                   =  tokenize
+> inline, display               :: Lang -> Formats -> String -> Either Exc Doc
+> inline lang dict              =  tokenize lang
 >                               @> lift (latexs sub'thin sub'thin dict)
 >                               @> lift sub'inline
 
-> display dict                  =  lift trim
+> display lang dict             =  lift trim
 >                               @> lift (expand 0)
->                               @> tokenize
+>                               @> tokenize lang
 >                               @> lift (latexs sub'space sub'nl dict)
 >                               @> lift sub'code
 

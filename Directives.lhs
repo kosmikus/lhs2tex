@@ -44,13 +44,13 @@ arguments a formatting directive expects.
 repr"asentiert, da math |Pos Token| verlangt.
 
 >
-> parseFormat                   :: String -> Either Exc (String, Equation)
-> parseFormat s                 =  parse equation (convert s)
+> parseFormat                   :: Lang -> String -> Either Exc (String, Equation)
+> parseFormat lang s            =  parse lang (equation lang) (convert s)
 
 Format directives. \NB @%format ( = "(\;"@ is legal.
 
-> equation                      :: Parser Token (String, Equation)
-> equation                      =  do (opt, (f, opts, args)) <- optParen lhs
+> equation                      :: Lang -> Parser Token (String, Equation)
+> equation lang                 =  do (opt, (f, opts, args)) <- optParen lhs
 >                                     _ <- varsym "="
 >                                     r <- many item
 >                                     return (f, (opt, opts, args, r))
@@ -100,7 +100,7 @@ substitution directive should be invoked here.
 >                                                    ++
 >                                                    [TeX False (Text ("}"))]
 >         where (t, u)          =  break (== '_') s
->               tok_u           =  tokenize (tail u)
+>               tok_u           =  tokenize lang (tail u)
 >               proc_u          =  case tok_u of
 >                                    Left  _ -> [f (tail u)] -- should not happen
 >                                    Right t -> t
@@ -134,8 +134,8 @@ substitution directive should be invoked here.
 > type Substs                   =  FiniteMap Char Subst
 > type Subst                    =  [Doc] -> Doc
 
-> parseSubst                    :: String -> Either Exc (String, Subst)
-> parseSubst s                  =  parse substitution (convert s)
+> parseSubst                    :: Lang -> String -> Either Exc (String, Subst)
+> parseSubst lang s             =  parse lang substitution (convert s)
 >
 > substitution                  =  do s <- varid
 >                                     args <- many varid
@@ -151,7 +151,7 @@ substitution directive should be invoked here.
 
 > varid                         =  do x <- satisfy isVarid; return (string x)
 > conid                         =  do x <- satisfy isConid; return (string x)
-> varsym s                      =  satisfy (== (Varsym s))
+> varsym s                      =  satisfy (\ x -> x == (Varsym s) || x == (Varid s)) -- Agda has no symbol/id distinction
 >
 > isTeX (TeX _ _)               =  True
 > isTeX _                       =  False
@@ -164,8 +164,8 @@ substitution directive should be invoked here.
 
 Auswertung Boole'scher Ausdr"ucke.
 
-> eval                          :: Toggles -> String -> Either Exc Value
-> eval togs                     =  parse (expression togs)
+> eval                          :: Lang -> Toggles -> String -> Either Exc Value
+> eval lang togs                =  parse lang (expression togs)
 >
 > expression                    :: Toggles -> Parser Token Value
 > expression togs               =  expr
@@ -200,8 +200,8 @@ Auswertung Boole'scher Ausdr"ucke.
 
 Definierende Gleichungen.
 
-> define                        :: Toggles -> String -> Either Exc (String, Value)
-> define togs                   =  parse (definition togs)
+> define                        :: Lang -> Toggles -> String -> Either Exc (String, Value)
+> define lang togs              =  parse lang (definition togs)
 >
 > definition                    :: Toggles -> Parser Token (String, Value)
 > definition togs               =  do Varid x <- satisfy isVarid
@@ -213,7 +213,7 @@ Primitive Parser.
 
 > equal', not',  true', false', open', close'
 >                               :: Parser Token Token
-> equal'                        =  satisfy (== (Varsym "="))
+> equal'                        =  varsym "="
 > not'                          =  satisfy (== (Varid "not"))
 > true'                         =  satisfy (== (Conid "True"))
 > false'                        =  satisfy (== (Conid "False"))
@@ -222,6 +222,7 @@ Primitive Parser.
 
 > varsym'                       =  do x <- satisfy isVarsym; return (string x)
 > isVarsym (Varsym _)           =  True
+> isVarsym (Varid _)            =  True  -- for Agda
 > isVarsym _                    =  False
 > isString (String _)           =  True
 > isString _                    =  False
@@ -230,8 +231,8 @@ Primitive Parser.
 
 Hilfsfunktionen.
 
-> parse                         :: Parser Token a -> [Char] -> Either Exc a
-> parse p str                   =  do ts <- tokenize str
+> parse                         :: Lang -> Parser Token a -> [Char] -> Either Exc a
+> parse lang p str              =  do ts <- tokenize lang str
 >                                     let ts' = map (\t -> case t of TeX _ x -> TeX False x; _ -> t) .
 >                                               filter (\t -> catCode t /= White || isTeX t) $ ts
 >                                     maybe (Left msg) Right (run p ts')

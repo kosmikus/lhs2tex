@@ -22,6 +22,7 @@ way that is compatible with the @poly@ or @math@ formatters.
 > import qualified FiniteMap as FM
 > import Auxiliaries
 > import MathPoly               (  exprParse, substitute, number )
+> import TeXCommands            (  Lang(..) )
 
 %endif
 
@@ -32,10 +33,10 @@ way that is compatible with the @poly@ or @math@ formatters.
 \NB We do not need an |inline| function because we are only interested
 in the ``real'' program code. All comments are deleted.
 
-> display                       :: Formats -> String -> Either Exc Doc
-> display fmts                  =  lift trim
+> display                       :: Lang -> Formats -> String -> Either Exc Doc
+> display lang fmts             =  lift trim
 >                               @> lift (expand 0)
->                               @> tokenize
+>                               @> tokenize lang
 >                               @> lift (number 1 1)
 >                               @> lift (partition (\t -> catCode t /= White))
 >                               @> exprParse *** return

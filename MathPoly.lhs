@@ -27,6 +27,7 @@ are subtle differences, and they will grow over time \dots
 > import Parser
 > import qualified FiniteMap as FM
 > import Auxiliaries
+> import TeXCommands            (  Lang(..)  )
 > -- import Debug.Trace ( trace )
 
 %endif
@@ -35,9 +36,9 @@ are subtle differences, and they will grow over time \dots
 \subsubsection{Inline and display code}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
-> inline                        :: Formats -> Bool -> String -> Either Exc Doc
-> inline fmts auto              =  fmap unNL
->                               .> tokenize
+> inline                        :: Lang -> Formats -> Bool -> String -> Either Exc Doc
+> inline lang fmts auto         =  fmap unNL
+>                               .> tokenize lang
 >                               @> lift (number 1 1)
 >                               @> when auto (lift (filter (isNotSpace . token)))
 >                               @> lift (partition (\t -> catCode t /= White))
@@ -49,12 +50,12 @@ are subtle differences, and they will grow over time \dots
 >                               @> lift (latexs fmts)
 >                               @> lift sub'inline
 
-> display                       :: Formats -> Bool -> Int -> Int -> Stack
+> display                       :: Lang -> Formats -> Bool -> Int -> Int -> Stack
 >                               -> String -> Either Exc (Doc, Stack)
-> display fmts auto sep lat stack
+> display lang fmts auto sep lat stack
 >                               =  lift trim
 >                               @> lift (expand 0)
->                               @> tokenize
+>                               @> tokenize lang
 >                               @> lift (number 1 1)
 >       --                     |@> when auto (lift (filter (isNotSpace . token)))|
 >                               @> lift (partition (\t -> catCode t /= White))
@@ -126,10 +127,10 @@ Primitive parser.
 > sep, noSep, left, anyright    :: (CToken tok) => Parser tok tok
 > sep                           =  satisfy (\t -> catCode t == Sep)
 > noSep                         =  satisfy (\t -> catCode t == NoSep)
-> left                          =  satisfy (\t -> case catCode t of Del c -> c `elem` "(["; _ -> False)
-> anyright                      =  satisfy (\t -> case catCode t of Del c -> c `elem` ")]"; _ -> False)
+> left                          =  satisfy (\t -> case catCode t of Del c -> c `elem` "([{"; _ -> False)
+> anyright                      =  satisfy (\t -> case catCode t of Del c -> c `elem` ")]}"; _ -> False)
 > right l                       =  (satisfy (\c -> case (catCode l, catCode c) of
->                                       (Del o, Del c) -> (o,c) `elem` zip "([" ")]" 
+>                                       (Del o, Del c) -> (o,c) `elem` zip "([{" ")]}" 
 >                                       _     -> False)
 >                                  ) `mplus` do eof
 >                                               return (fromToken $ TeX False Empty)

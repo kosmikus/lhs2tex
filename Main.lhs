@@ -84,6 +84,7 @@ State.
 > type CondInfo                 =  (FilePath, LineNo, Bool, Bool)
 
 > data State                    =  State { style      :: Style,
+>                                          lang       :: Lang,
 >                                          verbose    :: Bool,
 >                                          searchpath :: [FilePath],
 >                                          file       :: FilePath,      -- also used for `hugs'
@@ -113,7 +114,8 @@ State.
 Initial state.
 
 > state0                        :: State
-> state0                        =  State { verbose    = False,
+> state0                        =  State { lang       = Haskell,
+>                                          verbose    = False,
 >                                          searchpath = searchPath,
 >                                          lineno     = 0,
 >                                          olineno    = 0,
@@ -152,7 +154,9 @@ Initial state.
 >                                  [("style", Int (fromEnum sty))]
 >                               ++ [("version", Int numversion)]
 >                               ++ [("pre", Int pre)]
+>                               ++ [("lang", Int (fromEnum (lang s)))]
 >                               ++ [ (decode s, Int (fromEnum s)) | s <- [(minBound :: Style) .. maxBound] ]
+>                               ++ [ (decode s, Int (fromEnum s)) | s <- [(minBound :: Lang) .. maxBound] ]
 >                               -- |++ [ (s, Bool False) || s <- ["underlineKeywords", "spacePreserving", "meta", "array", "latex209", "times", "euler" ] ]|
 
 > preprocess                    :: State -> [Class] -> Bool -> [String] -> IO ()
@@ -207,10 +211,12 @@ because with some versions of GHC it triggers ambiguity errors with
 >   , Option ['V'] ["version"] (NoArg (return, id, [Version]))                              "show version"
 >   , Option []    ["tt"]      (NoArg (return, id, [Typewriter]))                           "typewriter style"
 >   , Option []    ["math"]    (NoArg (return, id, [Math]))                                 "math style"
->   , Option []    ["poly"]    (NoArg (return, id, [Poly]))                                 "poly style"
+>   , Option []    ["poly"]    (NoArg (return, id, [Poly]))                                 "poly style (default)"
 >   , Option []    ["code"]    (NoArg (return, id, [CodeOnly]))                             "code style"
 >   , Option []    ["newcode"] (NoArg (return, id, [NewCode]))                              "new code style"
 >   , Option []    ["verb"]    (NoArg (return, id, [Verb]))                                 "verbatim"
+>   , Option []    ["haskell"] (NoArg (\s -> return $ s { lang = Haskell}, id, []))         "Haskell lexer (default)"
+>   , Option []    ["agda"]    (NoArg (\s -> return $ s { lang = Agda}, id, []))            "Agda lexer"
 >   , Option []    ["pre"]     (NoArg (return, id, [Pre]))                                  "act as ghc preprocessor"
 >   , Option ['o'] ["output"]  (ReqArg (\f -> (\s -> do h <- openFile f WriteMode
 >                                                       return $ s { output = h }, id, [])) "file") "specify output file"
@@ -278,8 +284,9 @@ We abort immediately if an error has occured.
 > formats (No n  (Directive d s) : ts)
 >     | conditional d           =  do update (\st -> st{lineno = n})
 >                                     st <- fetch
->                                     directive d s (file st,n) 
->                                                   (conds st) (toggles st) ts
+>                                     directive (lang st)
+>                                               d s (file st,n) 
+>                                               (conds st) (toggles st) ts
 > formats (No n t : ts)         =  do update (\st -> st{lineno = n})
 >                                     format t
 >                                     formats ts
@@ -308,7 +315,8 @@ Remove trailing blank line.
 >            | otherwise        =  s
 >            where (t, u)       =  breakAfter (== '\n') s
 
-> format (Environment Haskell s)=  display s
+> format (Environment Haskell_ s)
+>                               =  display s
 > format (Environment Code s)   =  display s
 > format (Environment Spec s)   =  do st <- fetch
 >                                     when (not (style st `elem` [CodeOnly,NewCode])) $
@@ -323,10 +331,10 @@ Remove trailing blank line.
 > format (Environment (Verbatim b) s)
 >                               =  out (Verbatim.display 120 b s)
 > format (Directive Format s)   =  do st <- fetch
->                                     b@(n,e) <- fromEither (parseFormat s)
+>                                     b@(n,e) <- fromEither (parseFormat (lang st) s)
 >                                     store (st{fmts = FM.add b (fmts st)})
 > format (Directive Subst s)    =  do st <- fetch
->                                     b <- fromEither (parseSubst s)
+>                                     b <- fromEither (parseSubst (lang st) s)
 >                                     store (st{subst = FM.add b (subst st)})
 > format (Directive Include arg)=  do st <- fetch
 >                                     let d  = path st
@@ -373,7 +381,7 @@ ks, 11.09.03: added exception handling for unbalanced grouping
 \Todo{|toggles| should be saved, as well.}
 
 > format (Directive Let s)      =  do st <- fetch
->                                     t <- fromEither (define (toggles st) s)
+>                                     t <- fromEither (define (lang st) (toggles st) s)
 >                                     store st{toggles = FM.add t (toggles st)}
 > format (Directive Align s)
 >     | all isSpace s           =  update (\st -> st{align = Nothing, stacks  = ([], [])})
@@ -444,9 +452,9 @@ Printing documents.
 >                                     d <- fromEither (select (style st) st)
 >                                     eject d
 >   where select Verb st        =  Right (Verbatim.inline False s)
->         select Typewriter st  =  Typewriter.inline (fmts st) s
->         select Math st        =  Math.inline (fmts st) (isTrue (toggles st) auto) s
->         select Poly st        =  Poly.inline (fmts st) (isTrue (toggles st) auto) s
+>         select Typewriter st  =  Typewriter.inline (lang st) (fmts st) s
+>         select Math st        =  Math.inline (lang st) (fmts st) (isTrue (toggles st) auto) s
+>         select Poly st        =  Poly.inline (lang st) (fmts st) (isTrue (toggles st) auto) s
 >         select CodeOnly st    =  return Empty
 >         select NewCode st     =  return Empty   -- generate PRAGMA or something?
 
@@ -455,12 +463,12 @@ Printing documents.
 >                                     store st'
 >                                     eject d
 >   where select Verb st        =  return (Verbatim.display 120 False s, st)
->         select Typewriter st  =  do d <- Typewriter.display (fmts st) s; return (d, st)
->         select Math st        =  do (d, sts) <- Math.display (fmts st) (isTrue (toggles st) auto) (stacks st) (align st) s
+>         select Typewriter st  =  do d <- Typewriter.display (lang st) (fmts st) s; return (d, st)
+>         select Math st        =  do (d, sts) <- Math.display (lang st) (fmts st) (isTrue (toggles st) auto) (stacks st) (align st) s
 >                                     return (d, st{stacks = sts})
->         select Poly st        =  do (d, pstack') <- Poly.display (fmts st) (isTrue (toggles st) auto) (separation st) (latency st) (pstack st) s
+>         select Poly st        =  do (d, pstack') <- Poly.display (lang st) (fmts st) (isTrue (toggles st) auto) (separation st) (latency st) (pstack st) s
 >                                     return (d, st{pstack = pstack'})
->         select NewCode st     =  do d <- NewCode.display (fmts st) s
+>         select NewCode st     =  do d <- NewCode.display (lang st) (fmts st) s
 >                                     let p = sub'pragma $ Text ("LINE " ++ show (lineno st + 1) ++ " " ++ show (takeFileName $ file st))
 >                                     return ((if pragmas st then ((p <> sub'nl) <>) else id) d, st)
 >         select CodeOnly st    =  return (Text (trim s), st)
@@ -492,15 +500,15 @@ conditions of the current @%if@-chain.
 ks, 16.08.2004: At the end of the input, we might want to check for unbalanced if's or
 groups.
 
-> directive                     :: Directive -> String 
+> directive                     :: Lang -> Directive -> String 
 >                               -> (FilePath,LineNo) -> [CondInfo] -> Toggles
 >                               -> [Numbered Class] -> Formatter
-> directive d s (f,l) stack togs ts
+> directive lang d s (f,l) stack togs ts
 >                               =  dir d s stack
 >   where
->   dir If s bs                 =  do b <- fromEither (eval togs s)
+>   dir If s bs                 =  do b <- fromEither (eval lang togs s)
 >                                     skipOrFormat ((f, l, bool b, True) : bs) ts
->   dir Elif s ((f,l,b2,b1):bs) =  do b <- fromEither (eval togs s)
+>   dir Elif s ((f,l,b2,b1):bs) =  do b <- fromEither (eval lang togs s)
 >                                     skipOrFormat ((f, l, bool b, not b2 && b1) : bs) ts
 >   dir Else _ ((f,l,b2,b1):bs) =  skipOrFormat ((f, l, not b2 && b1, True) : bs) ts
 >   dir Endif _ ((f,l,b2,b1):bs)=  skipOrFormat bs ts

@@ -14,7 +14,12 @@
 
 %endif
 
+These don't really belong into a module named TeXCommands:
+
 > data Style                    =  Version | Help | SearchPath | Copying | Warranty | CodeOnly | NewCode | Verb | Typewriter | Poly | Math | Pre
+>                                  deriving (Eq, Show, Enum, Bounded)
+
+> data Lang                     =  Haskell | Agda
 >                                  deriving (Eq, Show, Enum, Bounded)
 
 \Todo{Better name for |Class|.}
@@ -31,10 +36,10 @@
 > data Command                  =  Hs | Eval | Perform | Vrb Bool
 >                                  deriving (Eq, Show)
 >
-> data Environment              =  Haskell | Code | Spec | Evaluate | Hide | Ignore | Verbatim Bool
+> data Environment              =  Haskell_ | Code | Spec | Evaluate | Hide | Ignore | Verbatim Bool
 >                                  deriving (Eq, Show)
 
-\NB |Hs|, |Haskell|, |Hide|, and |Ignore| are obsolete.
+\NB |Hs|, |Haskell_|, |Hide|, and |Ignore| are obsolete.
 ks, 16.08.2004: added EOF.
 
 >
@@ -68,12 +73,14 @@ Encoding and decoding of commands, environments, and directives.
 >                                    ("verb", Verb), ("code", CodeOnly), ("newcode",NewCode),
 >                                    ("pre", Pre), ("version", Version),
 >                                    ("copying", Copying), ("warranty", Warranty), ("help", Help), ("searchpath", SearchPath) ]
+> instance Representation Lang where
+>     representation            =  [ ("haskell", Haskell), ("agda", Agda) ]
 > instance Representation Command where
 >     representation            =  [ ("hs", Hs), ("eval", Eval),
 >                                    ("perform", Perform), ("verb*", Vrb True),
 >                                    ("verb", Vrb False) ]
 > instance Representation Environment where
->     representation            =  [ ("haskell", Haskell), ("code", Code),
+>     representation            =  [ ("haskell", Haskell_), ("code", Code),
 >                                    ("spec", Spec), ("evaluate", Evaluate), ("hide", Hide),
 >                                    ("ignore", Ignore), ("verbatim*", Verbatim True),
 >                                    ("verbatim", Verbatim False) ]
