@@ -1,4 +1,4 @@
-cabal-version:  >=1.4
+cabal-version:  >=1.6
 name:		lhs2tex
 version:	1.13
 license:	GPL

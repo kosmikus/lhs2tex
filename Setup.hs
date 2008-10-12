@@ -1,6 +1,7 @@
 import Distribution.Simple.Setup (CopyDest(..),ConfigFlags(..),BuildFlags(..),
                                   CopyFlags(..),RegisterFlags(..),InstallFlags(..),
-                                  emptyRegisterFlags,fromFlagOrDefault,Flag(..))
+                                  defaultRegisterFlags,fromFlagOrDefault,Flag(..),
+                                  defaultCopyFlags)
 import Distribution.Simple
 import Distribution.Simple.LocalBuildInfo
                             (LocalBuildInfo(..),absoluteInstallDirs)
@@ -223,8 +224,8 @@ lhs2texPostCopy a (CopyFlags { copyDest = cdf, copyVerbosity = vf }) pd lbi =
           Nothing    -> return ()
 
 lhs2texPostInst a (InstallFlags { installPackageDB = db, installVerbosity = v }) pd lbi =
-    do  lhs2texPostCopy a (CopyFlags { copyDest = Flag NoCopyDest, copyVerbosity = v }) pd lbi
-        lhs2texRegHook pd lbi Nothing (emptyRegisterFlags { regPackageDB = db, regVerbosity = v })
+    do  lhs2texPostCopy a (defaultCopyFlags { copyDest = Flag NoCopyDest, copyVerbosity = v }) pd lbi
+        lhs2texRegHook pd lbi Nothing (defaultRegisterFlags { regPackageDB = db, regVerbosity = v })
 
 lhs2texRegHook pd lbi _ (RegisterFlags { regVerbosity = vf }) =
     do  let v = fromFlagOrDefault normal vf
