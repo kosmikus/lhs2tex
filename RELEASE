@@ -20,7 +20,7 @@ lhs2TeX includes the following features:
 
 * A manual explaining all the important aspects of lhs2TeX.
 
-Changes (w.r.t. lhs2TeX 1.12)
+Changes (w.r.t. lhs2TeX 1.13)
 -----------------------------
 
 * Compatible with cabal-1.6; traditional configure/make
