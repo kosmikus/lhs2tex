@@ -1,0 +1,36 @@
+%if False
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% exists.fmt
+%
+% Format exists x. y as \exists x. y in TeX, not as compose
+% Based on forall.fmt; look there for slightly more
+% documentation.
+%
+% Andres Loeh, September 2008, version 1.1
+% Duncan Coutts, September 2008, copy'n'pasted from lambda.fmt
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%endif
+%if not lhs2tex_exists_fmt_read
+%let lhs2tex_exists_fmt_read = True
+%include lhs2TeX.fmt
+%include forall.fmt
+%
+%if style /= newcode
+%format exists(x) = exists_ x "\hsexists "
+%format exists_   = "\exists "
+%
+\ReadOnlyOnce{exists.fmt}%
+\makeatletter
+
+\newcommand\hsexists{\global\let\hsdot=\hsperiodonce}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+%endif
+%endif

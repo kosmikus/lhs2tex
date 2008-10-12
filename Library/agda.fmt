@@ -1,0 +1,55 @@
+%if False
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% agda.fmt
+%
+% basic definitions for formatting agda code
+%
+% Permission is granted to include this file (or parts of this file) 
+% literally into other documents, regardless of the conditions or 
+% license applying to these documents.
+%
+% Andres Loeh, October 2008, ver 1.0
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%endif
+%if not lhs2tex_agda_fmt_read
+%let lhs2tex_agda_fmt_read = True
+%include polycode.fmt
+%
+%if style /= newcode
+\ReadOnlyOnce{agda.fmt}%
+
+%if lang == agda
+
+\RequirePackage[T1]{fontenc}
+\RequirePackage{lmodern}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage{ucs}
+\RequirePackage{amsfonts}
+
+\providecommand\mathbbm{\mathbb}
+
+% TODO: Define more of these ...
+\DeclareUnicodeCharacter{737}{\textsuperscript{l}}
+\DeclareUnicodeCharacter{8718}{\ensuremath{\blacksquare}}
+\DeclareUnicodeCharacter{8759}{::}
+\DeclareUnicodeCharacter{9669}{\ensuremath{\triangleleft}}
+\DeclareUnicodeCharacter{8799}{\ensuremath{\stackrel{\scriptsize?}{=}}}
+\DeclareUnicodeCharacter{10214}{\ensuremath{\llbracket}}
+\DeclareUnicodeCharacter{10215}{\ensuremath{\rrbracket}}
+
+% TODO: This is in general not a good idea.
+\providecommand\textepsilon{$\epsilon$}
+\renewcommand\textmu{$\mu$}
+
+%subst varsym a = "\Varid{" a "}"
+
+% TODO: Make this configurable. IMHO, italics doesn't work well
+% for Agda code.
+
+\let\Varid\textsf
+\let\Conid\textsf
+\EndFmtInput
+
+%endif
+%endif
+%endif

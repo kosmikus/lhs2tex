@@ -1,0 +1,39 @@
+%if False
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% lambda.fmt
+%
+% Format \ x -> y as \ x . y in TeX
+% Based on forall.fmt; look there for slightly more
+% documentation.
+%
+% Andres Loeh, September 2008, version 1.1
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%endif
+%if not lhs2tex_lambda_fmt_read
+%let lhs2tex_lambda_fmt_read = True
+%include lhs2TeX.fmt
+%include forall.fmt
+%
+%if style /= newcode
+%format \         = lambda_ "\hslambda "
+%format ->        = "\hsarrow{" `arrow_` "}{" lambdaperiod_ "}"
+%format `arrow_`  = "\rightarrow "
+%format lambda_   = "\lambda "
+%format lambdaperiod_ = "\mathpunct{.}"
+%
+\ReadOnlyOnce{lambda.fmt}%
+\makeatletter
+
+\newcommand\hslambda{\global\let\hsarrow=\hsarrowperiodonce}
+\newcommand*\hsarrowperiodonce[2]{#2\global\let\hsarrow=\hscompose}
+
+\AtHaskellReset{\global\let\hsarrow=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+%endif
+%endif
