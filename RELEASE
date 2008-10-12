@@ -39,6 +39,10 @@ A source distribution is available from
 
   http://people.cs.uu.nl/andres/lhs2tex/
 
+and, of course, via Hackage:
+
+  http://hackage.haskell.org/cgi-bin/hackage-scripts/package/lhs2tex
+
 Should work on all major platforms, but has mainly been
 tested on Linux. Binaries will be made available on request.
 
