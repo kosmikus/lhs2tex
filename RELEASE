@@ -1,5 +1,5 @@
 
-                     lhs2TeX version 1.13
+                     lhs2TeX version 1.14
                      ====================
 
 We are pleased to announce a new release of lhs2TeX, 
@@ -23,26 +23,19 @@ lhs2TeX includes the following features:
 Changes (w.r.t. lhs2TeX 1.12)
 -----------------------------
 
-* Compatible with ghc-6.8.{1,2}.
-
-* Compatible with cabal-1.2; traditional configure/make
+* Compatible with cabal-1.6; traditional configure/make
   installation should still work.
 
-* Uses filepath.
+* Unicode support.
 
-* LINE pragmas can be disabled with --no-pragmas.
-
-* Fixed comment lexing bugs (--> was considered a Haskell comment,
-  \% was considered a TeX comment)
-
-* Added a %subst directive for backquoted operators.
+* Support for Agda's lexing rules (via --agda flag).
 
 Requirements and Download
 -------------------------
 
 A source distribution is available from
 
-  http://www.cs.uu.nl/~andres/lhs2tex/
+  http://people.cs.uu.nl/andres/lhs2tex/
 
 Should work on all major platforms, but has mainly been
 tested on Linux. Binaries will be made available on request.
