@@ -249,9 +249,9 @@
   \smaller (for version \ProgramVersion)}
 \author{{Ralf Hinze}\\
   \smaller \tabular{c}
-           Institut f\"ur Informatik III, Universit\"at Bonn\\
-           R\"omerstra\ss e 164, 53117 Bonn, Germany\\
-           \verb|ralf@informatik.uni-bonn.de|
+           Computing Laboratory, University of Oxford\\
+           Wolfson Building, Parks Road, Oxford, OX1 3QD, England\\
+           \verb|ralf.hinze@comlab.ox.ac.uk|
            \endtabular
   \and
   {Andres L\"oh}\\
