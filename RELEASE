@@ -30,6 +30,8 @@ Changes (w.r.t. lhs2TeX 1.12)
 
 * Support for Agda's lexing rules (via --agda flag).
 
+* Minor bugfixes.
+
 Requirements and Download
 -------------------------
 
@@ -40,7 +42,7 @@ A source distribution is available from
 Should work on all major platforms, but has mainly been
 tested on Linux. Binaries will be made available on request.
 
-You need a recent version of GHC (6.8.2 is tested, older versions
+You need a recent version of GHC (6.8.{2,3} are tested, older versions
 might work) to build lhs2TeX, and, of course, you need a TeX
 distribution to make use of lhs2TeX's output. The program includes
 a configuration that is suitable for use with LaTeX. In theory, 
