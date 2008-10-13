@@ -173,7 +173,7 @@ column specifiers. It only works for @poly@ style.
 \visiblecomments
 
 \newlength{\blanklineskip}
-\setlength{\blanklineskip}{1mm}
+\setlength{\blanklineskip}{0.66084ex}
 
 \newcommand{\hsindent}[1]{\quad}% default is fixed indentation
 \let\hspre\empty

@@ -253,7 +253,7 @@ in a conditional checking |anyMath|.
 %subst column1 a	= "${" a "}$"
 %endif
 %subst newline   	= "\\'n"
-%subst blankline 	= "\\[1mm]%'n"
+%subst blankline 	= "\\[0.66084ex]%'n"
 %let anyMath            = True
 %elif style == poly
 %subst comment a	= "\mbox{\onelinecomment " a "}"
