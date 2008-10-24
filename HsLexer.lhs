@@ -106,7 +106,7 @@ ks, 28.08.2008: New: Agda and Haskell modes.
 > lex' lang ('-' : '-' : s)
 >   | not (null s') && isSymbol lang (head s')
 >                               =  case s' of
->                                    (c : s'') -> return (Varsym ("--" ++ d ++ [c]), s'')
+>                                    (c : s'') -> return (varsymid lang ("--" ++ d ++ [c]), s'')
 >   | otherwise                 =  return (Comment t, u)
 >   where (d, s') = span (== '-') s
 >         (t, u)  = break (== '\n') s'
@@ -126,13 +126,15 @@ ks, 28.08.2008: New: Agda and Haskell modes.
 >     | isSpecial c             =  Just (Special c, s)
 >     | isUpper c               =  let (t, u) = span (isIdChar lang) s in return (Conid (c : t), u)
 >     | isLower c || c == '_'   =  let (t, u) = span (isIdChar lang) s in return (classify (c : t), u)
->     | c == ':'                =  let (t, u) = span (isSymbol lang) s in return (Consym (c : t), u)
->     | isSymbol lang c         =  let (t, u) = span (isSymbol lang) s in return (Varsym (c : t), u)
+>     | c == ':'                =  let (t, u) = span (isSymbol lang) s in return (consymid lang (c : t), u)
 >     | isDigit c               =  do let (ds, t) = span isDigit s
 >                                     (fe, u)  <- lexFracExp t
->                                     return (Numeral (c : ds ++ fe), u)
+>                                     return (numeral lang (c : ds ++ fe), u)
+>     | isSymbol lang c         =  let (t, u) = span (isSymbol lang) s in return (varsymid lang (c : t), u)
 >     | otherwise               =  Nothing
 >     where
+>     numeral Agda              =  Varid
+>     numeral Haskell           =  Numeral
 >     classify s
 >         | s `elem` keywords lang
 >                               =  Keyword s
@@ -158,6 +160,11 @@ ks, 28.08.2008: New: Agda and Haskell modes.
 >
 > lexDigits'                    :: String -> Maybe (String, String)
 > lexDigits' s                  =  do (cs@(_ : _), t) <- Just (span isDigit s); return (cs, t)
+
+> varsymid Agda    = Varid
+> varsymid Haskell = Varsym
+> consymid Agda    = Conid
+> consymid Haskell = Consym
 
 %}
 
@@ -343,8 +350,8 @@ an improvement.
 >     catCode (Space _)         =  White
 >     catCode (Conid _)         =  NoSep
 >     catCode (Varid _)         =  NoSep
->     catCode (Consym _)        =  NoSep -- !
->     catCode (Varsym _)        =  NoSep -- !
+>     catCode (Consym _)        =  Sep -- Sep is necessary for correct Haskell formatting
+>     catCode (Varsym _)        =  Sep -- in Agda mode, Consym/Varsym don't occur
 >     catCode (Numeral _)       =  NoSep
 >     catCode (Char _)          =  NoSep
 >     catCode (String _)        =  NoSep

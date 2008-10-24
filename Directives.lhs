@@ -51,11 +51,11 @@ Format directives. \NB @%format ( = "(\;"@ is legal.
 
 > equation                      :: Lang -> Parser Token (String, Equation)
 > equation lang                 =  do (opt, (f, opts, args)) <- optParen lhs
->                                     _ <- varsym "="
+>                                     _ <- varsym lang "="
 >                                     r <- many item
 >                                     return (f, (opt, opts, args, r))
 >                               `mplus` do f <- item
->                                          _ <- varsym "="
+>                                          _ <- varsym lang "="
 >                                          r <- many item
 >                                          return (string f, (False, [], [], r))
 >                               `mplus` do f <- satisfy isVarid `mplus` satisfy isConid
@@ -135,11 +135,11 @@ substitution directive should be invoked here.
 > type Subst                    =  [Doc] -> Doc
 
 > parseSubst                    :: Lang -> String -> Either Exc (String, Subst)
-> parseSubst lang s             =  parse lang substitution (convert s)
+> parseSubst lang s             =  parse lang (substitution lang) (convert s)
 >
-> substitution                  =  do s <- varid
+> substitution lang             =  do s <- varid
 >                                     args <- many varid
->                                     _ <- varsym "="
+>                                     _ <- varsym lang "="
 >                                     rhs <- many (satisfy isVarid `mplus` satisfy isTeX)
 >                                     return (s, subst args rhs)
 >   where
@@ -148,10 +148,15 @@ substitution directive should be invoked here.
 >             sub (Varid x)     =  FM.fromList (zip args ds) ! x
 
 \Todo{unbound variables behandeln.}
+ks, 24.10.2008: A bit messy: For Agda, we explicitly exclude "=" from the set
+of varids accepted on the lhs of a directive, because according to the Agda
+lexer, "=" is both a varid and a varsym. This shouldn't matter for Haskell,
+because "=" will never occur in a Varid constructor.
 
-> varid                         =  do x <- satisfy isVarid; return (string x)
+> varid                         =  do x <- satisfy (\ x -> isVarid x && x /= (Varid "=")); return (string x)
 > conid                         =  do x <- satisfy isConid; return (string x)
-> varsym s                      =  satisfy (\ x -> x == (Varsym s) || x == (Varid s)) -- Agda has no symbol/id distinction
+> varsym Agda s                 =  satisfy (\ x -> x == (Varsym s) || x == (Varid s)) -- Agda has no symbol/id distinction
+> varsym Haskell s              =  satisfy (== (Varsym s))
 >
 > isTeX (TeX _ _)               =  True
 > isTeX _                       =  False
@@ -165,13 +170,13 @@ substitution directive should be invoked here.
 Auswertung Boole'scher Ausdr"ucke.
 
 > eval                          :: Lang -> Toggles -> String -> Either Exc Value
-> eval lang togs                =  parse lang (expression togs)
+> eval lang togs                =  parse lang (expression lang togs)
 >
-> expression                    :: Toggles -> Parser Token Value
-> expression togs               =  expr
+> expression                    :: Lang -> Toggles -> Parser Token Value
+> expression lang togs          =  expr
 >   where
 >   expr                        =  do e1 <- appl
->                                     e2 <- optional (do op <- varsym'; e <- expr; return (op, e))
+>                                     e2 <- optional (do op <- varsym' lang; e <- expr; return (op, e))
 >                                     return (maybe e1 (\(op, e2) -> sys2 op e1 e2) e2)
 >   appl                        =  do f <- optional not'
 >                                     e <- atom
@@ -201,29 +206,30 @@ Auswertung Boole'scher Ausdr"ucke.
 Definierende Gleichungen.
 
 > define                        :: Lang -> Toggles -> String -> Either Exc (String, Value)
-> define lang togs              =  parse lang (definition togs)
+> define lang togs              =  parse lang (definition lang togs)
 >
-> definition                    :: Toggles -> Parser Token (String, Value)
-> definition togs               =  do Varid x <- satisfy isVarid
->                                     _ <- equal'
->                                     b <- expression togs
+> definition                    :: Lang -> Toggles -> Parser Token (String, Value)
+> definition lang togs          =  do Varid x <- satisfy isVarid
+>                                     _ <- equal' lang
+>                                     b <- expression lang togs
 >                                     return (x, b)
 
 Primitive Parser.
 
-> equal', not',  true', false', open', close'
+> not',  true', false', open', close'
 >                               :: Parser Token Token
-> equal'                        =  varsym "="
+> equal'                        :: Lang -> Parser Token Token
+> equal' lang                   =  varsym lang "="
 > not'                          =  satisfy (== (Varid "not"))
 > true'                         =  satisfy (== (Conid "True"))
 > false'                        =  satisfy (== (Conid "False"))
 > open'                         =  satisfy (== (Special '('))
 > close'                        =  satisfy (== (Special ')'))
 
-> varsym'                       =  do x <- satisfy isVarsym; return (string x)
-> isVarsym (Varsym _)           =  True
-> isVarsym (Varid _)            =  True  -- for Agda
-> isVarsym _                    =  False
+> varsym' lang                  =  do x <- satisfy (isVarsym lang); return (string x)
+> isVarsym _ (Varsym _)         =  True
+> isVarsym Agda (Varid _)       =  True  -- for Agda
+> isVarsym _ _                  =  False
 > isString (String _)           =  True
 > isString _                    =  False
 > isNumeral (Numeral _)         =  True

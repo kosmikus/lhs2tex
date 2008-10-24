@@ -21,7 +21,6 @@
 %if lang == agda
 
 \RequirePackage[T1]{fontenc}
-\RequirePackage{lmodern}
 \RequirePackage[utf8]{inputenc}
 \RequirePackage{ucs}
 \RequirePackage{amsfonts}
@@ -33,7 +32,7 @@
 \DeclareUnicodeCharacter{8718}{\ensuremath{\blacksquare}}
 \DeclareUnicodeCharacter{8759}{::}
 \DeclareUnicodeCharacter{9669}{\ensuremath{\triangleleft}}
-\DeclareUnicodeCharacter{8799}{\ensuremath{\stackrel{\scriptsize?}{=}}}
+\DeclareUnicodeCharacter{8799}{\ensuremath{\stackrel{\scriptscriptstyle ?}{=}}}
 \DeclareUnicodeCharacter{10214}{\ensuremath{\llbracket}}
 \DeclareUnicodeCharacter{10215}{\ensuremath{\rrbracket}}
 
@@ -41,13 +40,17 @@
 \providecommand\textepsilon{$\epsilon$}
 \renewcommand\textmu{$\mu$}
 
+%subst keyword a = "\Keyword{" a "}"
+
+%Actually, varsyms should not occur in Agda output.
 %subst varsym a = "\Varid{" a "}"
 
 % TODO: Make this configurable. IMHO, italics doesn't work well
 % for Agda code.
 
-\let\Varid\textsf
-\let\Conid\textsf
+\renewcommand\Varid[1]{\mathord{\textsf{#1}}}
+\let\Conid\Varid
+\newcommand\Keyword[1]{\textsf{\textbf{#1}}}
 \EndFmtInput
 
 %endif
