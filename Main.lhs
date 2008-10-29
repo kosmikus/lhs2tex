@@ -10,7 +10,7 @@
 > import Data.Char ( isSpace )
 > import Data.List ( isPrefixOf )
 > import System.IO ( hClose, hFlush, stderr, stdout, openFile, IOMode(..), Handle(..) )
-> import System.IO.UTF8 ( hPutStr, hPutStrLn, hGetLine )
+> import System.IO.UTF8 ( hPutStr, hPutStrLn, hGetLine, getContents )
 > import System.Directory ( copyFile )
 > import System.Console.GetOpt
 > import Text.Regex ( matchRegex, mkRegexWithOpts )
@@ -19,6 +19,7 @@
 > import System.Process
 > import Version
 > import Control.Monad
+> import Prelude hiding ( getContents )
 >
 > -- import IOExts
 > import TeXCommands
