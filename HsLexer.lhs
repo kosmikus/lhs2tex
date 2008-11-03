@@ -15,7 +15,7 @@
 > import TeXCommands    (  Lang(..)  )
 
 %endif
-Ein Haskell-Lexer. Modifikation der Prelude-Funktion \hs{lex}.
+A Haskell lexer, based on the Prelude function \hs{lex}.
 
 > data Token                    =  Space String
 >                               |  Conid String

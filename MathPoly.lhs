@@ -206,8 +206,9 @@ was that in |findCols| above, the recursive calls used |vs| instead of |(v':vs)|
 >               | otherwise
 >                               -> (cc,us,ind) : splitn (n,i) False oas (v:vs)
 
-Die Funktion |isInternal| pr"uft, ob |v| ein spezielles Symbol wie
-@::@, @=@ etc~oder ein Operator wie @++@ ist.
+The function |isInternal| returns |True| iff the argument is a symbol
+or a special internal symbol. See @HsLexer@ for the list of special
+symbols.
 
 > isInternal                    :: (CToken tok) => tok -> Bool
 > isInternal t                  =  case token t of
@@ -293,7 +294,7 @@ Operators are `self spacing'.
 > -- |selfSpacing (TeX _) =  True|
 > selfSpacing _                 =  False
 
-\NB It's not a good idea to regard inline \TeX\ as self spacing consider,
+\NB It's not a good idea to regard inline \TeX\ as self spacing -- consider,
 for example, a macro like @%format mu = "\mu "@.
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
