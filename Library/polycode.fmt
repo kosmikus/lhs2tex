@@ -8,7 +8,7 @@
 % literally into other documents, regardless of the conditions or 
 % license applying to these documents.
 %
-% Andres Loeh, January 2008, ver 1.10
+% Andres Loeh, November 2008, ver 1.11
 %
 % TODO: use \[ \] in arrayhs (fleqn problem)
 %       think about penalties and better pagebreaks
@@ -67,7 +67,8 @@
    \advance\leftskip\mathindent
    \hscodestyle
    \let\\=\@@normalcr
-   \(\pboxed}%
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
   {\endpboxed\)%
    \par\noindent
    \ignorespacesafterend}
