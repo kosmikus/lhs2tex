@@ -1,0 +1,28 @@
+%if False
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% beamer.fmt
+%
+% Utility commands for use of lhs2TeX with the beamer
+% class. Note that this fmt file is not required for
+% using lhs2TeX together with beamer.
+%
+% Andres Loeh, November 2008, version 1.0
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%endif
+%if not lhs2tex_beamer_fmt_read
+%let lhs2tex_beamer_fmt_read = True
+%include lhs2TeX.fmt
+%
+\ReadOnlyOnce{beamer.fmt}%
+
+\let\savesavecolumns\savecolumns
+
+\newcommand{\saverestorecolumns}{%
+\savecolumns\global\let\savecolumns\restorecolumns}
+
+\newcommand{\resetsavecolumns}{%
+\global\let\savecolumns\savesavecolumns}
+
+\EndFmtInput
+%endif
