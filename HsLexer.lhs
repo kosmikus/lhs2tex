@@ -6,7 +6,7 @@
 
 > module HsLexer                (  module HsLexer ) --Token(..), isVarid, isConid, isNotSpace, string, tokenize  )
 > where
-> import Data.Char 	(  isSpace, isUpper, isLower, isDigit, isAlphaNum  )
+> import Data.Char 	(  isSpace, isUpper, isLower, isDigit, isAlphaNum, isPunctuation  )
 > import qualified Data.Char ( isSymbol )
 > import Control.Monad
 > import Control.Monad.Error ()
@@ -209,7 +209,9 @@ patterns"'. [ks: This is no longer true (with GHC 5.04.3).]
 > isSpecial                     :: Char -> Bool
 > isIdChar, isSymbol            :: Lang -> Char -> Bool
 > isSpecial c                   =  c `elem` ",;()[]{}`"
-> isSymbol Haskell c            =  c `elem` "!@#$%&*+./<=>?\\^|:-~" || Data.Char.isSymbol c
+> isSymbol Haskell c            =  not (isSpecial c) && not (c `elem` "'\"") &&
+>                                  (c `elem` "!@#$%&*+./<=>?\\^|:-~" ||
+>                                   Data.Char.isSymbol c || Data.Char.isPunctuation c)
 > isSymbol Agda c               =  isIdChar Agda c
 > isIdChar Haskell c            =  isAlphaNum c || c `elem` "_'"
 > isIdChar Agda c               =  not (isSpecial c || isSpace c)
