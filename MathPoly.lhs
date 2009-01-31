@@ -97,7 +97,7 @@ This variant can handle unbalanced parentheses in some cases (see below).
 >
 > chunk                         :: (CToken tok) => Int -> Parser (Pos tok) (Chunk (Pos tok))
 > chunk d                       =  do a <- many (atom d)
->                                     as <- many (do s <- sep; a <- many (atom d); return ([Delim s] ++ offside a))
+>                                     as <- many (do s <- sep; a <- many (atom d); return (Delim s : offside a))
 >                                     return (offside a ++ concat as)
 >     where offside []          =  []
 >           -- old: |opt a =  [Apply a]|
@@ -129,11 +129,11 @@ Primitive parser.
 > noSep                         =  satisfy (\t -> catCode t == NoSep)
 > left                          =  satisfy (\t -> case catCode t of Del c -> c `elem` "([{"; _ -> False)
 > anyright                      =  satisfy (\t -> case catCode t of Del c -> c `elem` ")]}"; _ -> False)
-> right l                       =  (satisfy (\c -> case (catCode l, catCode c) of
->                                       (Del o, Del c) -> (o,c) `elem` zip "([{" ")]}" 
->                                       _     -> False)
->                                  ) `mplus` do eof
->                                               return (fromToken $ TeX False Empty)
+> right l                       =  satisfy (\c -> case (catCode l, catCode c) of
+>                                      (Del o, Del c) -> (o,c) `elem` zip "([{" ")]}" 
+>                                      _     -> False)
+>                                   `mplus` do eof
+>                                              return (fromToken $ TeX False Empty)
 
 ks, 06.09.2003: Modified the |right| parser to accept the end of file,
 to allow for unbalanced parentheses. This behaviour is not (yet) backported
@@ -244,7 +244,7 @@ same amount of space.
 >     where
 >     cts                       = transpose (concatMap (deline cs) ats)
 >     maxlengths                = {- |trace (show cts) $ |-} map (maximum . map length) cts
->     anyinternals              = map (or . map (any isInternal)) cts
+>     anyinternals              = map (any (any isInternal)) cts
 >
 >     -- deline                    :: [(String,Int)] -> Line [a] -> [[[a]]]
 >     deline cs Blank           = []
@@ -396,7 +396,7 @@ Letztlich wird die augenblickliche Zeile auf den Stack gelegt.
 >
 >   indent                      :: (String,Int) -> (String,Int) -> Doc
 >   indent (n,c) (n',c')
->     | c /= c'                 =  (sub'indent (Text (show (c' - c))))
+>     | c /= c'                 =  sub'indent (Text (show (c' - c)))
 >     | otherwise               =  Empty
 
 M"ussen |v| und |t| zueinander passen?
