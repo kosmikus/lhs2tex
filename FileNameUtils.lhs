@@ -1,3 +1,5 @@
+> {-# LANGUAGE ScopedTypeVariables #-}
+>
 > module FileNameUtils          ( extension
 >                               , expandPath
 >                               , chaseFile
@@ -14,7 +16,7 @@
 > import System.Environment
 > import Data.List
 > import Control.Monad (filterM)
-> import Control.Exception      (  try, catch )
+> import Control.Exception      (  try, catch, IOException )
 > import System.FilePath
 > import System.Info
 
@@ -87,7 +89,7 @@ more than one directory separator, all subpaths are added ...
 >                                             d''' <- mapM descendFrom d''
 >                                             return (s : concat d''')
 >                                        )
->                                        (const $ return [s])
+>                                        (\ (_ :: IOException) -> return [s])
 
 > expandEnvironment             :: String -> IO [String]
 > expandEnvironment s           =  case break (=='{') s of
@@ -97,7 +99,7 @@ more than one directory separator, all subpaths are added ...
 >                                                    (e,'}':r') -> findEnvironment e s' r'
 >   where findEnvironment       :: String -> String -> String -> IO [String]
 >         findEnvironment e a o =  do er <- try (getEnv e)
->                                     return $ either (const [])
+>                                     return $ either (\ (_ :: IOException) -> [])
 >                                                     (map (\x -> a ++ x ++ o) . splitOn isSearchPathSeparator)
 >                                                     er
 
@@ -124,8 +126,8 @@ own.
 >                               =  cs
 >         | otherwise           =  addTrailingPathSeparator cs
 >   t f                         =  catch (readTextFile f >>= \x -> return (x,f))
->                                        (\_ -> ioError $ userError $ "File `" ++ fn ++ "' not found.\n")
+>                                        (\ (_ :: IOException) -> ioError $ userError $ "File `" ++ fn ++ "' not found.\n")
 >   s []                        =  ioError 
 >                               $  userError $ "File `" ++ fn ++ "' not found in search path:\n" ++ showpath
->   s (x:xs)                    =  catch x (\_ -> s xs)
+>   s (x:xs)                    =  catch x (\ (_ :: IOException) -> s xs)
 >   showpath                    =  concatMap (\x -> "   " ++ x ++ "\n") p

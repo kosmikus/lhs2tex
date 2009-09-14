@@ -15,6 +15,8 @@ therefore there has been much overlap between the two modules.
 > import HsLexer
 > import qualified FiniteMap as FM
 > import Auxiliaries
+>
+> import Control.Monad
 
 > when True f                   =  f
 > when False f                  =  return
@@ -39,6 +41,9 @@ therefore there has been much overlap between the two modules.
 >     Pos r1 c1 _ == Pos r2 c2 _=  r1 == r2 && c1 == c2
 > instance Ord (Pos a) where
 >     Pos r1 c1 _ <= Pos r2 c2 _=  (r1, c1) <= (r2, c2)
+
+> pos2string :: Pos a -> String
+> pos2string (Pos r c _) = "'" ++ show r ++ "_" ++ show c
 
 %}
 
@@ -124,20 +129,20 @@ To change this is on my TODO list. Substitutions without arguments,
 hovewer, do work recursively because they are handled again at a later
 stage (by the call to latexs, for instance in leftIndent).
 
-> substitute                    :: (CToken tok,Show tok) => Formats -> Bool -> Chunk tok -> [tok]
+> substitute                    :: (CToken tok,Show tok) => Formats -> Bool -> Chunk (Pos tok) -> [Pos tok]
 > substitute d auto chunk       =  snd (eval chunk)
 >   where
->   eval                        :: (CToken tok) => [Item tok] -> (Mode,[tok])
+>   eval                        :: (CToken tok) => [Item (Pos tok)] -> (Mode,[Pos tok])
 >   eval [e]                    =  eval' e
 >   eval chunk                  =  (Optional False, concat [ snd (eval' i) | i <- chunk ])
 >
->   eval'                       :: (CToken tok) => Item tok -> (Mode,[tok])
+>   eval'                       :: (CToken tok) => Item (Pos tok) -> (Mode,[Pos tok])
 >   eval' (Delim s)             =  (Optional False, [s])
 >   eval' (Apply [])            =  impossible "eval'"
 >   eval' (Apply (e : es))      =  eval'' False e es
 >
->   eval''                      :: (CToken tok) => Bool -> Atom tok -> [Atom tok] -> (Mode,[tok])
->   eval'' _ (Atom s) es        =  case FM.lookup (string (token s)) d of
+>   eval''                      :: (CToken tok) => Bool -> Atom (Pos tok) -> [Atom (Pos tok)] -> (Mode,[Pos tok])
+>   eval'' _ (Atom s) es        =  case FM.lookup (string (token s) ++ pos2string s) d `mplus` FM.lookup (string (token s)) d of
 >     Nothing                   -> (Optional False, s : args es)
 >     Just (opt, opts, lhs, rhs)-> (Optional opt, set s (concat (fmap sub rhs)) ++ args bs)
 >         where
@@ -165,9 +170,9 @@ inherits the position of the original token.
 that would remove the parentheses in @deriving (Eq)@ and @module M (a)@
 as well.
 
->   args                        :: (CToken tok) => [Atom tok] -> [tok]
+>   args                        :: (CToken tok) => [Atom (Pos tok)] -> [Pos tok]
 >   args es                     =  concat [ sp ++ snd (eval'' False i []) | i <- es ] -- $\cong$ Applikation
->   sp                          :: (CToken tok) => [tok]
+>   sp                          :: (CToken tok) => [Pos tok]
 >   sp | auto                   =  [fromToken (TeX False sub'space)]
 >      | otherwise              =  []
 

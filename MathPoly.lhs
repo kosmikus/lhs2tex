@@ -50,13 +50,13 @@ are subtle differences, and they will grow over time \dots
 >                               @> lift (latexs fmts)
 >                               @> lift sub'inline
 
-> display                       :: Lang -> Formats -> Bool -> Int -> Int -> Stack
+> display                       :: Lang -> Int -> Formats -> Bool -> Int -> Int -> Stack
 >                               -> String -> Either Exc (Doc, Stack)
-> display lang fmts auto sep lat stack
+> display lang line fmts auto sep lat stack
 >                               =  lift trim
 >                               @> lift (expand 0)
 >                               @> tokenize lang
->                               @> lift (number 1 1)
+>                               @> lift (number line 1)
 >       --                     |@> when auto (lift (filter (isNotSpace . token)))|
 >                               @> lift (partition (\t -> catCode t /= White))
 >                               @> exprParse *** return

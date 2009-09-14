@@ -467,7 +467,7 @@ Printing documents.
 >         select Typewriter st  =  do d <- Typewriter.display (lang st) (fmts st) s; return (d, st)
 >         select Math st        =  do (d, sts) <- Math.display (lang st) (fmts st) (isTrue (toggles st) auto) (stacks st) (align st) s
 >                                     return (d, st{stacks = sts})
->         select Poly st        =  do (d, pstack') <- Poly.display (lang st) (fmts st) (isTrue (toggles st) auto) (separation st) (latency st) (pstack st) s
+>         select Poly st        =  do (d, pstack') <- Poly.display (lang st) (lineno st + 1) (fmts st) (isTrue (toggles st) auto) (separation st) (latency st) (pstack st) s
 >                                     return (d, st{pstack = pstack'})
 >         select NewCode st     =  do d <- NewCode.display (lang st) (fmts st) s
 >                                     let p = sub'pragma $ Text ("LINE " ++ show (lineno st + 1) ++ " " ++ show (takeFileName $ file st))
