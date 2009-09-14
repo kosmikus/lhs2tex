@@ -8,6 +8,7 @@
 >                               ) where
 >
 > import Prelude hiding         (  catch, readFile )
+> import System.IO              (  openFile, IOMode(..) )
 > import System.IO.UTF8
 > import System.Directory
 > import System.Environment
@@ -106,6 +107,13 @@ more than one directory separator, all subpaths are added ...
 >                                    s' -> w : splitOn p s''
 >                                            where (w,s'') = break p s'
 
+The UTF8 version of readFile defaults to binary files, whereas the
+System.IO version defaults to text files. Therfore we implement our
+own.
+
+> readTextFile                  :: FilePath -> IO String
+> readTextFile f                =  openFile f ReadMode >>= hGetContents
+
 > chaseFile                     :: [String]    {- search path -}
 >                               -> FilePath -> IO (String,FilePath)
 > chaseFile p fn | isAbsolute fn=  t fn
@@ -115,7 +123,7 @@ more than one directory separator, all subpaths are added ...
 >   md cs | isPathSeparator (last cs)
 >                               =  cs
 >         | otherwise           =  addTrailingPathSeparator cs
->   t f                         =  catch (readFile f >>= \x -> return (x,f))
+>   t f                         =  catch (readTextFile f >>= \x -> return (x,f))
 >                                        (\_ -> ioError $ userError $ "File `" ++ fn ++ "' not found.\n")
 >   s []                        =  ioError 
 >                               $  userError $ "File `" ++ fn ++ "' not found in search path:\n" ++ showpath
