@@ -18,7 +18,7 @@ flag splitBase
 executable lhs2TeX
   main-is:	Main.lhs
   if flag(splitBase)
-    build-depends:	base >= 3 && < 5, regex-compat, mtl, filepath, directory, process, utf8-string
+    build-depends:	base >= 3 && < 5, regex-compat, mtl, filepath, directory, process, utf8-string, extensible-exceptions
   else
     build-depends:	base < 3, regex-compat, mtl, filepath, utf8-string
 

@@ -1,4 +1,5 @@
 > {-# LANGUAGE ScopedTypeVariables #-}
+> {-# LANGUAGE PatternSignatures #-}
 >
 > module FileNameUtils          ( extension
 >                               , expandPath
@@ -16,7 +17,8 @@
 > import System.Environment
 > import Data.List
 > import Control.Monad (filterM)
-> import Control.Exception      (  try, catch, IOException )
+> import Control.Exception.Extensible
+>                               (  try, catch, IOException )
 > import System.FilePath
 > import System.Info
 
