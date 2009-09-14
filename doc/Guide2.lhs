@@ -292,8 +292,10 @@ then the resulting \PDF file will look similar to
 \par\noindent
 %endif
 The behaviour of @lhs2TeX@ is highly customizable.
-For example, the argument @--poly@ in the call above
-specifies one of several different \defined{style}s.
+The main mode of operation of @lhs2TeX@ is called the
+\defined{style}. By default, @lhs2TeX@ operates in
+\textbf{poly} style. Other styles can be selected via
+command line flags.
 Depending on the selected style, @lhs2TeX@ can perform
 quite different tasks. Here is a brief overview:
 \begin{compactitem}
@@ -308,6 +310,10 @@ quite different tasks. Here is a brief overview:
   \item \textbf{newcode} (new code): delete all comments, extract sourcecode,
     but allow for formatting, supersedes \textbf{code}
 \end{compactitem}
+The name of the style is also the name of the flag you have
+to pass to @lhs2TeX@ in order to activate the style. For example,
+call @lhs2TeX --newcode@ to use @lhs2TeX@ in \textbf{newcode}
+style.
 
 %%%
 %%%
