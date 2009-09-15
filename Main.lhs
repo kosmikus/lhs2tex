@@ -67,7 +67,7 @@
 >                                       [s]    -> lhs2TeX s flags (reverse initdirs) n
 >                                       _      -> quitError (incompatibleStylesError styles)
 >                                     when (output flags /= stdout) (hClose (output flags))
->   (_,_,errs)                  -> do hPutStrLn stderr $ (concat errs)
+>   (_,_,errs)                  -> do hPutStrLn stderr $ concat errs
 >                                     hPutStrLn stderr $ "Trying compatibility mode option handling ..."
 >                                     cstyle args
 >  where
@@ -189,7 +189,7 @@ Initial state.
 > input                         :: [String] -> IO (String, FilePath)
 > input []                      =  do s <- getContents; return (s, "<stdin>")
 > input ["-"]                   =  do s <- getContents; return (s, "<stdin>")
-> input (filePath : _)          =  do chaseFile [] filePath
+> input (filePath : _)          =  chaseFile [] filePath
 
 Converting command line options into directives.
 
@@ -271,7 +271,7 @@ We abort immediately if an error has occured.
 >                                     fromIO (hPutStrLn stderr (text st))
 >                                     fromIO (exitWith (ExitFailure 1))
 >     where text st             =  "*** Error in " ++ at (file st) (lineno st) ++ ": \n"
->                               ++ unlines [ "included from " ++ at f l | (f, l) <- (files st) ]
+>                               ++ unlines [ "included from " ++ at f l | (f, l) <- files st ]
 >                               ++ msg ++ "\n"
 >                               ++ unlines (take 4 (lines context))
 >           at f n              =  "file " ++ f ++ " line " ++ show n
@@ -299,11 +299,11 @@ We abort immediately if an error has occured.
 > format (Command Hs s)         =  inline s
 > format (Command (Vrb b) s)    =  out (Verbatim.inline b s)
 > format (Command Eval s)       =  do st <- fetch
->                                     when (not (style st `elem` [CodeOnly,NewCode])) $
+>                                     unless (style st `elem` [CodeOnly,NewCode]) $
 >                                       do result <- external (map unNL s)
 >                                          inline result
 > format (Command Perform s)    =  do st <- fetch
->                                     when (not (style st `elem` [CodeOnly,NewCode])) $
+>                                     unless (style st `elem` [CodeOnly,NewCode]) $
 >                                       do result <- external s
 >                                          out (Text (trim result))
 >     where
@@ -320,7 +320,7 @@ Remove trailing blank line.
 >                               =  display s
 > format (Environment Code s)   =  display s
 > format (Environment Spec s)   =  do st <- fetch
->                                     when (not (style st `elem` [CodeOnly,NewCode])) $
+>                                     unless (style st `elem` [CodeOnly,NewCode]) $
 >                                       display s
 > format (Environment Evaluate s )
 >                               =  do st <- fetch
@@ -413,7 +413,7 @@ Printing documents.
 > eject (Text s)                =  do  st <- fetch
 >                                      let (ls,enl) = checkNLs 0 s
 >                                      when (fldir st && not (null s) && atnewline st && (ofile st /= file st || olineno st /= lineno st)) $
->                                        do  fromIO (hPutStr (output st) ("%file " ++ show (lineno st) ++ " " ++ (show $ file st) ++ "\n"))
+>                                        do  fromIO (hPutStr (output st) ("%file " ++ show (lineno st) ++ " " ++ show (file st) ++ "\n"))
 >                                            store (st { ofile = file st, olineno = lineno st })
 >                                            
 >                                      fromIO (hPutStr (output st) s)
@@ -523,7 +523,7 @@ groups.
 >                                                     else skip ts
 
 > andS                          :: [CondInfo] -> Bool
-> andS                          =  and . map (\(_,_,x,y) -> x && y)
+> andS                          =  all (\(_,_,x,y) -> x && y)
 
 > unBalancedIf                  :: CondInfo -> String
 > unBalancedIf (f,l,_,_)        =  "%if at " ++ f ++ " line " ++ show l ++ " not closed"

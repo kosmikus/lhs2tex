@@ -13,9 +13,8 @@
 > import TeXCommands
 > import TeXParser
 > import HsLexer
-> import FiniteMap              (  FiniteMap  )
+> import FiniteMap              (  FiniteMap, (!)  )
 > import qualified FiniteMap as FM
-> import FiniteMap ( (!) )
 > import Auxiliaries
 > import Document
 > import Value
@@ -94,11 +93,11 @@ substitution directive should be invoked here.
 >     underscore f s
 >                               =  [f t]
 >                                  ++ if null u then []
->                                               else [TeX False (Text ("_{"))]
+>                                               else [TeX False (Text "_{")]
 >                                                    ++
 >                                                    proc_u
 >                                                    ++
->                                                    [TeX False (Text ("}"))]
+>                                                    [TeX False (Text "}")]
 >         where (t, u)          =  break (== '_') s
 >               tok_u           =  tokenize lang (tail u)
 >               proc_u          =  case tok_u of
@@ -115,7 +114,7 @@ substitution directive should be invoked here.
 > optParen p                    =  do _ <- open'; a <- p; _ <- close'; return (True, a)
 >                               `mplus` do a <- p ; return (False, a)
 >
-> item                          =  satisfy (\_ -> True)
+> item                          =  satisfy (const True)
 
 > convert []                    =  []
 > convert ('"' : '"' : s)       =  '"' : convert s
@@ -153,9 +152,9 @@ of varids accepted on the lhs of a directive, because according to the Agda
 lexer, "=" is both a varid and a varsym. This shouldn't matter for Haskell,
 because "=" will never occur in a Varid constructor.
 
-> varid                         =  do x <- satisfy (\ x -> isVarid x && x /= (Varid "=")); return (string x)
+> varid                         =  do x <- satisfy (\ x -> isVarid x && x /= Varid "="); return (string x)
 > conid                         =  do x <- satisfy isConid; return (string x)
-> varsym Agda s                 =  satisfy (\ x -> x == (Varsym s) || x == (Varid s)) -- Agda has no symbol/id distinction
+> varsym Agda s                 =  satisfy (\ x -> x == Varsym s || x == Varid s) -- Agda has no symbol/id distinction
 > varsym Haskell s              =  satisfy (== (Varsym s))
 >
 > isTeX (TeX _ _)               =  True
@@ -200,7 +199,7 @@ Auswertung Boole'scher Ausdr"ucke.
 > sys2 "+"                      =  onInt2 (+)
 > sys2 "-"                      =  onInt2 (-)
 > sys2 "*"                      =  onInt2 (*)
-> sys2 "/"                      =  onInt2 (div)
+> sys2 "/"                      =  onInt2 div
 > sys2 _                        =  \_ _ -> Undef
 
 Definierende Gleichungen.
@@ -237,7 +236,7 @@ Primitive Parser.
 
 Hilfsfunktionen.
 
-> parse                         :: Lang -> Parser Token a -> [Char] -> Either Exc a
+> parse                         :: Lang -> Parser Token a -> String -> Either Exc a
 > parse lang p str              =  do ts <- tokenize lang str
 >                                     let ts' = map (\t -> case t of TeX _ x -> TeX False x; _ -> t) .
 >                                               filter (\t -> catCode t /= White || isTeX t) $ ts

@@ -77,7 +77,7 @@ This should probably be either documented better or be removed again.
 
 The main function.
 
-> tokenize                      :: Lang -> [Char] -> Either Exc [Token]
+> tokenize                      :: Lang -> String -> Either Exc [Token]
 > tokenize lang                 =  lift tidyup @@ lift qualify @@ lexify lang
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
@@ -151,7 +151,7 @@ ks, 28.08.2008: New: Agda and Haskell modes.
 > lexExp                        :: String -> Maybe (String, String)
 > lexExp (e:s)
 >      | e `elem` "eE"          =  do (c : t) <- Just s
->                                     if c `elem` "+-" then return () else Nothing
+>                                     unless (c `elem` "+-") Nothing
 >                                     (ds, u) <- lexDigits' t
 >                                     return (e : c : ds, u)
 >                               `mplus` do (ds, t) <- lexDigits' s
@@ -209,7 +209,7 @@ patterns"'. [ks: This is no longer true (with GHC 5.04.3).]
 > isSpecial                     :: Char -> Bool
 > isIdChar, isSymbol            :: Lang -> Char -> Bool
 > isSpecial c                   =  c `elem` ",;()[]{}`"
-> isSymbol Haskell c            =  not (isSpecial c) && not (c `elem` "'\"") &&
+> isSymbol Haskell c            =  not (isSpecial c) && notElem c "'\"" &&
 >                                  (c `elem` "!@#$%&*+./<=>?\\^|:-~" ||
 >                                   Data.Char.isSymbol c || Data.Char.isPunctuation c)
 > isSymbol Agda c               =  isIdChar Agda c

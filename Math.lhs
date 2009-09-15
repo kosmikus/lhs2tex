@@ -74,7 +74,7 @@ This variant cannot handle unbalanced parentheses.
 >
 > chunk                         :: (CToken tok) => Parser (Pos tok) (Chunk (Pos tok))
 > chunk                         =  do a <- many atom
->                                     as <- many (do s <- sep; a <- many atom; return ([Delim s] ++ offside a))
+>                                     as <- many (do s <- sep; a <- many atom; return (Delim s : offside a))
 >                                     return (offside a ++ concat as)
 >     where offside []          =  []
 >           -- old: |opt a =  [Apply a]|
