@@ -5,9 +5,13 @@ There are two possibilities to install lhs2TeX:
 
 =====================================================================
 
-(A) Using Cabal to install lhs2TeX:
+(A) Using Cabal to install lhs2TeX (preferred):
 
-This requires Cabal 1.2 or later. The process is then as usual:
+This requires Cabal 1.6 or later. The process is then as usual:
+
+cabal install
+
+if you have cabal-install (included in the Haskell Platform) or
 
 runghc Setup configure
 runghc Setup build
@@ -18,7 +22,7 @@ the LaTeX filename database.
 
 =====================================================================
 
-(B) configure/make:
+(B) configure/make (might be removed in the future):
 
 The following instructions apply to Unix-like environments.  However,
 lhs2TeX does run on Windows systems, too. (If you would like to add

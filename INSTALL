@@ -11,13 +11,12 @@ This requires Cabal 1.6 or later. The process is then as usual:
 
 cabal install
 
-if you have cabal-install or
+if you have cabal-install (included in the Haskell Platform) or
 
 runghc Setup configure
 runghc Setup build
 runghc Setup install
 
-otherwise.
 The third step requires write access to the installation location and
 the LaTeX filename database.
 
