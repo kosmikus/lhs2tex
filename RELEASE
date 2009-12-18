@@ -1,5 +1,5 @@
 
-                     lhs2TeX version 1.14
+                     lhs2TeX version 1.15
                      ====================
 
 We are pleased to announce a new release of lhs2TeX, 
@@ -20,17 +20,13 @@ lhs2TeX includes the following features:
 
 * A manual explaining all the important aspects of lhs2TeX.
 
-Changes (w.r.t. lhs2TeX 1.13)
+Changes (w.r.t. lhs2TeX 1.14)
 -----------------------------
 
-* Compatible with cabal-1.6; traditional configure/make
-  installation should still work.
+* Small bugfixes.
 
-* Unicode support.
-
-* Support for Agda's lexing rules (via --agda flag).
-
-* Minor bugfixes.
+* Fixed a bug with the handling of newlines in the Windows
+  version.
 
 Requirements and Download
 -------------------------
