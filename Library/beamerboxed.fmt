@@ -1,0 +1,45 @@
+%if False
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% beamerboxed.fmt
+%
+% Displaying code that is set with lhs2TeX in poly style inside boxes from the
+% beamer class.
+%
+% Permission is granted to include this file (or parts of this file) literally
+% into other documents, regardless of the conditions or license applying to
+% these documents.
+%
+% Stefan Holdermans, April 2010, version 1.0
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%endif
+%if not lhs2tex_beamerboxed_fmt_read
+%let lhs2tex_beamerboxed_fmt_read = True
+%include polycode.fmt
+%include beamer.fmt
+%
+%if style /= newcode
+\ReadOnlyOnce{beamerboxed.fmt}
+
+\setbeamercolor{hsbox}{parent=block body}
+\newlength{\hsboxsep}
+\setlength{\hsboxsep}{.33em}
+\newcommand{\hsboxrounded}{true}
+\newcommand{\hsboxshadow}{true}
+
+\newenvironment{beamerboxedhscode}
+  {\let\hspre\(\let\hspost\)%
+   \beamercolorbox%
+     [sep=\hsboxsep,rounded=\hsboxrounded,shadow=\hsboxshadow]%
+     {hsbox}%
+   \hscodestyle%
+   \pboxed}%
+  {\endpboxed%
+   \endbeamercolorbox%
+   \ignorespacesafterend}
+
+\newcommand{\beamerboxedhs}{\sethscode{beamerboxedhscode}}
+
+\EndFmtInput
+%endif
+%endif
