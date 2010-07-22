@@ -1,5 +1,5 @@
 
-                     lhs2TeX version 1.15
+                     lhs2TeX version 1.16
                      ====================
 
 We are pleased to announce a new release of lhs2TeX, 
@@ -20,13 +20,14 @@ lhs2TeX includes the following features:
 
 * A manual explaining all the important aspects of lhs2TeX.
 
-Changes (w.r.t. lhs2TeX 1.14)
+Changes (w.r.t. lhs2TeX 1.15)
 -----------------------------
 
-* Small bugfixes.
+* Fixes for UTF8 and ghc-6.12
 
-* Fixed a bug with the handling of newlines in the Windows
-  version.
+* \perform output is now run through lhs2TeX again
+
+* Some smaller bugfixes
 
 Requirements and Download
 -------------------------
@@ -37,13 +38,12 @@ A source distribution is available from
 
 and, of course, via Hackage:
 
-  http://hackage.haskell.org/cgi-bin/hackage-scripts/package/lhs2tex
+  http://hackage.haskell.org/package/lhs2tex
 
 Should work on all major platforms, but has mainly been
 tested on Linux. Binaries will be made available on request.
 
-You need a recent version of GHC (6.8.{2,3} are tested, older versions
-might work) to build lhs2TeX, and, of course, you need a TeX
+You need GHC 6.12 to build lhs2TeX, and, of course, you need a TeX
 distribution to make use of lhs2TeX's output. The program includes
 a configuration that is suitable for use with LaTeX. In theory, 
 there should be no problem to generate code for other TeX 
@@ -51,7 +51,6 @@ flavors, such as plainTeX or ConTeXt.
 
 
   Happy lhs2TeXing,
-  Andres Loeh and Ralf Hinze
+  Andres Loeh
 
   lhs2TeX@andres-loeh.de
-  ralf@informatik.uni-bonn.de
