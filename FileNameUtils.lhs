@@ -1,5 +1,4 @@
 > {-# LANGUAGE ScopedTypeVariables #-}
-> {-# LANGUAGE PatternSignatures #-}
 >
 > module FileNameUtils          ( extension
 >                               , expandPath

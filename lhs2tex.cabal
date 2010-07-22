@@ -3,7 +3,7 @@ name:		lhs2tex
 version:	1.16
 license:	GPL
 license-file:	LICENSE
-author:		Ralf Hinze <ralf@informatik.uni-bonn.de>, Andres Loeh <lhs2tex@andres-loeh.de>
+author:		Ralf Hinze <ralf.hinze@comlab.ox.ac.uk>, Andres Loeh <lhs2tex@andres-loeh.de>
 maintainer:	Andres Loeh <lhs2tex@andres-loeh.de>
 stability:	stable
 homepage:	http://www.andres-loeh.de/lhs2tex/
@@ -11,9 +11,6 @@ synopsis:	Preprocessor for typesetting Haskell sources with LaTeX
 description:	Preprocessor for typesetting Haskell sources with LaTeX
 category:       Development, Language
 build-type:     Custom
-
-flag splitBase
-  description:	Choose the new smaller, split-up base package.
 
 executable lhs2TeX
   main-is:	Main.lhs
