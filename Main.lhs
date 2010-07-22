@@ -9,8 +9,7 @@
 >
 > import Data.Char ( isSpace )
 > import Data.List ( isPrefixOf )
-> import System.IO ( hClose, hFlush, stderr, stdout, openFile, IOMode(..), Handle(..) )
-> import System.IO.UTF8 ( hPutStr, hPutStrLn, hGetLine, getContents )
+> import System.IO
 > import System.Directory ( copyFile )
 > import System.Console.GetOpt
 > import Text.Regex ( matchRegex, mkRegexWithOpts )
@@ -50,7 +49,10 @@
 
 > main'                         :: [String] -> IO ()
 > main' args                    =  case getOpt Permute options args of
->   (o,n,[])                    -> do (flags,initdirs,styles) 
+>   (o,n,[])                    -> do hSetEncoding stdin  utf8
+>                                     hSetEncoding stdout utf8
+>                                     hSetEncoding stderr utf8
+>                                     (flags,initdirs,styles) 
 >                                        <- foldM (\(s,d,x) (sf,df,ns) -> do s' <- sf s
 >                                                                            return (s',df d,ns ++ x))
 >                                                 (state0,[],[]) o
@@ -167,12 +169,12 @@ Initial state.
 >                                  else do c <- readFile f1
 >                                          case matchRegex (mkRegexWithOpts "^%include" True False) c of
 >                                            Nothing -> if lit then
->                                                          do h <- openFile f3 WriteMode
+>                                                          do h <- openOutputFile f3
 >                                                             lhs2TeX NewCode (flags { output = h }) (Directive Include "lhs2TeX.fmt" : dirs) [f1]
 >                                                             hClose h
 >                                                       else copyFile f2 f3
 >                                            Just _  -> -- supposed to be an lhs2TeX file
->                                                       do h <- openFile f3 WriteMode
+>                                                       do h <- openOutputFile f3
 >                                                          lhs2TeX NewCode (flags { output = h }) dirs [f1]
 >                                                          hClose h
 > preprocess _ _ _ _            =  error "preprocess: too few arguments"
@@ -219,7 +221,7 @@ because with some versions of GHC it triggers ambiguity errors with
 >   , Option []    ["haskell"] (NoArg (\s -> return $ s { lang = Haskell}, id, []))         "Haskell lexer (default)"
 >   , Option []    ["agda"]    (NoArg (\s -> return $ s { lang = Agda}, id, []))            "Agda lexer"
 >   , Option []    ["pre"]     (NoArg (return, id, [Pre]))                                  "act as ghc preprocessor"
->   , Option ['o'] ["output"]  (ReqArg (\f -> (\s -> do h <- openFile f WriteMode
+>   , Option ['o'] ["output"]  (ReqArg (\f -> (\s -> do h <- openOutputFile f
 >                                                       return $ s { output = h }, id, [])) "file") "specify output file"
 >   , Option []    ["file-directives"]
 >                              (NoArg (\s -> return $ s { fldir = True }, id, []))          "generate %file directives"

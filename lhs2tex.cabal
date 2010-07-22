@@ -1,6 +1,6 @@
 cabal-version:  >=1.6
 name:		lhs2tex
-version:	1.15
+version:	1.16
 license:	GPL
 license-file:	LICENSE
 author:		Ralf Hinze <ralf@informatik.uni-bonn.de>, Andres Loeh <lhs2tex@andres-loeh.de>
@@ -17,8 +17,5 @@ flag splitBase
 
 executable lhs2TeX
   main-is:	Main.lhs
-  if flag(splitBase)
-    build-depends:	base >= 3 && < 5, regex-compat, mtl, filepath, directory, process, utf8-string, extensible-exceptions
-  else
-    build-depends:	base < 3, regex-compat, mtl, filepath, utf8-string
+  build-depends:	base >= 4.2 && < 5, regex-compat, mtl, filepath, directory, process, extensible-exceptions
 

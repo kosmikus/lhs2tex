@@ -4,6 +4,8 @@
 > module FileNameUtils          ( extension
 >                               , expandPath
 >                               , chaseFile
+>                               , readTextFile
+>                               , openOutputFile
 >                               , modifySearchPath
 >                               , deep, env
 >                               , absPath
@@ -11,8 +13,7 @@
 >                               ) where
 >
 > import Prelude hiding         (  catch, readFile )
-> import System.IO              (  openFile, IOMode(..) )
-> import System.IO.UTF8
+> import System.IO              (  openFile, IOMode(..), hSetEncoding, hGetContents, utf8, Handle() )
 > import System.Directory
 > import System.Environment
 > import Data.List
@@ -111,12 +112,15 @@ more than one directory separator, all subpaths are added ...
 >                                    s' -> w : splitOn p s''
 >                                            where (w,s'') = break p s'
 
-The UTF8 version of readFile defaults to binary files, whereas the
-System.IO version defaults to text files. Therfore we implement our
-own.
-
 > readTextFile                  :: FilePath -> IO String
-> readTextFile f                =  openFile f ReadMode >>= hGetContents
+> readTextFile f                =  do h <- openFile f ReadMode
+>                                     hSetEncoding h utf8
+>                                     hGetContents h
+
+> openOutputFile                :: FilePath -> IO Handle
+> openOutputFile f              =  do h <- openFile f WriteMode
+>                                     hSetEncoding h utf8
+>                                     return h
 
 > chaseFile                     :: [String]    {- search path -}
 >                               -> FilePath -> IO (String,FilePath)
