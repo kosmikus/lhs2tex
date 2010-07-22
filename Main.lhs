@@ -85,7 +85,7 @@ State.
 > type CondInfo                 =  (FilePath, LineNo, Bool, Bool)
 
 > data State                    =  State { style      :: Style,
->                                          lang       :: Lang,
+>                                          lang       :: Lang,          -- Haskell or Agda, currently
 >                                          verbose    :: Bool,
 >                                          searchpath :: [FilePath],
 >                                          file       :: FilePath,      -- also used for `hugs'
@@ -228,8 +228,8 @@ because with some versions of GHC it triggers ambiguity errors with
 >   , Option ['A'] ["align"]   (ReqArg (\c -> (return, (Directive Align c:), [])) "col")    "align at <col>"
 >   , Option ['i'] ["include"] (ReqArg (\f -> (return, (Directive Include f:), [])) "file") "include <file>"
 >   , Option ['l'] ["let"]     (ReqArg (\s -> (return, (Directive Let s:), [])) "equation") "assume <equation>"
->   , Option ['s'] ["set"]     (ReqArg (\s -> (return, (Directive Let (s ++ "=True"):), [])) "flag")  "set <flag>"
->   , Option ['u'] ["unset"]   (ReqArg (\s -> (return, (Directive Let (s ++ "=False"):), [])) "flag") "unset <flag>"
+>   , Option ['s'] ["set"]     (ReqArg (\s -> (return, (Directive Let (s ++ " = True"):), [])) "flag")  "set <flag>"
+>   , Option ['u'] ["unset"]   (ReqArg (\s -> (return, (Directive Let (s ++ " = False"):), [])) "flag") "unset <flag>"
 >   , Option ['P'] ["path"]    (ReqArg (\p -> (\s -> return $ s { searchpath = modifySearchPath (searchpath s) p }, id , [])) "path") 
 >                                                                                       "modify search path"
 >   , Option []    ["searchpath"]
@@ -304,9 +304,16 @@ We abort immediately if an error has occured.
 >                                          inline result
 > format (Command Perform s)    =  do st <- fetch
 >                                     unless (style st `elem` [CodeOnly,NewCode]) $
->                                       do result <- external s
->                                          out (Text (trim result))
+>                                       do result <- external (map unNL s)
+>                                          update (\st@State{file = f', lineno = l'} ->
+>                                                    st{file = "<perform>", files = (f', l') : files st})
+>                                          fromIO (when (verbose st) (hPutStr stderr $ "(" ++ "<perform>"))
+>                                          formatStr (addEndNL result)
+>                                          update (\st'@State{files = (f, l) : fs} ->
+>                                                    st'{file = f, lineno = l, files = fs})
+>                                          fromIO (when (verbose st) (hPutStrLn stderr $ ")"))
 >     where
+>     addEndNL                  =  (++"\n") . unlines . lines
 
 Remove trailing blank line.
 
@@ -322,11 +329,11 @@ Remove trailing blank line.
 > format (Environment Spec s)   =  do st <- fetch
 >                                     unless (style st `elem` [CodeOnly,NewCode]) $
 >                                       display s
-> format (Environment Evaluate s )
+> format (Environment Evaluate s)
 >                               =  do st <- fetch
->                                     result <- external (map unNL s)
->                                     --fromIO (hPutStrLn stderr result)        -- TEST
->                                     display result
+>                                     unless (style st `elem` [CodeOnly,NewCode]) $
+>                                       do result <- external s
+>                                          display result
 > format (Environment Hide s)   =  return ()
 > format (Environment Ignore s) =  return ()
 > format (Environment (Verbatim b) s)
@@ -648,7 +655,7 @@ and the second |magic| plus prompt is the result we look for.
 
 > programInfo                   :: String
 > programInfo                   =
->     "lhs2TeX " ++ version ++ ", Copyright (C) 1997-2009 Ralf Hinze, Andres Loeh\n\n\
+>     "lhs2TeX " ++ version ++ ", Copyright (C) 1997-2010 Ralf Hinze, Andres Loeh\n\n\
 >     \lhs2TeX comes with ABSOLUTELY NO WARRANTY;\n\
 >     \for details type `lhs2TeX --warranty'.\n\
 >     \This is free software, and you are welcome to redistribute it\n\
