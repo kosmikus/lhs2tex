@@ -1,18 +1,25 @@
 cabal-version:  >=1.6
-name:		lhs2tex
-version:	1.16
-license:	GPL
-license-file:	LICENSE
-author:		Ralf Hinze <ralf.hinze@comlab.ox.ac.uk>, Andres Loeh <lhs2tex@andres-loeh.de>
-maintainer:	Andres Loeh <lhs2tex@andres-loeh.de>
-stability:	stable
-homepage:	http://www.andres-loeh.de/lhs2tex/
-synopsis:	Preprocessor for typesetting Haskell sources with LaTeX
-description:	Preprocessor for typesetting Haskell sources with LaTeX
+name:           lhs2tex
+version:        1.17
+license:        GPL
+license-file:   LICENSE
+author:         Ralf Hinze <ralf.hinze@comlab.ox.ac.uk>, Andres Loeh <lhs2tex@andres-loeh.de>
+maintainer:     Andres Loeh <lhs2tex@andres-loeh.de>
+stability:      stable
+homepage:       http://www.andres-loeh.de/lhs2tex/
+synopsis:       Preprocessor for typesetting Haskell sources with LaTeX
+description:    Preprocessor for typesetting Haskell sources with LaTeX
 category:       Development, Language
 build-type:     Custom
 
 executable lhs2TeX
-  main-is:	Main.lhs
-  build-depends:	base >= 4.2 && < 5, regex-compat, mtl, filepath, directory, process, extensible-exceptions
+  main-is:              Main.lhs
+  hs-source-dirs:       src
+  build-depends:        base >= 4.2 && < 5,
+                        regex-compat,
+                        mtl,
+                        filepath,
+                        directory,
+                        process,
+                        extensible-exceptions
 

@@ -34,8 +34,8 @@ lhs2tex = "lhs2TeX"
 minPolytableVersion = [0,8,2]
 shortversion = show (numversion `div` 100) ++ "." ++ show (numversion `mod` 100)
 version = shortversion ++ if ispre then "pre" ++ show pre else ""
-numversion = 116
-ispre = False
+numversion = 117
+ispre = True
 pre = 1
 
 main = defaultMainWithHooks lhs2texHooks
@@ -45,7 +45,8 @@ sep =  if isWindows then ";" else ":"
 lhs2texBuildInfoFile :: FilePath
 lhs2texBuildInfoFile = "." `joinFileName` ".setup-lhs2tex-config"
 
-generatedFiles = ["Version.lhs","lhs2TeX.1",
+generatedFiles = ["src" `joinFileName` "Version.lhs",
+                  "lhs2TeX.1",
                   "doc" `joinFileName` "InteractiveHugs.lhs",
                   "doc" `joinFileName` "InteractivePre.lhs"]
 
@@ -168,7 +169,7 @@ lhs2texBuildDocumentation a (BuildFlags { buildVerbosity = vf }) pd lbi =
                          callLhs2tex v lbi ["--" ++ incToStyle inc , "-Pdoc" ++ sep, lhs2texDir `joinFileName` snippet]
                                            (lhs2texDocDir `joinFileName` s ++ ".tex")
                 ) snippets
-        callLhs2tex v lbi ["--poly" , "-Pdoc" ++ sep, "doc" `joinFileName` "Guide2.lhs"]
+        callLhs2tex v lbi ["--poly" , "-Pdoc" ++ sep, "-Psrc" ++ sep, "doc" `joinFileName` "Guide2.lhs"]
                           (lhs2texDocDir `joinFileName` "Guide2.tex")
         copyFileVerbose v ("polytable" `joinFileName` "polytable.sty") (lhs2texDocDir `joinFileName` "polytable.sty")
         copyFileVerbose v ("polytable" `joinFileName` "lazylist.sty")  (lhs2texDocDir `joinFileName` "lazylist.sty")
