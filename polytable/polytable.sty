@@ -9,7 +9,7 @@
 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{polytable}%
-   [2005/04/25 v0.8.2 `polytable' package (Andres Loeh)]
+   [2009/11/01 v0.8.4 `polytable' package (Andres Loeh)]
 \let\PT@original@And\And
 \RequirePackage{lazylist}
 \let\PT@And\And
@@ -507,7 +507,7 @@
 \def\PT@gobblefalse\else\relax\gobbletrue\fi #1#2%
   {\fi #1}
 \def\PT@ltmax #1#2%
-  {\PT@TeXif{\ifdim\csname #1.max\endcsname<\csname #2.max\endcsname}}
+  {\Not{\PT@TeXif{\ifdim\csname #1.max\endcsname>\csname #2.max\endcsname}}}
 \def\PT@numbercol #1%
   {%\PT@typeout@{numbering #1 as \the\PT@cols}%
    \PT@enamedef{#1.num}{\the\PT@cols}%
@@ -639,10 +639,10 @@
    \PT@expanded{\def\PT@temp}%
                {\csname PT@restore@\romannumeral\PT@temp\endcsname}%
    \expandafter\gdef\PT@temp{}% start empty
-   % this is: \PT@Execute{\Map{\PT@savecolumn{\PT@temp}}\PT@sortedlist}
+   % this is: \PT@Execute{\Map{\PT@savecolumn{\PT@temp}}{\Reverse\PT@allcols}}
    \expandafter\PT@Execute\expandafter{\expandafter
      \Map\expandafter{\expandafter\PT@savecolumn
-       \expandafter{\PT@temp}}\PT@sortedlist}}
+       \expandafter{\PT@temp}}{\Reverse\PT@allcols}}}
 \def\PT@savecolumn#1#2% #1 macro name, #2 column name
   {\PT@typeout@{saving column #2 in \string #1 ...}%
    \def\PT@temp{#2}%
@@ -739,7 +739,7 @@
      {\immediate\write\@auxout{%
         \gdef\expandafter\noexpand
           \csname PT@restore@\romannumeral\PT@table\endcsname
-            {\PT@Execute{\Map{\PT@write@column{#1}}\PT@allcols}}}}%
+            {\PT@Execute{\Map{\PT@write@column{#1}}{\Reverse\PT@allcols}}}}}%
      \PT@postlazylist
    \fi}
 \def\PT@write@column #1#2%
