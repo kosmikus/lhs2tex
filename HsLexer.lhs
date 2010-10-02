@@ -192,9 +192,6 @@ incorrectly reject programs that contain comments like the
 following one: {- start normal, but close as pragma #-} ...
 I don't expect this to be a problem, though.
 
-\NB GHC meldet bei |nested| f"alschlicherweise "`incomplete
-patterns"'. [ks: This is no longer true (with GHC 5.04.3).]
-
 > lexLitChar, lexLitStr         :: String -> (String, String)
 > lexLitChar []                 =  ([], [])
 > lexLitChar ('\'' : s)         =  ([], '\'' : s)
@@ -221,8 +218,6 @@ patterns"'. [ks: This is no longer true (with GHC 5.04.3).]
 >     | p == t                  =  Just u
 >     | otherwise               =  Nothing
 >     where (t, u)              =  splitAt (length p) s
-
-\NB |match| entspricht eigentlich |lits|.
 
 Keywords
 
@@ -273,8 +268,8 @@ be made more efficient if that seems necessary.
 >                               =  Qual (m ++ [m']) (Varsym s) : qualify ts
 > qualify (t : ts)              =  t : qualify ts
 
-Backquoted ids zusammenfassen, da @`Prelude.div`@ zul"assig ist,
-erst nach |qualify|.
+Join backquoted ids -- because @`Prelude.div`@ is allowed,
+we do this after |qualify|.
 
 > tidyup                        :: [Token] -> [Token]
 > tidyup []                     =  []
@@ -290,8 +285,8 @@ erst nach |qualify|.
 > tidyup (Space s : ts)         =  splitSpace s ++ tidyup ts
 > tidyup (t : ts)               =  t : tidyup ts
 
-Beachte: @` div `@ wird nicht zusammengefa"st; damit wird eine
-eventuelle Formatanweisung @%format `div` = ...@ ignoriert.
+Note: @` div `@ is not joined; in such a case, a
+potential format statement @%format `div` = ...@ is ignored.
 
 Breaking a string into string items.
 

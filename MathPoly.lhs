@@ -301,39 +301,36 @@ for example, a macro like @%format mu = "\mu "@.
 \subsubsection{Left indentation}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
-ks, 16.07.2003: Die Bedeutung von |auto| verstehe ich nicht so ganz:
-Auch wenn |auto = False| wird der Stack auf dem laufenden gehalten.
+ks, 16.07.2003: I don't quite understand the meaning of |auto|. Even
+if |auto = False|, the stack is still updated.
 
-ks, 16.07.2003: Ich versuche nun, das folgende relativ einfache
-Einrueckungsverhalten zu implementieren -- aus meiner bisherigen Erfahrung
-mit dem @poly@-style heraus habe ich den Eindruck, als muesste das
-weitgehend genuegen. Ansonsten kann man ja immer noch explizit die
-Einrueckung mit Annotationen formatieren.
+ks, 16.07.2003: I'm going to implement the following relatively simple
+heuristic for indentation. Based on my current experience with the
+@poly@-style I think that this is sufficient. If not, one can still
+indent explicitly via annotations.
 
 > type Stack                    =  [(Col, Line [Pos Token])]
 
-Der Stack besteht also aus einer Liste von Paaren aus Spaltennummern
-und Token. Der Kopf der Liste hat die hoechste Spaltennummer, und die
-Spaltennummern in der Liste sind absteigend.
+The stack is a list of pairs of column numbers and tokens. The head
+of the list is the largest column number, and the column numbers in
+the list appear sorted and descending.
 
-Einrueckung findet immer am Beginn einer neuen Zeile statt, wobei
-die Position des ersten Tokens in der Zeile relevant ist.
-Als erstes wird der Stack adjustiert: alle Elemente, die hoehere
-oder gleiche Spaltennummern haben als die augenblickliche Zeile, 
-werden entfernt.
+Indentations occur at the beginning of a line, and the position
+of the first token of the line is relevant. First, the stack is
+adjusted: all elements that have a higher or equal column number
+than the current line are removed.
 
-Dann wird in dem nun obersten Stackelement nach dem letzten Token
-gesucht, das eine Spaltenposition kleiner oder gleich dem aktuellen
-Element hat. Bezueglich diesem wird nun eingerueckt.
-Achtung: Derzeit findet das \emph{immer} statt. Das ist vielleicht
-keine so gute Idee, aber mir fallen nur wenige Situationen ein,
-in denen es von Schaden waere.
+In the now topmost stack element, we then look for the final token
+that occurs at a column less than or equal to the current element.
+Relative to this token, we indent. Note: this happens in \emph{all}
+situations, currently. Perhaps, there are a few situations where
+this is not a good idea, but let's see.
 
-Letztlich wird die augenblickliche Zeile auf den Stack gelegt.
+As a final step, the current line is placed on the stack.
 
 > leftIndent                    :: Formats -> Bool 
->                               -> [Col]        -- zentrierte Spalten
->                               -> Stack        -- augenblicklicher Stack
+>                               -> [Col]        -- centered columns
+>                               -> Stack        -- current stack
 >                               -> [Line [Pos Token]]
 >                               -> (Doc, Stack)
 > leftIndent dict auto z stack
@@ -343,33 +340,33 @@ Letztlich wird die augenblickliche Zeile auf den Stack gelegt.
 >          | otherwise          =  Empty
 
 >   loop                        :: Bool -> Stack -> [Line [Pos Token]] -> (Doc, Stack)
->   loop first stack []         =  (Empty, stack)  -- fertig
+>   loop first stack []         =  (Empty, stack)  -- done
 >   loop first stack (l:ls)     =  case l of
->       Blank                   -> loop True stack ls -- Leerzeilen ignorieren
+>       Blank                   -> loop True stack ls -- ignore blank lines
 >    {-| Poly x || trace (show x) False -> undefined |-}
->       Poly []                 -> loop True stack ls -- naechste Zeile
+>       Poly []                 -> loop True stack ls -- next line
 >       Poly (((n,c),[],ind):rs)
->         | first               -> loop True stack (Poly rs:ls) -- ignoriere leere Spalten zu Beginn
+>         | first               -> loop True stack (Poly rs:ls) -- ignore leading blank columns
 >       Poly p@(((n,c),ts,ind):rs)
->         | first               -> -- ueberpruefe Einrueckung:
->                                  let -- Schritt 1: Stack verkleinern
+>         | first               -> -- check indentation
+>                                  let -- step 1: shrink stack
 >                                      rstack  = dropWhile (\(rc,_) -> rc >= c) stack
->                                      -- Schritt 2: relevante Spalte finden
+>                                      -- step 2: find relevant column
 >                                      (rn,rc) = findrel (n,c) rstack
->                                      -- Schritt 3: Zeile auf Stack legen
+>                                      -- step 3: place line on stack
 >                                      fstack  = (c,l) : rstack
 >                                  in mkFromTo fstack rn n rc [fromToken $ TeX False (indent (rn,rc) (n,c))] p ls
 >                                              
 >
 >         | c `elem` z          -> mkFromTo stack n (n ++ "E") c ts rs ls
->                                                     -- zentrierte Spalten gesondert behandeln
+>                                                     -- treat centered lines special
 >       Poly [((n,c),ts,ind)]   -> mkFromTo stack n "E" c ts [] ls
->                                                     -- letzte Spalten
+>                                                     -- last columns
 >       Poly (((n,c),ts,ind):rs@(((nn,_),_,_):_))
 >                               -> mkFromTo stack n nn  c ts rs ls 
 >
 >   mkFromTo stack bn en c ts rs ls
->     | bn == en                =  -- dies kann am Beginn einer Zeile durch Einrueckung passieren
+>     | bn == en                =  -- this can happen at the beginning of a line due to indentation
 >                                  (rest,stack')
 >     | otherwise               =  (sub'fromto bn en (latexs dict ts)
 >                                     <> (if null rs then sep ls else Empty) <> rest
@@ -399,7 +396,6 @@ Letztlich wird die augenblickliche Zeile auf den Stack gelegt.
 >     | c /= c'                 =  sub'indent (Text (show (c' - c)))
 >     | otherwise               =  Empty
 
-M"ussen |v| und |t| zueinander passen?
 %
 \begin{verbatim}
 where |a      =    where |Str c =    [    [    (    {

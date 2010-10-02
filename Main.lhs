@@ -295,7 +295,7 @@ We abort immediately if an error has occured.
 >                                     formats ts
 
 > format                        :: Class -> Formatter
-> -- |format (Many ('%' : '%' : _))     =  return ()|   -- @%%@-Kommentare werden entfernt
+> -- |format (Many ('%' : '%' : _))     =  return ()|   -- @%%@-comments used to be removed
 > format (Many s)               =  out (Text s)
 > format (Inline s)             =  inline s
 > format (Command Hs s)         =  inline s
@@ -364,7 +364,7 @@ Remove trailing blank line.
 >     where f                   =  withoutSpaces arg
 >           addEndNL            =  (++"\n") . unlines . lines
 
-ks, 25.01.2003: If added the above function at the suggestion of NAD, but
+ks, 25.01.2003: I added the above function at the suggestion of NAD, but
 I am not completely sure if this is the right thing to do. Maybe we should
 strip blank lines from the end of a file as well, maybe we should do nothing
 at all. Hard to say what people think is intuitive. Anyway, the reason why
