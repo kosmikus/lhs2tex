@@ -269,6 +269,7 @@
 
 %---------------------------------------------------------------------------
 \section{About @lhs2TeX@}
+\label{sec:about}
 %---------------------------------------------------------------------------
 
 The program @lhs2TeX@ is a preprocessor
@@ -428,18 +429,21 @@ Depending on the style in which it is called, @lhs2TeX@ will treat
 these blocks in different ways.
 
 %---------------------------------------------------------------------------
-\section{Overview over the different styles}
+\section{Using @lhs2TeX@ with style}
+\label{sec:styles}
 %---------------------------------------------------------------------------
 
-In this section, we will demonstrate on a common example how the
-different styles can be used. For each style, there will also be
-a short summary. Some of the points listed in the summary are
-defaults for the particular style and can actually be changed.
+In this section, we will walk though an example to illustrate how to
+utilize the styles of @lhsTeX@. As we noted in
+Section~\ref{sec:about}, @lhs2TeX@ operates in the \textbf{poly} style
+by default. Appendix~\ref{sec:deprecatedstyles} contains summaries of
+the more simplistic and deprecated styles: \textbf{verb}, \textbf{tt}
+and \textbf{math}. For each style, there will also be a short summary.
+Some of the points listed in the summary are simply defaults for the
+particular style and can actually be changed.
 
 %%%
 %%%
-
-
 
 \subsection{Complex layouts: ``poly'' style}
 
@@ -1691,7 +1695,14 @@ an aligned column.
 
 %---------------------------------------------------------------------------
 \section{Deprecated styles}
+\label{sec:deprecatedstyles}
 %---------------------------------------------------------------------------
+
+In this Appendix, we will cover the styles that were omitted from
+Section~\ref{sec:styles}. We will demonstrate them with the same
+common example. As before, each style will include a short summary.
+Some of the points listed in the summary are simply defaults for the
+particular style and can actually be changed.
 
 \subsection{Verbatim: ``verb'' style}
 
