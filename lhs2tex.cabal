@@ -12,6 +12,30 @@ description:    Preprocessor for typesetting Haskell sources with LaTeX
 category:       Development, Language
 build-type:     Custom
 
+
+library
+  hs-source-dirs:       src
+  exposed-modules:      Lhs2TeX
+                        Lhs2TeX.Directive
+                        Lhs2TeX.Directive.Format
+                        Lhs2TeX.Directive.Let
+                        Lhs2TeX.Directive.Subst
+                        Lhs2TeX.Document
+                        Lhs2TeX.Driver
+                        Lhs2TeX.Eval
+                        Lhs2TeX.Exception
+                        Lhs2TeX.File
+                        Lhs2TeX.Flags
+                        Lhs2TeX.Help
+                        Lhs2TeX.HsLexer
+                        Lhs2TeX.Options
+                        Lhs2TeX.Representation
+                        Lhs2TeX.SearchPath
+                        Lhs2TeX.State
+                        Lhs2TeX.TeXSyntax
+                        Lhs2TeX.Utils
+                        Lhs2TeX.Version
+
 executable lhs2TeX
   main-is:              Main.lhs
   hs-source-dirs:       src
