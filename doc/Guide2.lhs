@@ -272,11 +272,9 @@
 \label{sec:about}
 %---------------------------------------------------------------------------
 
-The program @lhs2TeX@ is a preprocessor
-that takes as input a literate Haskell source file
-(or something sufficiently alike) and produces as
-output a formatted file that can be further processed
-by \LaTeX.
+The program @lhs2TeX@ is a preprocessor that takes a literate Haskell
+source file as input (or something sufficiently alike) and produces a
+formatted file that can be processed further by \LaTeX.
 
 For example, consider the following input file:
 \input{HelloWorldInput}
@@ -293,13 +291,13 @@ then the resulting \PDF file will look similar to
 \vspace*{\belowdisplayskip}%
 \par\noindent
 %endif
-The behaviour of @lhs2TeX@ is highly customizable.
-The main mode of operation of @lhs2TeX@ is called the
-\defined{style}. By default, @lhs2TeX@ operates in
-\textbf{poly} style. Other styles can be selected via
-command line flags.
-Depending on the selected style, @lhs2TeX@ can perform
-quite different tasks. Here is a brief overview:
+The behaviour of @lhs2TeX@ is highly customizable. The main mode of
+operation of @lhs2TeX@ is called the \defined{style}. By default,
+@lhs2TeX@ operates in \textbf{poly} style. Other styles can be
+selected via command line flags.
+Depending on the selected style, @lhs2TeX@ can perform quite different
+tasks. Here is a brief overview:
+%
 \begin{compactitem}
   \item \textbf{verb} (verbatim): format code completely verbatim
   \item \textbf{tt} (typewriter): format code verbatim, but allow special
@@ -324,18 +322,32 @@ style.
 \section{Installing @lhs2TeX@}
 %---------------------------------------------------------------------------
 
-There are two possibilities to install @lhs2TeX@:
+There are three options for installing @lhs2TeX@ (ordered by ease):
 \begin{compactitem}
+\item Using Hackage
 \item Using Cabal.
 \item Classic configure/make.
 \end{compactitem}
 
+\subsection{Using Hackage to install @lhs2TeX@}
+
+The Haskell Platform~\cite{platform} is the easiest way to get started
+with programming Haskell. It is also the easiest way to build,
+install, and manage Haskell packages, through Hackage~\cite{hackage}:
+\input{HackageInstallation}%
+The first command downloads the latest package list, and the second
+installs (along with any dependencies) the latest version of
+@lhs2TeX@.
+
 \subsection{Using Cabal to install @lhs2TeX@}
 
-This requires Cabal 1.2 or later. The process is then as usual:
+If you have downloaded a source distribution, which is a valid Cabal
+package, you can install @lhs2TeX@ using Cabal (this requires Cabal
+1.2 or later). Begin by unpacking the archive. Assuming that it has been unpacked
+into directory @/somewhere@, then say
 \input{CabalInstallation}%
-The third step requires write access to the installation location
-and the \LaTeX\ filename database.
+The install step requires write access to the installation location and
+the \LaTeX\ filename database. (Hint: use \texttt{sudo} if necessary.)
 
 \subsection{configure/make}
 
@@ -344,50 +356,47 @@ The following instructions apply to Unix-like environments.  However,
 installation instructions or facilitate the installation procedure for
 Windows systems, please contact the authors.)
 
-Unpack the archive. Assume that it has been unpacked into directory
-@/somewhere@. Then say
+Begin by unpack the archive. Assuming that it has been unpacked into directory
+@/somewhere@, then say
 \input{InstallationInstructions}%
 You might need administrator permissions to perform the @make install@
 step. Alternatively, you can select your own installation location by
 passing the @--prefix@ argument to @configure@:
 \input{ConfigureCall}
 
-With @lhs2TeX@ come a couple of library files (containing basic 
-@lhs2TeX@ formatting directives) that need to be found by the
-@lhs2TeX@ binary. The default search path is as follows:
+There are a couple of library files that come with @lhs2TeX@
+(containing basic @lhs2TeX@ formatting directives) that need to be
+found by the @lhs2TeX@ binary. The default search path is as follows:
 \input{SearchPath}%
 \label{defaultsearchpath}%
-Here, @{HOME}@ and @{LHS2TEX}@ denote the current values of
-the environment variables @HOME@ and @LHS2TEX@. The double slash
-at the end of each dir means that subdirectories are also scanned.
-If @lhs2TeX@ is installed
-to a non-standard path, you might want to set the environment
-variable @LHS2TEX@ to point to the directory where
+Here, @{HOME}@ and @{LHS2TEX}@ denote the current values of the
+environment variables @HOME@ and @LHS2TEX@. The double slash at the
+end of each dir means that subdirectories are also scanned. If
+@lhs2TeX@ is installed to a non-standard path, you might want to set
+the environment variable @LHS2TEX@ to point to the directory where
 @lhs2TeX.fmt@ and the other library files have been installed to.
 
 \begin{important}
 To be able to use ``poly'' style, the two \LaTeX\ 
 packages\\ @polytable.sty@ and @lazylist.sty@ are required!
 \end{important}
-Both are included
-in the @lhs2TeX@ distribution (they are not part of standard
-\LaTeX\ distributions, although they are available from 
-\CTAN~\cite{polytable,lazylist}),
-and are usually installed during the normal procedure. The
-@configure@ script will determine whether a suitably recent
-version of @polytable@ is installed on your system, and if
-necessary, install both @polytable.sty@ and @lazylist.sty@ to
-your \TeX\ system. If this is not desired or fails (because the
-script cannot detect your \TeX\ installation properly),
-the installation of these files can be disabled by passing 
-the option @--disable-polytable@ to @configure@. In this case, 
-the two files must be manually installed to
-a location where your \TeX\ distribution will find them.
-Assuming that you have a local \TeX\ tree at @/usr/local/share/texmf@,
-this can usually be achieved by placing the files in the directory
-@/usr/local/share/texmf/tex/latex/polytable@ and subsequently running
-\input{MkTeXLsrCall}%
-to update the \TeX\ filename database.
+%
+Both are included in the @lhs2TeX@ distribution (they are not part of
+standard \LaTeX\ distributions, although they are available from
+\CTAN~\cite{polytable,lazylist}), and are usually installed during the
+normal procedure. The @configure@ script will determine whether a
+suitably recent version of @polytable@ is installed on your system,
+and if necessary, install both @polytable.sty@ and @lazylist.sty@ to
+your \TeX\ system. If this is not desired or fails (because the script
+cannot detect your \TeX\ installation properly), the installation of
+these files can be disabled by passing the option
+@--disable-polytable@ to @configure@. In this case, the two files must
+be manually installed to a location where your \TeX\ distribution will
+find them. Assuming that you have a local \TeX\ tree at
+@/usr/local/share/texmf@, this can usually be achieved by placing the
+files in the directory @/usr/local/share/texmf/tex/latex/polytable@
+and subsequently running \input{MkTeXLsrCall}% to update the \TeX\
+filename database.
 
 %%%
 %%%
@@ -1698,6 +1707,14 @@ an aligned column.
   Andres L\"oh.
   \emph{Exploring Generic Haskell.}
   PhD Thesis, Utrecht University, 2004.
+
+\bibitem{hackage}
+  Hackage
+  \url{http://hackage.haskell.org}
+
+\bibitem{platform}
+  The Haskell Platform.
+  \url{http://hackage.haskell.org/platform/}
 
 \end{thebibliography}
 
