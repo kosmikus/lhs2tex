@@ -31,6 +31,7 @@
 
 \newcommand*{\PDF}{{\smaller{PDF}}\xspace}
 \newcommand*{\CTAN}{{\smaller{CTAN}}\xspace}
+\newcommand*{\lhstoTeX}{\text{lhs}\textsf{2}\TeX}
 \setdefaultitem{\textbf{--}}{}{}{}
 
 \let\defined\textbf
@@ -245,7 +246,7 @@
 %\fonttable
 %\endgroup
 
-\title{@Guide2lhs2TeX@\\
+\title{Guide to \lhstoTeX\\
   \smaller (for version \ProgramVersion)}
 \author{{Ralf Hinze}\\
   \smaller \tabular{c}
@@ -268,13 +269,12 @@
 
 %---------------------------------------------------------------------------
 \section{About @lhs2TeX@}
+\label{sec:about}
 %---------------------------------------------------------------------------
 
-The program @lhs2TeX@ is a preprocessor
-that takes as input a literate Haskell source file
-(or something sufficiently alike) and produces as
-output a formatted file that can be further processed
-by \LaTeX.
+The program @lhs2TeX@ is a preprocessor that takes a literate Haskell
+source file as input (or something sufficiently alike) and produces a
+formatted file that can be processed further by \LaTeX.
 
 For example, consider the following input file:
 \input{HelloWorldInput}
@@ -291,13 +291,13 @@ then the resulting \PDF file will look similar to
 \vspace*{\belowdisplayskip}%
 \par\noindent
 %endif
-The behaviour of @lhs2TeX@ is highly customizable.
-The main mode of operation of @lhs2TeX@ is called the
-\defined{style}. By default, @lhs2TeX@ operates in
-\textbf{poly} style. Other styles can be selected via
-command line flags.
-Depending on the selected style, @lhs2TeX@ can perform
-quite different tasks. Here is a brief overview:
+The behaviour of @lhs2TeX@ is highly customizable. The main mode of
+operation of @lhs2TeX@ is called the \defined{style}. By default,
+@lhs2TeX@ operates in \textbf{poly} style. Other styles can be
+selected via command line flags.
+Depending on the selected style, @lhs2TeX@ can perform quite different
+tasks. Here is a brief overview:
+%
 \begin{compactitem}
   \item \textbf{verb} (verbatim): format code completely verbatim
   \item \textbf{tt} (typewriter): format code verbatim, but allow special
@@ -322,18 +322,32 @@ style.
 \section{Installing @lhs2TeX@}
 %---------------------------------------------------------------------------
 
-There are two possibilities to install @lhs2TeX@:
+There are three options for installing @lhs2TeX@ (ordered by ease):
 \begin{compactitem}
+\item Using Hackage
 \item Using Cabal.
 \item Classic configure/make.
 \end{compactitem}
 
+\subsection{Using Hackage to install @lhs2TeX@}
+
+The Haskell Platform~\cite{platform} is the easiest way to get started
+with programming Haskell. It is also the easiest way to build,
+install, and manage Haskell packages, through Hackage~\cite{hackage}:
+\input{HackageInstallation}%
+The first command downloads the latest package list, and the second
+installs (along with any dependencies) the latest version of
+@lhs2TeX@.
+
 \subsection{Using Cabal to install @lhs2TeX@}
 
-This requires Cabal 1.2 or later. The process is then as usual:
+If you have downloaded a source distribution, which is a valid Cabal
+package, you can install @lhs2TeX@ using Cabal (this requires Cabal
+1.2 or later). Begin by unpacking the archive. Assuming that it has been unpacked
+into directory @/somewhere@, then say
 \input{CabalInstallation}%
-The third step requires write access to the installation location
-and the \LaTeX\ filename database.
+The install step requires write access to the installation location and
+the \LaTeX\ filename database. (Hint: use \texttt{sudo} if necessary.)
 
 \subsection{configure/make}
 
@@ -342,50 +356,47 @@ The following instructions apply to Unix-like environments.  However,
 installation instructions or facilitate the installation procedure for
 Windows systems, please contact the authors.)
 
-Unpack the archive. Assume that it has been unpacked into directory
-@/somewhere@. Then say
+Begin by unpack the archive. Assuming that it has been unpacked into directory
+@/somewhere@, then say
 \input{InstallationInstructions}%
 You might need administrator permissions to perform the @make install@
 step. Alternatively, you can select your own installation location by
 passing the @--prefix@ argument to @configure@:
 \input{ConfigureCall}
 
-With @lhs2TeX@ come a couple of library files (containing basic 
-@lhs2TeX@ formatting directives) that need to be found by the
-@lhs2TeX@ binary. The default search path is as follows:
+There are a couple of library files that come with @lhs2TeX@
+(containing basic @lhs2TeX@ formatting directives) that need to be
+found by the @lhs2TeX@ binary. The default search path is as follows:
 \input{SearchPath}%
 \label{defaultsearchpath}%
-Here, @{HOME}@ and @{LHS2TEX}@ denote the current values of
-the environment variables @HOME@ and @LHS2TEX@. The double slash
-at the end of each dir means that subdirectories are also scanned.
-If @lhs2TeX@ is installed
-to a non-standard path, you might want to set the environment
-variable @LHS2TEX@ to point to the directory where
+Here, @{HOME}@ and @{LHS2TEX}@ denote the current values of the
+environment variables @HOME@ and @LHS2TEX@. The double slash at the
+end of each dir means that subdirectories are also scanned. If
+@lhs2TeX@ is installed to a non-standard path, you might want to set
+the environment variable @LHS2TEX@ to point to the directory where
 @lhs2TeX.fmt@ and the other library files have been installed to.
 
 \begin{important}
 To be able to use ``poly'' style, the two \LaTeX\ 
 packages\\ @polytable.sty@ and @lazylist.sty@ are required!
 \end{important}
-Both are included
-in the @lhs2TeX@ distribution (they are not part of standard
-\LaTeX\ distributions, although they are available from 
-\CTAN~\cite{polytable,lazylist}),
-and are usually installed during the normal procedure. The
-@configure@ script will determine whether a suitably recent
-version of @polytable@ is installed on your system, and if
-necessary, install both @polytable.sty@ and @lazylist.sty@ to
-your \TeX\ system. If this is not desired or fails (because the
-script cannot detect your \TeX\ installation properly),
-the installation of these files can be disabled by passing 
-the option @--disable-polytable@ to @configure@. In this case, 
-the two files must be manually installed to
-a location where your \TeX\ distribution will find them.
-Assuming that you have a local \TeX\ tree at @/usr/local/share/texmf@,
-this can usually be achieved by placing the files in the directory
-@/usr/local/share/texmf/tex/latex/polytable@ and subsequently running
-\input{MkTeXLsrCall}%
-to update the \TeX\ filename database.
+%
+Both are included in the @lhs2TeX@ distribution (they are not part of
+standard \LaTeX\ distributions, although they are available from
+\CTAN~\cite{polytable,lazylist}), and are usually installed during the
+normal procedure. The @configure@ script will determine whether a
+suitably recent version of @polytable@ is installed on your system,
+and if necessary, install both @polytable.sty@ and @lazylist.sty@ to
+your \TeX\ system. If this is not desired or fails (because the script
+cannot detect your \TeX\ installation properly), the installation of
+these files can be disabled by passing the option
+@--disable-polytable@ to @configure@. In this case, the two files must
+be manually installed to a location where your \TeX\ distribution will
+find them. Assuming that you have a local \TeX\ tree at
+@/usr/local/share/texmf@, this can usually be achieved by placing the
+files in the directory @/usr/local/share/texmf/tex/latex/polytable@
+and subsequently running \input{MkTeXLsrCall}% to update the \TeX\
+filename database.
 
 %%%
 %%%
@@ -427,153 +438,38 @@ Depending on the style in which it is called, @lhs2TeX@ will treat
 these blocks in different ways.
 
 %---------------------------------------------------------------------------
-\section{Overview over the different styles}
+\section{Using @lhs2TeX@ with style}
+\label{sec:styles}
 %---------------------------------------------------------------------------
 
-In this section, we will demonstrate on a common example how the
-different styles can be used. For each style, there will also be
-a short summary. Some of the points listed in the summary are
-defaults for the particular style and can actually be changed.
+In this section, we will walk though an example to illustrate how to
+utilize the styles of @lhsTeX@. As we noted in
+Section~\ref{sec:about}, @lhs2TeX@ operates in the \textbf{poly} style
+by default. Appendix~\ref{sec:deprecatedstyles} contains summaries of
+the more simplistic and deprecated styles: \textbf{verb}, \textbf{tt}
+and \textbf{math}. For each style, there will also be a short summary.
+Some of the points listed in the summary are simply defaults for the
+particular style and can actually be changed.
 
 %%%
 %%%
 
-\subsection{Verbatim: ``verb'' style}
+\subsection{Achieving complex layouts with the ``poly'' style}
 
-In \textbf{verb} style, the code shows up in the formatted
-document exactly as it has been entered, i.e. verbatim.
-All spaces are preserved, and a non-proportional font is
-used.
-\input{Zip}%
-One does not need @lhs2TeX@ to achieve such a result. This style,
-however, does not make use of an internal \TeX\ verbatim construct.
-The implementation of verbatim environments in \TeX\ is somewhat
-restricted, and the preprocessor approach may prove more flexible
-in some situations. For example, it is easier to apply additional
-formatting instructions to the output as a whole, such as placing
-the code in a colored box.
-
-\paragraph{Verbatim summary}
-\begin{compactitem}
-\item formatting directives are ignored
-\item conditionals and includes are handled
-\item inline code, inline verbatim, and code blocks are all
-      typeset completely verbatim, using a typewriter font
-\item all spaces in code blocks are preserved
-\item plain text is copied unchanged
-\end{compactitem}
-
-%%%
-%%%
-
-\subsection{Space-preserving formatting with ``tt'' style}
-
-The \textbf{tt} style is very similar to \textbf{verb} style,
-but applies a tiny bit of formatting to the code and allows
-for more customizabilty:
-\input{ZipTT}%
-By default, some of the Haskell symbols are expressed more
-naturally. For instance, special symbols are being used
-for the arrows or the lambda. In addition, the user can
-specify additional formatting directives to affect the appearance
-of certain identifiers. In this way, keywords can be highlighted,
-user-defined Haskell infix operators can be replaced by more
-appropriate symbols etc. In this style, the layout and all
-spaces from the source file are still preserved, and a non-proportional
-font is used, as in \textbf{verb} style.
-
-\paragraph{Typewriter summary}
-\begin{compactitem}
-\item non-recursive formatting directives are obeyed
-\item conditionals and includes are handled
-\item inline verbatim is typeset as verbatim, whereas inline
-      code and code blocks are typeset almost verbatim, after
-      formatting directives are applied, in a typewriter font
-      using some special symbols to ``beautify'' some
-      Haskell operators.
-\item all spaces in code blocks are preserved
-\item plain text is copied unchanged
-\end{compactitem}
-
-%%%
-%%%
-
-\subsection{Proportional vs.~Monospaced}
-
-Usually, there is a tradeoff between restricting oneself to
-the use of a typewriter font and not using any formatting and
-using a proportional font, at the same time replacing operators
-with mathematical symbols, using different font shapes to highlight
-keywords etc. While the latter offers far more flexibility, the
-proportional font might destroy (at least part of) the layout
-that the programmer has employed in order to make the source
-code more readable.
-
-Compare, for example, the previous two examples with the
-following result (this is a negative example, @lhs2TeX@ can
-do far better than that!!):
-\input{ZipStupid}%
-\noindent
-While the indentation is kept (otherwise, for the layout sensitive
-Haskell it would be even disastrous, because the code might no
-longer be valid), alignment that has been present in the code
-lines has been lost. For example, in the input the user had decided
-to align all equality symbols of all three function definitions,
-and also align them with the ``has-type'' operator |::|.
-
-Without support from a tool like @lhs2TeX@, the horizontal positions
-of the equality symbols in the formatted code are totally unrelated.
-A solution to this problem is of course to put the Haskell code in
-a \LaTeX\ table. Doing this manually, though, is very cumbersome and
-in some case still quite hard. The task of the formatted styles of
-@lhs2TeX@ is thus to spare the user the burden of cluttering up
-the code with formatting annotations. Most of the time, completely
-un-annotated code can be used to achieve good results, using the
-fonts you like while maintaining alignment information in the code!
-
-%%%
-%%%
-
-\subsection{Alignment and formatting with ``math'' style}
-
-In prior versions of @lhs2TeX@, \textbf{math} style was the mode
-to use for formatted Haskell code. There is one alignment column,
-often used to align the equality symbols of several equations.
-Additionally, indentation is handled automatically. User-defined
-formatting directives can be used to alter the formatting of
-identifiers, operators and symbols in many places.
-\input{ZipMath}%
-\noindent
-The example shows that there is still a loss of alignment information
-compared to the original verbatim example. The three arguments of the
-|zipWith| function as well as the two guarded equations
-in the definition of |select| are not aligned. At the moment,
-\textbf{math} style exists mainly to maintain compatibility with
-old documents. New features may be added to \textbf{poly}
-style only.
-
-\paragraph{``math'' summary}
-\begin{compactitem}
-\item all formatting directives are obeyed
-\item conditionals and includes are handled
-\item inline verbatim is typeset as verbatim, whereas inline
-      code and code blocks are typeset using a proportional
-      font, using mathematical symbols to represent many Haskell
-      operators.
-\item indentation in code blocks is preserved; furthermore, alignment
-      on a single column is possible
-\item plain text is copied unchanged
-\end{compactitem}
-
-%%%
-%%%
-
-\subsection{Complex layouts: ``poly'' style}
-
-The \textbf{poly} style has been designed to lift the restrictions
-that \textbf{math} style still has. Multiple alignments and thus
-complex layouts are possible:
+The \textbf{poly} style permits multiple alignments and thus it is
+possible to construct complex layouts. The style supersedes the
+\textbf{math} style and lifts the alignment restrictions that the
+\textbf{math} style has.
+%
+We will demonstrate the \textbf{poly} style with the following example
+as our input to @lhs2TeX@:
+%
+\input{ZipPolyIn}%
+%
+This results in the following output:
+%
 \input{ZipPoly}%
+%
 If run in \textbf{poly} style, @lhs2TeX@ produces \LaTeX\ code
 that makes use of the @polytable@ package, a package that has
 been specifically designed to fit the needs that arise while
@@ -584,7 +480,7 @@ welcome to look at the documentation for
 @polytable.pdf@ in the @polytable@ directory]{polytable}.)
 
 Beyond the advanced alignment options, \textbf{poly} style has
-all the functionality of \textbf{math} style. If \textbf{poly}
+all the functionality of its ancestor style. If \textbf{poly}
 style works for you, you should use it.
 
 \paragraph{``poly'' summary}
@@ -603,35 +499,37 @@ style works for you, you should use it.
 %%%
 %%%
 
-\subsection{``poly'' style is customizable}
+\subsection{Customizing the``poly'' style}
 
-The following example demonstrates that the visual appearance
-of ``poly'' style is in no way dictated by @lhs2TeX@. There
-are several possibilities to modify the output by means
-of formatting directives. Here, we try to mimic \textbf{tt}
-style by choosing a typewriter font again and using the same
-symbols that are default in \textbf{tt} style.
+The following example demonstrates that the visual appearance of
+``poly'' style is in no way dictated by @lhs2TeX@. There are several
+possibilities to modify the output by means of formatting directives.
+Here, we try to mimic the legacy \textbf{tt} style (see
+Section~\ref{sec:tt-style}) by choosing a typewriter font again and
+using the same symbols that are default in \textbf{tt} style.
+%
 \input{ZipPolyTT}%
-In contrast to the \textbf{tt} style example, here the spaces
-in the code are \emph{not} preserved -- the alignment is generated
-by the @polytable@ package.
+%
+The spaces in the code of the source file are \emph{not}
+preserved---the alignment is generated by the @polytable@ package.
+This is in contrast to the \textbf{tt} style we are imitating, where
+the spacing of the output is the spacing of the input.
 
 %%%
 %%%
 
-\subsection{The ``code'' and ``newcode'' styles}
+\subsection{Producing code with the ``code'' and ``newcode'' styles}
 
-These two styles are not for producing a \LaTeX\ source file,
-but rather produce a Haskell file again. Everything that is
-not code is thrown away. In addition, \textbf{newcode} does
-a few things extra. It applies formatting directives which
-can here be used as simple macros on the Haskell source level,
-and it generates line pragmas for the Haskell compiler that will
-result in error messages pointing to the original file (before
-processing with @lhs2TeX@). The plain \textbf{code} style
-does not have this extra functionality. Again, \textbf{code}
-is mainly intended for compatibility with old documents. You
-should use \textbf{newcode}.
+These two styles are not for producing a \LaTeX\ source file, but
+instead are for producing a Haskell file again. Everything that is not
+code is thrown away. In addition, the \textbf{newcode} style has a few
+extra features. It applies formatting directives, which can be used as
+simple macros on the Haskell source level, and it generates line
+pragmas for the Haskell compiler that will result in error messages
+pointing to the original file (before processing with @lhs2TeX@). The
+plain \textbf{code} style does not have this extra functionality.
+Again, \textbf{code} is mainly intended for compatibility with old
+documents. You should use \textbf{newcode} where possible.
 
 \paragraph{``code'' summary}
 \begin{compactitem}
@@ -647,9 +545,8 @@ should use \textbf{newcode}.
 \item all formatting directives are obeyed
 \item conditionals and includes are handled
 \item code blocks that are not specifications are, after applying 
-      formatting directives, 
-      copied unchanged, prefixed by a line pragma indicating the
-      original source location of the code block
+      formatting directives, copied unchanged and prefixed by a line
+      pragma indicating the original source location of the code block
 \item plain text, inline code, specification code, 
       and inline verbatim are discarded
 \end{compactitem}
@@ -1811,7 +1708,160 @@ an aligned column.
   \emph{Exploring Generic Haskell.}
   PhD Thesis, Utrecht University, 2004.
 
+\bibitem{hackage}
+  Hackage
+  \url{http://hackage.haskell.org}
+
+\bibitem{platform}
+  The Haskell Platform.
+  \url{http://hackage.haskell.org/platform/}
+
 \end{thebibliography}
+
+\appendix
+\newpage
+
+%---------------------------------------------------------------------------
+\section{Deprecated styles}
+\label{sec:deprecatedstyles}
+%---------------------------------------------------------------------------
+
+In this Appendix, we will cover the styles that were omitted from
+Section~\ref{sec:styles}. We will demonstrate them with the same
+common example. As before, each style will include a short summary.
+Some of the points listed in the summary are simply defaults for the
+particular style and can actually be changed.
+
+\subsection{Verbatim: ``verb'' style}
+
+In \textbf{verb} style, the code shows up in the formatted
+document exactly as it has been entered, i.e. verbatim.
+All spaces are preserved, and a non-proportional font is
+used.
+\input{Zip}%
+One does not need @lhs2TeX@ to achieve such a result. This style,
+however, does not make use of an internal \TeX\ verbatim construct.
+The implementation of verbatim environments in \TeX\ is somewhat
+restricted, and the preprocessor approach may prove more flexible
+in some situations. For example, it is easier to apply additional
+formatting instructions to the output as a whole, such as placing
+the code in a colored box.
+
+\paragraph{Verbatim summary}
+\begin{compactitem}
+\item formatting directives are ignored
+\item conditionals and includes are handled
+\item inline code, inline verbatim, and code blocks are all
+      typeset completely verbatim, using a typewriter font
+\item all spaces in code blocks are preserved
+\item plain text is copied unchanged
+\end{compactitem}
+
+%%%
+%%%
+
+\subsection{Space-preserving formatting with ``tt'' style}
+\label{sec:tt-style}
+
+The \textbf{tt} style is very similar to \textbf{verb} style,
+but applies a tiny bit of formatting to the code and allows
+for more customizabilty:
+\input{ZipTT}%
+By default, some of the Haskell symbols are expressed more
+naturally. For instance, special symbols are being used
+for the arrows or the lambda. In addition, the user can
+specify additional formatting directives to affect the appearance
+of certain identifiers. In this way, keywords can be highlighted,
+user-defined Haskell infix operators can be replaced by more
+appropriate symbols etc. In this style, the layout and all
+spaces from the source file are still preserved, and a non-proportional
+font is used, as in \textbf{verb} style.
+
+\paragraph{Typewriter summary}
+\begin{compactitem}
+\item non-recursive formatting directives are obeyed
+\item conditionals and includes are handled
+\item inline verbatim is typeset as verbatim, whereas inline
+      code and code blocks are typeset almost verbatim, after
+      formatting directives are applied, in a typewriter font
+      using some special symbols to ``beautify'' some
+      Haskell operators.
+\item all spaces in code blocks are preserved
+\item plain text is copied unchanged
+\end{compactitem}
+
+%%%
+%%%
+
+\subsection{Proportional vs.~Monospaced}
+
+Usually, there is a tradeoff between restricting oneself to
+the use of a typewriter font and not using any formatting and
+using a proportional font, at the same time replacing operators
+with mathematical symbols, using different font shapes to highlight
+keywords etc. While the latter offers far more flexibility, the
+proportional font might destroy (at least part of) the layout
+that the programmer has employed in order to make the source
+code more readable.
+
+Compare, for example, the previous two examples with the
+following result (this is a negative example, @lhs2TeX@ can
+do far better than that!!):
+\input{ZipStupid}%
+\noindent
+While the indentation is kept (otherwise, for the layout sensitive
+Haskell it would be even disastrous, because the code might no
+longer be valid), alignment that has been present in the code
+lines has been lost. For example, in the input the user had decided
+to align all equality symbols of all three function definitions,
+and also align them with the ``has-type'' operator |::|.
+
+Without support from a tool like @lhs2TeX@, the horizontal positions
+of the equality symbols in the formatted code are totally unrelated.
+A solution to this problem is of course to put the Haskell code in
+a \LaTeX\ table. Doing this manually, though, is very cumbersome and
+in some case still quite hard. The task of the formatted styles of
+@lhs2TeX@ is thus to spare the user the burden of cluttering up
+the code with formatting annotations. Most of the time, completely
+un-annotated code can be used to achieve good results, using the
+fonts you like while maintaining alignment information in the code!
+
+%%%
+%%%
+
+\subsection{Alignment and formatting with ``math'' style}
+
+In prior versions of @lhs2TeX@, \textbf{math} style was the mode
+to use for formatted Haskell code. There is one alignment column,
+often used to align the equality symbols of several equations.
+Additionally, indentation is handled automatically. User-defined
+formatting directives can be used to alter the formatting of
+identifiers, operators and symbols in many places.
+\input{ZipMath}%
+\noindent
+The example shows that there is still a loss of alignment information
+compared to the original verbatim example. The three arguments of the
+|zipWith| function as well as the two guarded equations
+in the definition of |select| are not aligned. At the moment,
+\textbf{math} style exists mainly to maintain compatibility with
+old documents. New features may be added to \textbf{poly}
+style only.
+
+\paragraph{``math'' summary}
+\begin{compactitem}
+\item all formatting directives are obeyed
+\item conditionals and includes are handled
+\item inline verbatim is typeset as verbatim, whereas inline
+      code and code blocks are typeset using a proportional
+      font, using mathematical symbols to represent many Haskell
+      operators.
+\item indentation in code blocks is preserved; furthermore, alignment
+      on a single column is possible
+\item plain text is copied unchanged
+\end{compactitem}
+
+%%%
+%%%
 
 \end{document}
 

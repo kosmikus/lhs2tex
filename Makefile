@@ -1,14 +1,14 @@
 
 include config.mk
 
-main            := Main.lhs
-psources        := $(main) TeXCommands.lhs TeXParser.lhs \
-		   Typewriter.lhs Math.lhs MathPoly.lhs \
-                   MathCommon.lhs NewCode.lhs \
-		   Directives.lhs HsLexer.lhs FileNameUtils.lhs \
-		   Parser.lhs FiniteMap.lhs Auxiliaries.lhs \
-		   StateT.lhs Document.lhs Verbatim.lhs Value.lhs
-sources         := $(psources) Version.lhs
+main            := src/Main.lhs
+psources        := $(main) src/TeXCommands.lhs src/TeXParser.lhs \
+		   src/Typewriter.lhs src/Math.lhs src/MathPoly.lhs \
+                   src/MathCommon.lhs src/NewCode.lhs \
+		   src/Directives.lhs src/HsLexer.lhs src/FileNameUtils.lhs \
+		   src/Parser.lhs src/FiniteMap.lhs src/Auxiliaries.lhs \
+		   src/StateT.lhs src/Document.lhs src/Verbatim.lhs src/Value.lhs
+sources         := $(psources) src/Version.lhs
 snipssrc        := sorts.snip id.snip cata.snip spec.snip
 snips	        := sorts.tt sorts.math id.math cata.math spec.math
 objects         := $(sources:.lhs=.o)
@@ -106,7 +106,7 @@ lhs2TeX.fmt: lhs2TeX.fmt.lit lhs2TeX
 	./lhs2TeX --code lhs2TeX.fmt.lit > lhs2TeX.fmt
 
 lhs2TeX : $(sources)
-	$(GHC) $(GHCFLAGS) --make -o lhs2TeX $(main)
+	$(GHC) $(GHCFLAGS) -isrc --make -o lhs2TeX $(main)
 
 doc : bin
 	cd doc; $(MAKE)
