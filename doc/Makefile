@@ -27,7 +27,7 @@ polytable.sty :
 	$(LN_S) ../polytable/polytable.sty .
 	$(LN_S) ../polytable/lazylist.sty .
 
-RawSearchPath.lhs : ../Version.lhs
+RawSearchPath.lhs : ../src/Version.lhs
 	echo '\begin{code}' > $@
 	$(LHS2TEX) --searchpath >> $@
 	echo '\end{code}' >> $@
@@ -57,7 +57,7 @@ dontbuildwarning :
 			do $(PDFLATEX) $(PDFLATEX_OPTS) $<; done;'; \
 
 Guide2.tex : Guide2.lhs $(SNIPPETSGD)
-	$(LHS2TEX) --poly -P.:.. $< > $@
+	$(LHS2TEX) --poly -P.:..:../src: $< > $@
 
 STC.tex : STC.lhs $(SNIPPETSSTC)
 	$(LHS2TEX) --poly $< > $@
