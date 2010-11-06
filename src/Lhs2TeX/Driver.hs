@@ -10,6 +10,8 @@ import Lhs2TeX.TeXSyntax
 import Lhs2TeX.SearchPath
 import Lhs2TeX.Monad
 import Lhs2TeX.Utils
+import Lhs2TeX.Exception
+import Lhs2TeX.Formatting
 
 -- | Main lhs2TeX driver. Reads the input file(s) and generates output as
 -- directed by the selected style. Essentially is a simple wrapper around
@@ -23,16 +25,23 @@ lhs2TeX style state dirs files =
     (contents, file) <- input files  -- obtain the file to process
     runLhs2TeX (setupState style file expandedPath state) $
       do
-        formats (List.map (No 0) dirs) -- process initial directives
-        formatStr (addEndEOF contents) -- process actual input doc
-        stopExternals                  -- clean up external processes
-        closeOutputFile                -- clean up output files
-    -- TODO: properly handle exceptions
+        catchError
+          (do
+             formats (List.map (No 0) dirs) -- process initial directives
+             formatStr (addEndEOF contents) -- process actual input doc
+          )
+          reportError
+        stopExternals    -- clean up external processes
+        closeOutputFile  -- clean up output files
+      -- TODO: what about exceptions in the cleanup phase?
     return ()
 
+-- | Print an error message.
+reportError :: Exc -> Lhs2TeX ()
+reportError (msg, context) =
+  undefined
+
 data X a = No Int a
-formats = undefined
-formatStr = undefined
 
 -- | Normalizes the end of the input string.
 addEndEOF :: String -> String
