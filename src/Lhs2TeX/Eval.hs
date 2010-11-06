@@ -1,7 +1,13 @@
 -- | Embedded code evaluation.
-module Lhs2TeX.Eval where
+module Lhs2TeX.Eval
+  (module Lhs2TeX.Eval, module Lhs2TeX.Utils)
+  where
 
-data Externals = Externals
+import System.IO
+import System.Process
 
-empty :: Externals
-empty = undefined
+import Lhs2TeX.Utils
+
+type Externals   = Trie ProcessInfo
+type ProcessInfo = (Handle, Handle, Handle, ProcessHandle)
+

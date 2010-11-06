@@ -1,21 +1,72 @@
 module Lhs2TeX.Driver where
 
+import System.IO
+import System.Process
+import Data.List as List
+
 import Lhs2TeX.Flags
 import Lhs2TeX.State
 import Lhs2TeX.TeXSyntax
 import Lhs2TeX.SearchPath
+import Lhs2TeX.Monad
+import Lhs2TeX.Utils
 
 -- | Main lhs2TeX driver. Reads the input file(s) and generates output as
 -- directed by the selected style. Essentially is a simple wrapper around
--- the 'formatStr' function.
-lhs2TeX :: Style -> State -> [Class] -> [FilePath] -> IO a
+-- the 'formatStr' function. TODO: bugfix. stopping externals should
+-- also happen on abnormal program termination.
+lhs2TeX :: Style -> State -> [Class] -> [FilePath] -> IO ()
 lhs2TeX style state dirs files =
   do
     expandedPath     <- expandPath (searchpath state)
                                      -- we expand the searchpath once
     (contents, file) <- input files  -- obtain the file to process
-    -- TODO: continue here. At this point, we have to initialize the monad.
-    error "continue"
+    runLhs2TeX (setupState style file expandedPath state) $
+      do
+        formats (List.map (No 0) dirs) -- process initial directives
+        formatStr (addEndEOF contents) -- process actual input doc
+        stopExternals                  -- clean up external processes
+        closeOutputFile                -- clean up output files
+    -- TODO: properly handle exceptions
+    return ()
+
+data X a = No Int a
+formats = undefined
+formatStr = undefined
+
+-- | Normalizes the end of the input string.
+addEndEOF :: String -> String
+addEndEOF = (++ "%EOF\n") . unlines . lines
+
+-- | Tries to close the output file if it is a file.
+closeOutputFile :: Lhs2TeX ()
+closeOutputFile =
+  do
+    outfile <- gets output
+    liftIO $
+      do
+        isTerm  <- hIsTerminalDevice outfile
+        when (not isTerm) (hClose outfile)
+
+-- | Tries to stop external processes. TODO: actually kill the processes
+-- gracefully would be better to recover from problematic situations.
+stopExternals :: Lhs2TeX ()
+stopExternals =
+  do
+    -- obtain relevant parts of the state
+    ex  <- gets externals
+    -- obtain the process ids of the processes we have started
+    let pids = List.map snd $ toList ex
+    when (not (List.null pids)) $
+      do
+        info "Stopping external processes."
+        liftIO $
+          mapM_ (\ (pin, _, _, pid) ->
+                    do
+                      hPutStrLn pin ":q"  -- end hugs/ghci
+                      hFlush pin          -- make sure everything's sent
+                      waitForProcess pid  -- hope the process will end
+                ) pids
 
 -- | From a list of filename arguments, return the contents of the first
 -- and ignore the others. If no file or a minus is specified, we assume

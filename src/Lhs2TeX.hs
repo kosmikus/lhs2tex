@@ -55,7 +55,7 @@ encodingSetup =
 -- | Option handler. We try to figure out the style that has been selected.
 -- The style governs the way lhs2TeX treats the input file, or what
 -- information lhs2TeX should print.
-handleOptions :: State -> [Class] -> [Style] -> [FilePath] -> IO a
+handleOptions :: State -> [Class] -> [Style] -> [FilePath] -> IO ()
 handleOptions state dirs styles files =
   case styles of
     [Help]       -> quitSuccess usage

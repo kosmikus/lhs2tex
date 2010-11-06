@@ -1,5 +1,9 @@
-module Lhs2TeX.Utils where
+module Lhs2TeX.Utils
+  (module Lhs2TeX.Utils, module Data.ListTrie.Map)
+  where
 
+import Data.Map
+import Data.ListTrie.Map
 import System.IO
 import System.Exit
 
@@ -26,3 +30,5 @@ breakAfter p []        =  ([], [])
 breakAfter p (a : as)
   | p a                =  ([a], as)
   | otherwise          =  a <| breakAfter p as
+
+type Trie a = TrieMap Map Char a

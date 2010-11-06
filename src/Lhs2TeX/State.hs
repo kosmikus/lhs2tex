@@ -12,6 +12,9 @@ import Lhs2TeX.Directive.Format as Format
 import Lhs2TeX.Directive.Subst  as Subst
 import Lhs2TeX.Directive.Let    as Let
 import Lhs2TeX.SearchPath
+import Lhs2TeX.Version
+import Lhs2TeX.Representation
+import Lhs2TeX.Utils
 
 -- | All the program state for lhs2TeX. We currently do not distinguish between
 -- read-only state and state that can actually be updated during the program run.
@@ -88,3 +91,37 @@ initialState =
       ofile      = error "internal: uninitialized ofile",
       toggles    = error "internal: uninitialized toggles"
     }
+
+-- | Initialize the state with a couple of basic, but variable, settings.
+-- Also initializes a number of variables that are available for
+-- inspection during a run of lhs2TeX.
+setupState :: Style -> FilePath -> [FilePath] -> State -> State
+setupState newstyle newfile newpath state =
+  state
+    { style      = newstyle,
+      file       = newfile,
+      ofile      = newfile,
+      searchpath = newpath,
+      toggles    = fromList initialToggles }
+  where
+    initialToggles :: [(String, Value)]
+    initialToggles =
+      -- The following flags are set according to the flags lhs2TeX
+      -- has been invoked with.
+      [ ("style",   Int (fromEnum newstyle)),
+        ("version", Int numversion),
+        ("pre",     Int pre),
+        ("lang",    Int (fromEnum (lang state))) ] ++
+      -- The following flags are always the same. Since (for historic
+      -- reasons?) the style and lang toggles are numeric and not strings,
+      -- we have to have things to compare them with.
+      toggleList (undefined :: Style) ++
+      toggleList (undefined :: Lang)
+
+-- | Helper function to generate a number of numeric values from
+-- a given enumeration type. The argument is a dummy for the type
+-- checker.
+toggleList :: (Bounded a, Enum a, Representation a) =>
+              a {- dummy -} -> [(String, Value)]
+toggleList x = [ (decode s, Int (fromEnum s)) |
+                 s <- [minBound `asTypeOf` x .. maxBound] ]

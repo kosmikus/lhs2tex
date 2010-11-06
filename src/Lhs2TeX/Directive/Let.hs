@@ -1,6 +1,12 @@
 module Lhs2TeX.Directive.Let where
 
-type Toggles = ()
+import Lhs2TeX.Utils
 
-empty :: Toggles
-empty = ()
+type Toggles = Trie Value
+
+-- | Universal datatype for lhs2TeX run-time values
+data Value =
+    Undef
+  | Str   String
+  | Bool  Bool
+  | Int   Int
