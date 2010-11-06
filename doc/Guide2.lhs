@@ -31,6 +31,7 @@
 
 \newcommand*{\PDF}{{\smaller{PDF}}\xspace}
 \newcommand*{\CTAN}{{\smaller{CTAN}}\xspace}
+\newcommand*{\lhstoTeX}{\text{lhs}\textsf{2}\TeX}
 \setdefaultitem{\textbf{--}}{}{}{}
 
 \let\defined\textbf
@@ -245,7 +246,7 @@
 %\fonttable
 %\endgroup
 
-\title{@Guide2lhs2TeX@\\
+\title{Guide to \lhstoTeX\\
   \smaller (for version \ProgramVersion)}
 \author{{Ralf Hinze}\\
   \smaller \tabular{c}
@@ -438,135 +439,7 @@ defaults for the particular style and can actually be changed.
 %%%
 %%%
 
-\subsection{Verbatim: ``verb'' style}
 
-In \textbf{verb} style, the code shows up in the formatted
-document exactly as it has been entered, i.e. verbatim.
-All spaces are preserved, and a non-proportional font is
-used.
-\input{Zip}%
-One does not need @lhs2TeX@ to achieve such a result. This style,
-however, does not make use of an internal \TeX\ verbatim construct.
-The implementation of verbatim environments in \TeX\ is somewhat
-restricted, and the preprocessor approach may prove more flexible
-in some situations. For example, it is easier to apply additional
-formatting instructions to the output as a whole, such as placing
-the code in a colored box.
-
-\paragraph{Verbatim summary}
-\begin{compactitem}
-\item formatting directives are ignored
-\item conditionals and includes are handled
-\item inline code, inline verbatim, and code blocks are all
-      typeset completely verbatim, using a typewriter font
-\item all spaces in code blocks are preserved
-\item plain text is copied unchanged
-\end{compactitem}
-
-%%%
-%%%
-
-\subsection{Space-preserving formatting with ``tt'' style}
-
-The \textbf{tt} style is very similar to \textbf{verb} style,
-but applies a tiny bit of formatting to the code and allows
-for more customizabilty:
-\input{ZipTT}%
-By default, some of the Haskell symbols are expressed more
-naturally. For instance, special symbols are being used
-for the arrows or the lambda. In addition, the user can
-specify additional formatting directives to affect the appearance
-of certain identifiers. In this way, keywords can be highlighted,
-user-defined Haskell infix operators can be replaced by more
-appropriate symbols etc. In this style, the layout and all
-spaces from the source file are still preserved, and a non-proportional
-font is used, as in \textbf{verb} style.
-
-\paragraph{Typewriter summary}
-\begin{compactitem}
-\item non-recursive formatting directives are obeyed
-\item conditionals and includes are handled
-\item inline verbatim is typeset as verbatim, whereas inline
-      code and code blocks are typeset almost verbatim, after
-      formatting directives are applied, in a typewriter font
-      using some special symbols to ``beautify'' some
-      Haskell operators.
-\item all spaces in code blocks are preserved
-\item plain text is copied unchanged
-\end{compactitem}
-
-%%%
-%%%
-
-\subsection{Proportional vs.~Monospaced}
-
-Usually, there is a tradeoff between restricting oneself to
-the use of a typewriter font and not using any formatting and
-using a proportional font, at the same time replacing operators
-with mathematical symbols, using different font shapes to highlight
-keywords etc. While the latter offers far more flexibility, the
-proportional font might destroy (at least part of) the layout
-that the programmer has employed in order to make the source
-code more readable.
-
-Compare, for example, the previous two examples with the
-following result (this is a negative example, @lhs2TeX@ can
-do far better than that!!):
-\input{ZipStupid}%
-\noindent
-While the indentation is kept (otherwise, for the layout sensitive
-Haskell it would be even disastrous, because the code might no
-longer be valid), alignment that has been present in the code
-lines has been lost. For example, in the input the user had decided
-to align all equality symbols of all three function definitions,
-and also align them with the ``has-type'' operator |::|.
-
-Without support from a tool like @lhs2TeX@, the horizontal positions
-of the equality symbols in the formatted code are totally unrelated.
-A solution to this problem is of course to put the Haskell code in
-a \LaTeX\ table. Doing this manually, though, is very cumbersome and
-in some case still quite hard. The task of the formatted styles of
-@lhs2TeX@ is thus to spare the user the burden of cluttering up
-the code with formatting annotations. Most of the time, completely
-un-annotated code can be used to achieve good results, using the
-fonts you like while maintaining alignment information in the code!
-
-%%%
-%%%
-
-\subsection{Alignment and formatting with ``math'' style}
-
-In prior versions of @lhs2TeX@, \textbf{math} style was the mode
-to use for formatted Haskell code. There is one alignment column,
-often used to align the equality symbols of several equations.
-Additionally, indentation is handled automatically. User-defined
-formatting directives can be used to alter the formatting of
-identifiers, operators and symbols in many places.
-\input{ZipMath}%
-\noindent
-The example shows that there is still a loss of alignment information
-compared to the original verbatim example. The three arguments of the
-|zipWith| function as well as the two guarded equations
-in the definition of |select| are not aligned. At the moment,
-\textbf{math} style exists mainly to maintain compatibility with
-old documents. New features may be added to \textbf{poly}
-style only.
-
-\paragraph{``math'' summary}
-\begin{compactitem}
-\item all formatting directives are obeyed
-\item conditionals and includes are handled
-\item inline verbatim is typeset as verbatim, whereas inline
-      code and code blocks are typeset using a proportional
-      font, using mathematical symbols to represent many Haskell
-      operators.
-\item indentation in code blocks is preserved; furthermore, alignment
-      on a single column is possible
-\item plain text is copied unchanged
-\end{compactitem}
-
-%%%
-%%%
 
 \subsection{Complex layouts: ``poly'' style}
 
@@ -1812,6 +1685,143 @@ an aligned column.
   PhD Thesis, Utrecht University, 2004.
 
 \end{thebibliography}
+
+\appendix
+\newpage
+
+%---------------------------------------------------------------------------
+\section{Deprecated styles}
+%---------------------------------------------------------------------------
+
+\subsection{Verbatim: ``verb'' style}
+
+In \textbf{verb} style, the code shows up in the formatted
+document exactly as it has been entered, i.e. verbatim.
+All spaces are preserved, and a non-proportional font is
+used.
+\input{Zip}%
+One does not need @lhs2TeX@ to achieve such a result. This style,
+however, does not make use of an internal \TeX\ verbatim construct.
+The implementation of verbatim environments in \TeX\ is somewhat
+restricted, and the preprocessor approach may prove more flexible
+in some situations. For example, it is easier to apply additional
+formatting instructions to the output as a whole, such as placing
+the code in a colored box.
+
+\paragraph{Verbatim summary}
+\begin{compactitem}
+\item formatting directives are ignored
+\item conditionals and includes are handled
+\item inline code, inline verbatim, and code blocks are all
+      typeset completely verbatim, using a typewriter font
+\item all spaces in code blocks are preserved
+\item plain text is copied unchanged
+\end{compactitem}
+
+%%%
+%%%
+
+\subsection{Space-preserving formatting with ``tt'' style}
+
+The \textbf{tt} style is very similar to \textbf{verb} style,
+but applies a tiny bit of formatting to the code and allows
+for more customizabilty:
+\input{ZipTT}%
+By default, some of the Haskell symbols are expressed more
+naturally. For instance, special symbols are being used
+for the arrows or the lambda. In addition, the user can
+specify additional formatting directives to affect the appearance
+of certain identifiers. In this way, keywords can be highlighted,
+user-defined Haskell infix operators can be replaced by more
+appropriate symbols etc. In this style, the layout and all
+spaces from the source file are still preserved, and a non-proportional
+font is used, as in \textbf{verb} style.
+
+\paragraph{Typewriter summary}
+\begin{compactitem}
+\item non-recursive formatting directives are obeyed
+\item conditionals and includes are handled
+\item inline verbatim is typeset as verbatim, whereas inline
+      code and code blocks are typeset almost verbatim, after
+      formatting directives are applied, in a typewriter font
+      using some special symbols to ``beautify'' some
+      Haskell operators.
+\item all spaces in code blocks are preserved
+\item plain text is copied unchanged
+\end{compactitem}
+
+%%%
+%%%
+
+\subsection{Proportional vs.~Monospaced}
+
+Usually, there is a tradeoff between restricting oneself to
+the use of a typewriter font and not using any formatting and
+using a proportional font, at the same time replacing operators
+with mathematical symbols, using different font shapes to highlight
+keywords etc. While the latter offers far more flexibility, the
+proportional font might destroy (at least part of) the layout
+that the programmer has employed in order to make the source
+code more readable.
+
+Compare, for example, the previous two examples with the
+following result (this is a negative example, @lhs2TeX@ can
+do far better than that!!):
+\input{ZipStupid}%
+\noindent
+While the indentation is kept (otherwise, for the layout sensitive
+Haskell it would be even disastrous, because the code might no
+longer be valid), alignment that has been present in the code
+lines has been lost. For example, in the input the user had decided
+to align all equality symbols of all three function definitions,
+and also align them with the ``has-type'' operator |::|.
+
+Without support from a tool like @lhs2TeX@, the horizontal positions
+of the equality symbols in the formatted code are totally unrelated.
+A solution to this problem is of course to put the Haskell code in
+a \LaTeX\ table. Doing this manually, though, is very cumbersome and
+in some case still quite hard. The task of the formatted styles of
+@lhs2TeX@ is thus to spare the user the burden of cluttering up
+the code with formatting annotations. Most of the time, completely
+un-annotated code can be used to achieve good results, using the
+fonts you like while maintaining alignment information in the code!
+
+%%%
+%%%
+
+\subsection{Alignment and formatting with ``math'' style}
+
+In prior versions of @lhs2TeX@, \textbf{math} style was the mode
+to use for formatted Haskell code. There is one alignment column,
+often used to align the equality symbols of several equations.
+Additionally, indentation is handled automatically. User-defined
+formatting directives can be used to alter the formatting of
+identifiers, operators and symbols in many places.
+\input{ZipMath}%
+\noindent
+The example shows that there is still a loss of alignment information
+compared to the original verbatim example. The three arguments of the
+|zipWith| function as well as the two guarded equations
+in the definition of |select| are not aligned. At the moment,
+\textbf{math} style exists mainly to maintain compatibility with
+old documents. New features may be added to \textbf{poly}
+style only.
+
+\paragraph{``math'' summary}
+\begin{compactitem}
+\item all formatting directives are obeyed
+\item conditionals and includes are handled
+\item inline verbatim is typeset as verbatim, whereas inline
+      code and code blocks are typeset using a proportional
+      font, using mathematical symbols to represent many Haskell
+      operators.
+\item indentation in code blocks is preserved; furthermore, alignment
+      on a single column is possible
+\item plain text is copied unchanged
+\end{compactitem}
+
+%%%
+%%%
 
 \end{document}
 
