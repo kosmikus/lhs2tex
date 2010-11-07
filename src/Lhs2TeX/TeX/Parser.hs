@@ -9,6 +9,10 @@ import Lhs2TeX.Exception
 import Lhs2TeX.TeX.Syntax
 import Lhs2TeX.Representation
 
+-- | Hardcoded maximum size of recognized environments. TODO: fix this.
+maxLine :: Int
+maxLine = 80 * 500
+
 -- | Produces a stream of TeX tokens from an input string.
 -- The TeX tokens retain all whitespace in the original file,
 -- so that we can properly keep track of line numbers.
@@ -37,18 +41,44 @@ classifyLine n s         = Many n : classify s
 classify :: String -> [Class]                           
 classify []         = []
 classify ('\n' : s) = classifyLine "\n" s
+
 -- Directives look like TeX comments.
 -- After recognizing a comment or directive, we continue with
 -- 'classifyLine' and thus allow a bird-track section directly
 -- after a directive. This is more liberal than Haskell is
 -- which always requires a blank line before a bird-track section.
-classify ('%'  : s) =
+classify ('%' : s) =
   case encode t of
     Nothing  -> Many ('%' : t ++ arg) : classifyLine "" v -- just a comment
     Just cmd -> Directive cmd arg     : classifyLine "" v
   where
     (t, u)   = break isSpace s
     (arg, v) = breakAfter (== '\n') u
+
+-- Environments.
+-- We scan for \begin and \end control sequences. Our TeX parser
+-- does not deal with nested environments properly.
+classify str@('\\' : s) =
+  case span isIdChar s of
+    ("begin", '{' : t) -> -- found the beginning of an environment
+      case span isIdChar t of
+        (env, '}' : u) -> -- found the name of the environment
+          case encode env of
+            Nothing  -> cont -- environment unknown, continue
+            Just cmd -> -- we know the environment, can we find its end?
+              case match maxLine (isPrefixOf end) u of
+                Nothing       -> notFound end str : cont -- end not found
+                Just (arg, v) ->
+                  -- extract the rest of the input and build known env
+                  let (w, x) = blank (drop (length end) v)
+                  in  Environment cmd (arg ++ w) : classify x
+            where
+              end = "\\end{" ++ env ++ "}" -- the string to look for
+  where
+    cont = One '\\' : classify s -- fallback, nothing recognized
+              
+        
+
 
 -- | Recognize code sections marked by bird tracks. The first
 -- argument takes the character to look for at the beginning of
@@ -104,3 +134,14 @@ number n (t : ts) = Numbered n t : number (n + inc) ts
 -- | Counts and returns the number of newline characters in a string.
 newlines :: String -> Int
 newlines = length . List.filter (== '\n')
+
+-- | Characters we allow for TeX control sequences and environment
+-- names are letters and the star. It's not important that this
+-- matches reality, since we only recognize a small set of commands
+-- and environments anyway, and they all fit into this scheme.
+isIdChar :: Char -> Bool
+isIdChar c = isAlpha c || c == '*'
+
+-- | Generate an error token.
+notFound :: String -> String -> Class
+notFound what s = Error (what ++ " not found", s)

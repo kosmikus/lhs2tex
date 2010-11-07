@@ -34,4 +34,16 @@ breakAfter p (a : as)
   | p a                =  ([a], as)
   | otherwise          =  a <| breakAfter p as
 
+-- | Find, within a limit, a position in a string that fulfills
+-- a certain predicate. Returns the prefix and the remaining string
+-- where the predicate holds for the remaining string.
+match :: Int -> ([a] -> Bool) -> [a] -> Maybe ([a], [a])
+match n pred [] = return ([], [])
+match n pred xs@(s : ss)
+  | pred xs     = return ([], xs)
+  | n == 0      = Nothing
+  | otherwise   = do
+                    rec <- match (n - 1) pred ss
+                    return (s <| rec)
+
 type Trie a = TrieMap Map Char a
