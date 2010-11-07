@@ -25,16 +25,16 @@ data State =
       verbose    :: Bool,        -- ^ how much output should be generated
       searchpath :: [FilePath],  -- ^ where lhs2TeX looks for inputs
       file       :: FilePath,    -- ^ file currently being processed
-      lineno     :: LineNo,      -- ^ current line number
+      lineno     :: LineNumber,  -- ^ current line number
       ofile      :: FilePath,    -- ^ old file: file being processed before
-      olineno    :: LineNo,      -- ^ old line number
+      olineno    :: LineNumber,  -- ^ old line number
       atnewline  :: Bool,        -- ^ at beginning of new line?
       fldir      :: Bool,        -- ^ whether we generate %file directives
       pragmas    :: Bool,        -- ^ whether we generate LINE pragmas
       output     :: Handle,      -- ^ where the output goes
       opts       :: String,      -- ^ options for embedded code evaluation
       externals  :: Externals,   -- ^ handles for embedded code evaluation
-      files      :: [(FilePath, LineNo)],
+      files      :: [(FilePath, LineNumber)],
                                  -- ^ stack of files being processed
       path       :: FilePath,    -- ^ path of current file
       fmts       :: Formats,     -- ^ %format directives currently active
@@ -54,7 +54,7 @@ data State =
     }  
 
 -- | Information for conditionals. TODO: turn this into a datatype.
-type CondInfo = (FilePath, LineNo, Bool, Bool)
+type CondInfo = (FilePath, LineNumber, Bool, Bool)
 
 -- | The state at the beginning of a run of lhs2TeX, before processing
 -- command line options.

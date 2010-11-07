@@ -7,7 +7,10 @@ import Data.ListTrie.Map
 import System.IO
 import System.Exit
 
-type LineNo = Int
+type LineNumber = Int
+
+-- | Anything can be explicitly tagged with a line number.
+data Numbered a = Numbered !LineNumber a
 
 infixr 5 <|  -- same fixity as cons
 

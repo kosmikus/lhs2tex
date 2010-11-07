@@ -6,7 +6,7 @@ import Data.List as List
 
 import Lhs2TeX.Flags
 import Lhs2TeX.State
-import Lhs2TeX.TeXSyntax
+import Lhs2TeX.TeX.Syntax
 import Lhs2TeX.SearchPath
 import Lhs2TeX.Monad
 import Lhs2TeX.Utils

@@ -7,7 +7,7 @@ import System.Console.GetOpt
 
 import Lhs2TeX.State     as State
 import Lhs2TeX.Flags
-import Lhs2TeX.TeXSyntax (Class(..))
+import Lhs2TeX.TeX.Syntax (Class(..))
 import Lhs2TeX.Directive
 import Lhs2TeX.SearchPath
 import Lhs2TeX.File

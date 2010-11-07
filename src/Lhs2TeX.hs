@@ -12,7 +12,7 @@ import Lhs2TeX.Flags
 import Lhs2TeX.Representation
 import Lhs2TeX.SearchPath
 import Lhs2TeX.Driver
-import Lhs2TeX.TeXSyntax
+import Lhs2TeX.TeX.Syntax
 
 -- | Main program. Only wraps 'mainArgs'.
 main :: IO ()
@@ -22,7 +22,7 @@ main = getArgs >>= mainArgs
 -- list of strings. Tries to figure out whether the options given
 -- make sense superficially and passes the options to an option
 -- handler.
-mainArgs :: [String] -> IO a
+mainArgs :: [String] -> IO ()
 mainArgs args =
   do
     encodingSetup
@@ -82,14 +82,14 @@ incompatibleStylesError styles =
 -- | Compatibility mode: in ancient times, lhs2TeX was interpreting command
 -- line options in a different way. If options don't make sense in the new
 -- way, we still try the old one.
-compatibilityMode :: [String] -> IO a
+compatibilityMode :: [String] -> IO ()
 compatibilityMode args@(('-' : a) : x) =
   case encode a of
     Just sty -> cStyle sty x
     Nothing  -> cStyle Typewriter args
        -- in ancient times, 'Typewriter' was default
   where
-    cStyle :: Style -> [String] -> IO a
+    cStyle :: Style -> [String] -> IO ()
     cStyle style args =
       let (dirs, files) = compatibilityOptions args
       in  lhs2TeX style initialState dirs files

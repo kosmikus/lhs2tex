@@ -1,4 +1,4 @@
-module Lhs2TeX.TeXSyntax where
+module Lhs2TeX.TeX.Syntax where
 
 import Lhs2TeX.Exception
 import Lhs2TeX.Directive
