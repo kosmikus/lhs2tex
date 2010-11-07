@@ -1,8 +1,10 @@
 %include tex.fmt
 %format ... = "\dots "
+%format brop = {
+%format brcl = }
 
 \begin{code}
-dir({)
+dir(brop)
 ...
-dir(})
+dir(brcl)
 \end{code}
