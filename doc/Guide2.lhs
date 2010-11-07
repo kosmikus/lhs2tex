@@ -589,7 +589,7 @@ documents. You should use \textbf{newcode} where possible.
 \paragraph{``code'' summary}
 \begin{compactitem}
 \item formatting directives are ignored
-\item conditionals and includes are handled (??)
+\item conditionals and includes are handled
 \item code blocks that are not specifications are copied unchanged
 \item plain text, inline code, specification code, 
       and inline verbatim are discarded
@@ -615,28 +615,42 @@ documents. You should use \textbf{newcode} where possible.
 \label{sec:directives}
 %---------------------------------------------------------------------------
 
-A number of directives are understood by @lhs2TeX@. Some of the are
-ignored in some of the styles, though.  Directives can occur on all
-non-code lines and start with a @%@, the \TeX\ comment character,
-immediately followed by the name of the directive, plus a list of
-potential arguments.
+There are a number of directives that are understood by @lhs2TeX@.
+Some of these are specific to styles, and others are ignored in some
+styles. Directives can occur on all non-code lines and start with a
+@%@, the \TeX\ comment character, immediately followed by the name of
+the directive, plus a list of potential arguments.
 
-While @lhs2TeX@ will remove directives that it has interpreted, it will 
-simply ignore all normal \TeX comments that are no directives. 
-Therefore, if a directive is accidentally misspelled, 
-no error message will be raised in general.
+While @lhs2TeX@ will remove directives that it has interpreted, it
+will simply ignore all normal \TeX\ comments that are no directives.
+Therefore, if a directive is accidentally misspelled, no error message
+will be raised, in general.
 
 Table~\ref{directives} is a complete list of the directives 
 that @lhs2TeX@ knows about.
+%
 \begin{table}
 \input{CompleteDirectives}%
 \caption{All @lhs2TeX@ directives}\label{directives}
 \end{table}
-These directives will be explained in more or less detail in the
-following sections.
+%
+Many of these directive will be explained in more detail in the
+following sections:
+\begin{compactitem}
+  \item See Section~\ref{sec:include} for the @%include@ directive.
+  \item See Section~\ref{sec:format} for the @%format@ directive.
+  \item See Section~\ref{subsec:group-directive} for the @%{@ and @%}@ directives.
+  \item See Section~\ref{subsec:poly-alignment} for the @%separation@ and @%latency@ directives.
+  \item See Section~\ref{sec:variables} for the @%let@ directive.
+  \item See Section~\ref{sec:conditionals} for the @%if@, @%elif@, @%else@ and @%endif@ directives.
+  \item See Section~\ref{sec:call-interp} for the @%options@ directive.
+  \item See Section~\ref{sec:subst} for the @%subst@ directive.
+\end{compactitem}
+
 
 %---------------------------------------------------------------------------
 \section{Including files}
+\label{sec:include}
 %---------------------------------------------------------------------------
 
 Other files can be included by @lhs2TeX@. This is what the
@@ -721,6 +735,7 @@ include mechanisms such as @\input@ or @\usepackage@.
 
 %---------------------------------------------------------------------------
 \section{Formatting}
+\label{sec:format}
 %---------------------------------------------------------------------------
 
 Using the @%format@ directive, tokens can be given a different
@@ -845,7 +860,7 @@ produces output similar to
 \end{colorsurround}
 If the function is used with too few arguments as in the text,
 a default symbol is substituted (usually a @\cdot@, but that is
-customizable, cf. Section~\ref{subst}).
+customizable, cf. Section~\ref{sec:subst}).
 
 %%%
 %%%
@@ -901,6 +916,7 @@ results in
 %%%
 
 \subsection{Local formatting directives}
+\label{subsec:group-directive}
 
 Usually, formatting directives scope over the rest of the input.
 If that is not desired, formatting directives can be placed into
@@ -964,7 +980,7 @@ And its output:
 \item In \textbf{verb} and \textbf{code} styles, formatting directives are ignored.
 \end{compactitem}
 A document can be prepared for processing in different styles 
-using conditionals (cf.~Section~\ref{conditionals}).
+using conditionals (cf.~Section~\ref{sec:conditionals}).
 
 %%%
 %%%
@@ -1042,6 +1058,7 @@ This input produces the correct output:
 %%%
 
 \subsection{The full story}
+\label{subsec:poly-alignment}
 
 If you further want to customize the alignment behaviour, you can.
 Here is exactly what happens:
@@ -1217,7 +1234,8 @@ of the @polytable@ package that tell you to rerun \LaTeX!
 \end{important}
 
 %---------------------------------------------------------------------------
-\section{Defining variables}\label{variables}
+\section{Defining variables}
+\label{sec:variables}
 %---------------------------------------------------------------------------
 
 One can define or define flags (or variables) by means of the
@@ -1234,7 +1252,7 @@ Variables can also be passed to @lhs2TeX@ from the operating
 system level by using the @-l@ or @-s@ command line options.
 
 The main use of variables is in conditionals 
-(cf.~Section~\ref{conditionals}).
+(cf.~Section~\ref{sec:conditionals}).
 At the moment, there is no way to directly use the value of a
 variable in a @%format@ directive.
 
@@ -1258,7 +1276,8 @@ new @lhs2TeX@ features by checking its version first.
 %%%
 
 %---------------------------------------------------------------------------
-\section{Conditionals}\label{conditionals}
+\section{Conditionals}
+\label{sec:conditionals}
 %---------------------------------------------------------------------------
 
 Boolean expressions can be used in conditionals. The syntax of an
@@ -1282,7 +1301,7 @@ These are some of the most common uses of conditionals:
       source file(s). Depending
       on a flag, @lhs2TeX@ can produce either the one or the other. 
       Because the flag can be defined via a command 
-      line option (cf.~Section~\ref{variables}), 
+      line option (cf.~Section~\ref{sec:variables}), 
       no modification of the source is necessary to switch versions.
 \item Code that is needed to make the Haskell program work but that
       should not appear in the formatted article (module headers,
@@ -1345,7 +1364,7 @@ automatic spacing of @lhs2TeX@ would usually place one.
 Conversely, use @^^@ everywhere where a space \emph{is} desired,
 but @lhs2TeX@ does usually not place one.
 
-As described in Section~\ref{conditionals}, one can use conditionals
+As described in Section~\ref{sec:conditionals}, one can use conditionals
 to format such annotated input code in both \textbf{poly} 
 (or \textbf{math}) and \text{newcode} style to generate both typeset
 document and code with annotation remove from a single source file.
@@ -1511,7 +1530,8 @@ This is the corresponding output:
 
 
 %---------------------------------------------------------------------------
-\section{Advanced customization}\label{subst}
+\section{Advanced customization}
+\label{sec:subst}
 %---------------------------------------------------------------------------
 
 There is one directive that has not yet been described: @%subst@.
