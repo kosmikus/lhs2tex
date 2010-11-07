@@ -755,48 +755,64 @@ directives, and therefore \emph{cannot} be included using \TeX\ or
 \label{sec:format}
 %---------------------------------------------------------------------------
 
-Using the @%format@ directive, tokens can be given a different
-appearance. The complete syntax that is supported by @lhs2TeX@ is
-quite complex, but we will look at many different cases in detail.
+The @%format@ directive is a powerful tool for transforming the source
+file. The complete syntax that is supported by @lhs2TeX@ is quite
+complex, but we will break it down by looking in detail at many
+different use cases.
+%
 \input{FormatSyntax}%
-There are three different forms of the
-formatting statement.  The first one can be used to change the
-appearance of most functions and operators and a few other
-symbols. The second form is restricted to named identifiers (both
-qualified and unqualified, but no symbolic operators); in turn,
-such formatting directives can be parametrized. Finally, the third 
-form provides a syntactically
-lightweight way of formatting certain identifiers using some
-heuristics. But let us look at some common examples first \dots
+%
+
+There are three different forms of the formatting statement. The first
+can be used to change the appearance of most functions and operators
+and a few other symbols (cf. Section~\ref{subsec:format-single}). The
+second form is restricted to named identifiers (both qualified and
+unqualified, but no symbolic operators); in turn, such formatting
+directives can be parametrized (cf.
+Section~\ref{subsec:format-param}). Finally, the third form provides a
+syntactically lightweight way of formatting certain identifiers using
+some heuristics (cf. Section~\ref{subsec:format-implicit}). Let us
+begin by looking at the first form.
 
 %%%
 %%%
 
 \subsection{Formatting single tokens}
+\label{subsec:format-single}
 
-The most important use for @%format@ is to assign a symbol to
-an identifier or an operator.
-The input
+The most important use for @%format@ is to assign a symbol to an
+identifier or an operator. The input
+%
 \input{FormatGreekIn}%
+%
 produces output similar to the following:
+%
 \input{FormatGreekOut}%
+%
 The occurrences of @alpha@ within the Haskell code portions of
 the input file are replaced by the \TeX\ command @\alpha@ and
 thus appear as ``$\alpha$'' in the output.
 
-A lot of formatting directives for frequently used identifiers
-or operators is already defined in the @lhs2TeX@ prelude.
-For instance, @++@ is formatted as ``|++|'', @undefined@ is
-formatted as ``|undefined|'', and @not@ is formatted
-as ``|not|''. If you look at @lhs2TeX.fmt@, you will find the
-following directives that do the job:
+A lot of formatting directives for frequently used identifiers or
+operators are already defined in the @lhs2TeX@ prelude. For instance,
+@++@ is formatted as ``|++|'', @undefined@ is formatted as
+``|undefined|'', and @not@ is formatted as ``|not|''. If you look at
+@lhs2TeX.fmt@, you will find the following directives that do the job:
+%
 \input{FormatIdentifierExamples}%
-Here, @\plus@ refers to a \LaTeX\ macro defined in the lhs2\TeX\ prelude:
+%
+Here, @\plus@ refers to a \LaTeX\ macro defined in the lhs2\TeX\
+prelude:
+%
 \input{PlusDefinition}%
-If you are not satisfied with any of the default definitions,
-just redefine them. A @%format@ directive scopes over the rest
-of the input, and if multiple directives for the same token
-are defined, the last one is used. Thus, after
+%
+
+If you are not satisfied with any of the default definitions, just
+redefine them (by overriding, not replacing them). A @%format@
+directive scopes over the rest of the input, and if multiple
+directives for the same token are defined, the last one is used. Thus,
+after
+%
 \input{FormatIdentifierRedefs}%
 %{
 %format ++        = "\mathbin{\mathbf{+}}"
@@ -807,6 +823,7 @@ Note that @\Varid@ is a macro defined in the lhs2\TeX\ prelude that
 can be used to typeset identifier names. It is predefined to
 be the same as @\mathit@, but can be changed. Do not use identifier
 names in \TeX\ replacements directly. For instance,
+%
 \input{FormatIdentifierWrong}%
 %{
 %format undefined  = "undefined"
@@ -815,9 +832,11 @@ by far less nice than
 %}
 ``|undefined|''.
 %}
-It is also possible to define a symbol for infix uses of a
-function. The file @lhs2TeX.fmt@ contains:
+It is also possible to define a symbol for infix uses of a function.
+The file @lhs2TeX.fmt@ contains:
+%
 \input{FormatElem}%
+%
 This causes @2 `elem` [1,2]@ to be typeset as ``|2 `elem` [1,2]|'',
 whereas @elem 2 [1,2]@ will still be typeset as ``|elem 2 [1,2]|''.
 
@@ -826,23 +845,27 @@ whereas @elem 2 [1,2]@ will still be typeset as ``|elem 2 [1,2]|''.
 
 \subsection{Nested formatting}
 
-The right hand sides of formatting directives are not restricted
-to (\TeX-)strings. They can in fact be sequences of such strings or
-other tokens, separated by space. Such other tokens will be replaced
-by their formatting again. For example, if you have already defined
-a specific formatting
+The right hand sides of formatting directives are not restricted to
+(\TeX-)strings. They can in fact be sequences of such strings or other
+tokens, separated by space. Such other tokens will be replaced by
+their formatting again. For example, if you have already defined a
+specific formatting
+%
 \input{FormatArrow}%
 %format ~> = "\leadsto "
 then you can later reuse that formatting while defining variants:
+%
 \input{FormatArrow2}%
 %format ~>* = ~> "^{" * "}"
 As you can see, in this definition we reuse both the current formatting
 for @~>@ and for @*@. We now get ``|~>*|'' for @~>*@, but should we
 decide to define
+%
 \input{FormatStar}%
 %format * = "\star "
 later, we then also get ``|~>*|''. Of course, you can use the same
 mechanism for non-symbolic identifiers:
+%
 \input{FormatId}%
 %{
 %format new      = "\mathbf{new}"
@@ -855,7 +878,9 @@ appear as ``|text_new|''.
 There is no check for recursion in the formatting directives.
 Formatting directives are expanded on-demand, therefore a directive
 such as
+%
 \input{FormatRecurse}%
+%
 will not produce ``$\mathsf{text}$'' for @text@, but rather 
 cause an infinite loop in
 @lhs2TeX@ once used.
@@ -865,16 +890,21 @@ cause an infinite loop in
 %%%
 
 \subsection{Parametrized formatting directives}
+\label{subsec:format-param}
 
 Formatting directives can be parametrized. The parameters may occur
-once or more on the right hand side. This form of a formatting
+one or more times on the right hand side. This form of the format
 directive is only available for alphanumeric identifiers. For
 example, the input
+%
 \input{CardIn}%
+%
 produces output similar to
+%
 \begin{colorsurround}
 \input{Card}
 \end{colorsurround}
+%
 If the function is used with too few arguments as in the text,
 a default symbol is substituted (usually a @\cdot@, but that is
 customizable, cf. Section~\ref{sec:subst}).
@@ -884,10 +914,10 @@ customizable, cf. Section~\ref{sec:subst}).
 
 \subsection{(No) nesting with parametrized directives}
 
-You cannot use a parametrized directive on the right hand side
-of another directive. 
-In summary,
-the right-hand sides of formatting directives are processed as follows:
+You cannot use a parametrized directive on the right hand side of
+another directive. In summary, the right-hand sides of formatting
+directives are processed as follows:
+%
 \begin{compactitem}
 \item A string, enclosed in @"@, will be reproduced literally (without
       the quotes).
@@ -897,8 +927,9 @@ the right-hand sides of formatting directives are processed as follows:
       will be replaced by that directive's replacement.
 \item Any other name will be replaced by its standard formatting.
 \end{compactitem}
+%
 Note that the spaces between the tokens do not occur in the output.
-If you want spaces, insert them explicitly.
+If you want spaces, insert them explicitly with quotes.
 
 %%%
 %%%
@@ -906,27 +937,46 @@ If you want spaces, insert them explicitly.
 \subsection{Parentheses}
 
 Sometimes, due to formatting an identifier as a symbol, parentheses
-around arguments or the entire function become unnecessary.
-Therefore, @lhs2TeX@ can be instructed to drop parentheses around an
-argument by enclosing the argument on the left hand side of the
-directive in parentheses. Parentheses around the entire function are
-dropped if the entire left hand side of the directive is enclosed in
-parentheses. Let us look at another example:
+around arguments, or the entire function, become unnecessary. Therefore,
+@lhs2TeX@ can be instructed to drop parentheses around an argument by
+enclosing the argument on the left hand side of the directive in
+parentheses. Parentheses around the entire function are dropped if the
+entire left hand side of the directive is enclosed in parentheses. Let
+us look at another example:
+%
 \input{ParensExampleIn}%
+%
 The above input produces the following output:
+%
 \begin{colorsurround}
 \input{ParensExample}
 \end{colorsurround}
-Note that in this example a special purpose operator, @^^@, is used
-to facilitate the insertion of spaces on the right hand side of a
-formatting directive. Read more about influencing spacing using formatting
-directives in Section~\ref{spacing}.
-Another example involving parentheses: the input
+%
+In the first line there are no parentheses to drop. In the second
+line, the parentheses around the arguments @a@ and @b@ are dropped, as
+are the parentheses around the function @ptest@. In the third line,
+the source has double parentheses around each argument as well as the
+function. One set of parentheses are dropped in each case, except for
+the @b@ argument.
+
+Note that in this example, a special purpose operator, @^^@, is used to
+facilitate the insertion of spaces on the right hand side of a
+formatting directive. You can read more about influencing spacing using
+formatting directives in Section~\ref{spacing}.
+
+Let us consider another example involving parentheses with the
+following input:
+%
 \input{ParensExample2In}%
-results in       
+%
+This results in
+%
 \begin{colorsurround}
 \input{ParensExample2}
 \end{colorsurround}
+%
+In the second format directive we have redefined the eval function to
+drop the redundant parentheses.
 
 
 %%%
@@ -935,54 +985,81 @@ results in
 \subsection{Local formatting directives}
 \label{subsec:group-directive}
 
-Usually, formatting directives scope over the rest of the input.
-If that is not desired, formatting directives can be placed into
+Usually, formatting directives scope over the rest of the input. If
+that is not desired, formatting directives can be placed into
 \textbf{groups}. Groups look as follows:
+%
 \input{GroupSyntax}%
-Formatting directives that are defined in a group scope only over
-the rest of the current group. Groups can be nested. Groups in
-@lhs2TeX@ do not interact with \TeX\ groups, so these different
-kinds of groups do not have to occur properly nested.
+%
+Formatting directives that are defined in a group only scope over the
+remainder of that group. Groups can also be nested. (Groups in @lhs2TeX@
+do not interact with \TeX\ groups, so these different kinds of groups
+do not have to occur properly nested.)
 
-The effect of groups is made visible by the example input
-\input{GroupExampleIn}
-which appears as follows:
+Let us demonstrate the effect of groups with the following example input:
+%
+\input{GroupExampleIn}%
+%
+This is appears as:
+%
 \begin{colorsurround}
-\input{GroupExample}
+\input{GroupExample}%
 \end{colorsurround}
+%
+On the first line, the string ``one'' has been formatted in italics as
+@lhs2TeX@ has treated it, by default, as a Haskell identifier. On the
+second line of output, the first format directive from the source file
+has come into effect, so ``one'' has been rendered as a numeral in a
+sans-serif font. On the third line, the corresponding source is inside
+the group and second formatting directive is in effect. Thus, ``one''
+has been rendered in a sans-serif font. Finally, on the fourth line,
+the group has closed, along with the scope of the second format
+directive. The original format directive applies again (as its scope
+extends to the end of the source file), thus, ``one'' has again been
+rendered as a numeral in a sans-serif font.
+
 
 %%%
 %%%
 
 \subsection{Implicit formatting}
+\label{subsec:format-implicit}
 
-The third syntactic form of the formatting directive, lacking a
+The third syntactic form of the formatting directive, which lacks a
 right hand side, can be used to easily format a frequently occurring
-special case:
-only a variable (or constructor) name that ends in a number or a prime @'@
-can be used in an implicit formatting statement.
-The prefix will then be formatted as determined by the formatting directives
-in the input so far. The number will be added as an index, the prime 
-character as itself.
+special case, where a token is to be given a numeric subscript, or is
+primed.
+%
+Only a variable (or constructor) name that ends in a number or
+a prime @'@ can be used in an implicit formatting statement. The
+prefix will then be formatted as determined by the formatting
+directives in the input so far. The number will be added as an index,
+the prime character as itself.
 
-The following input contains some example:
-\input{ImplicitIn}
+Let us demonstrate implicit formatting with the follow input:
+%
+\input{ImplicitIn}%
+%
 The corresponding output is:
+%
 \begin{colorsurround}
-\input{Implicit}
+\input{Implicit}%
 \end{colorsurround}
 
-Another form of implicit formatting only takes place only if the token to
-be formatted does not end in primes, and only if digits at the end are 
-immediately preceded by an underscore. The reason for these conditions is
-compatibility. If the conditions are met, then the token is split at
-underscores, and the part to the right of an underscore is typeset as
-subscript to the part on the left, recursively. Again, let us look at an
-example:
-\input{ImplicitUnderscoreIn}
+Another form of implicit formatting only takes place only if the token
+to be formatted does not end in primes, and only if digits at the end
+are immediately preceded by an underscore. The reason for these
+conditions is compatibility. If the conditions are met, then the token
+is split at underscores, and the part to the right of an underscore is
+typeset as subscript to the part on the left, recursively. Again, let
+us look at an example:
+%
+\input{ImplicitUnderscoreIn}%
+%
 And its output:
+%
 \begin{colorsurround}
-\input{ImplicitUnderscore}
+\input{ImplicitUnderscore}%
 \end{colorsurround}
 
 %%%
@@ -996,8 +1073,9 @@ And its output:
 \item In \textbf{tt} style, only non-parametrized directives apply.
 \item In \textbf{verb} and \textbf{code} styles, formatting directives are ignored.
 \end{compactitem}
-A document can be prepared for processing in different styles 
-using conditionals (cf.~Section~\ref{sec:conditionals}).
+%
+A document can be prepared for processing in different styles using
+conditionals (cf.~Section~\ref{sec:conditionals}).
 
 %%%
 %%%
