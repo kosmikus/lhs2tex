@@ -653,17 +653,21 @@ following sections:
 \label{sec:include}
 %---------------------------------------------------------------------------
 
-Other files can be included by @lhs2TeX@. This is what the
-@%include@ directive is for:
+Other files can be included by @lhs2TeX@; this is what the @%include@
+directive is for:
+%
 \input{IncludeSyntax}%
-The specified file is searched for in the @lhs2TeX@ source path
-which can be modified using environment variables or
-the @-P@ command line option (see also page~\pageref{defaultsearchpath}).
-Included files are inserted literally at the position of the
-@%include@ directive. Because of that, the included files may not
-only contain other sources, but also other directives (in particular,
-an included file may contain an @%include@ directive again).
-The @lhs2TeX@ is entirely independent of \TeX\ or Haskell includes/imports.
+%
+The specified file is searched for in the @lhs2TeX@ source path, which
+can be modified using environment variables or the @-P@ command line
+option (see also page~\pageref{defaultsearchpath}).
+%
+The include directive causes the indicated file to be read and processed,
+exactly as if its contents had been inserted in the current file at that point.
+It is the @lhs2TeX@ equivalent of the \TeX\ command @\input@.
+%
+The include mechanism of @lhs2TeX@ is entirely independent of \TeX\ or
+Haskell includes/imports.
 
 \begin{important}[Warning]
 Although relative and absolute pathnames can be specified as part
@@ -680,43 +684,56 @@ paths of the files it is reading on screen while processing a file.
 
 \subsection{The @lhs2TeX@ ``prelude''}
 
-Several aspects of the behaviour of @lhs2TeX@ are not hardcoded,
-but configurable via directives. As a consequence,
-a minimal amount of functionality has to be defined for @lhs2TeX@
-to be able to operate normally.
+Several aspects of the behaviour of @lhs2TeX@ are not hardcoded, but
+configurable via directives. As a consequence, a minimal amount of
+functionality has to be defined for @lhs2TeX@ to be able to operate
+normally.
 
-Essential definitions are collected in the file @lhs2TeX.fmt@.
-\begin{important}[Note to users of previous versions]
-There used to be a file @lhs2TeX.sty@ that also contained a part
-of the prelude declarations. This file does still exist for
-compatibility reasons, but is now deprecated. It should \emph{not}
-be included directly in any of your documents anymore.
-\end{important}
-If you are using the \textbf{poly} or \textbf{newcode}
-styles, some of the defaults in @lhs2TeX.fmt@ are sub-optimal.
-In this case, there is a better prelude @polycode.fmt@ (which includes
-@lhs2TeX.fmt@ in turn). One of the two files @lhs2TeX.fmt@ or @polycode.fmt@
-should be included (using @%include@)
--- directly or indirectly -- in every file to be processed by
-@lhs2TeX@!
+Essential definitions are collected in the file @polycode.fmt@. You
+should include this file at the start of your document:
+%
+\input{PolyPrelude}
+%
+This is the appropriate prelude to use for the default \textbf{poly}
+style and the \textbf{newcode} style. If you intend to use one of the
+other styles, you should instead include the file @lhs2TeX.fmt@.
+%
 \input{IncludePrelude}%
-It is perfectly possible to design
-own libraries that replace or extend these basic files and to include
-those own libraries instead.  It is not recommended, though, to edit
-these two files directly.  If you are not satisfied with some of the
-default definitions, create your own file to redefine selected
-parts. This way, if @lhs2TeX@ is updated, you will still be able to
-benefit from improvements and changes in the ``prelude'' files.
+%
+The reason for this is that some of the defaults in @lhs2TeX.fmt@ are
+sub-optimal for the \textbf{poly} or \textbf{newcode} styles; the
+@polycode.fmt@ prelude file has been tailored specifically for them.
 
-It is possible to use @lhs2TeX@ in a setup where a \TeX\ document
-is split into several files, and each of the files should be processed
-separately by @lhs2TeX@. In this case, just include @lhs2TeX.fmt@
-(or @polycode.fmt@) in every single file source file.
+One of the two files @lhs2TeX.fmt@ or @polycode.fmt@ should be
+included---directly or indirectly---in every file
+to be processed by @lhs2TeX@!
+
+%
+\begin{important}[Note to users of previous versions]
+There used to be a file @lhs2TeX.sty@ that also contained a part of
+the prelude declarations. This file still exists for compatibility
+reasons, but it is now deprecated; it should \emph{not} be included in
+any of your documents anymore.
+\end{important}
+%
+
+It is perfectly possible to design your own libraries that replace or
+extend these basic files and to include these libraries instead. It is
+not recommended, though, to edit @polycode.fmt@ or@lhs2TeX.fmt@ files
+directly. If you are not satisfied with some of the default
+definitions, create your own file to redefine selected parts. This
+way, if @lhs2TeX@ is updated, you will still be able to benefit from
+improvements and changes in the `prelude' files.
+
+It is possible to use @lhs2TeX@ in a setup where a \TeX\ document is
+split into several files. In this case, each of the files will be
+processed separately by @lhs2TeX@, so you should must include
+@polycode.fmt@ (or @lhs2TeX.fmt@) in every single source file.
 
 \begin{important}[Warning]
-Note that both @lhs2TeX.fmt@ and @polycode.fmt@ contain @lhs2TeX@
-directives, and therefore \emph{cannot} be included using \TeX\ or \LaTeX\
-include mechanisms such as @\input@ or @\usepackage@.
+Note that both @polycode.fmt@ and @lhs2TeX.fmt@ contain @lhs2TeX@
+directives, and therefore \emph{cannot} be included using \TeX\ or
+\LaTeX\ include mechanisms such as @\input@ or @\usepackage@.
 \end{important}
 
 %%%
