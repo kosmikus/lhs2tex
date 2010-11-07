@@ -223,7 +223,7 @@
 %subst spaces a		= a
 %subst special a	= a
 %subst space     	= "\mskip\thickmuskip"
-%subst conid a   	= "\text{\texfamily\origcolor{hcolor}{" a "}}"
+%subst conid a   	= "\text{\texfamily " a "}"
 %subst varid a   	= "\text{\texfamily " a "}"
 %subst consym a  	= "\text{\texfamily " a "}"
 %subst varsym a  	= "\text{\texfamily " a "}"

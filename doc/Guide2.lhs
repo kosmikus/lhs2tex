@@ -554,7 +554,7 @@ style works for you, you should use it.
 %%%
 %%%
 
-\subsection{Customizing the``poly'' style}
+\subsection{Customizing the ``poly'' style}
 
 The following example demonstrates that the visual appearance of
 ``poly'' style is in no way dictated by @lhs2TeX@. There are several
