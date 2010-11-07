@@ -34,8 +34,6 @@
 \newcommand*{\lhstoTeX}{\text{lhs}\textsf{2}\TeX}
 \setdefaultitem{\textbf{--}}{}{}{}
 
-\let\defined\textbf
-
 %let doc = True
 %include lhs2TeX.fmt
 %include Version.lhs
@@ -292,7 +290,7 @@ then the resulting \PDF file will look similar to
 \par\noindent
 %endif
 The behaviour of @lhs2TeX@ is highly customizable. The main mode of
-operation of @lhs2TeX@ is called the \defined{style}. By default,
+operation of @lhs2TeX@ is called the \textbf{style}. By default,
 @lhs2TeX@ operates in \textbf{poly} style. Other styles can be
 selected via command line flags.
 Depending on the selected style, @lhs2TeX@ can perform quite different
@@ -402,40 +400,97 @@ filename database.
 %%%
 
 %---------------------------------------------------------------------------
-\section{@lhs2TeX@ operation}
+\section{How to hit the ground running with @lhs2TeX@}
 %---------------------------------------------------------------------------
 
-When run on an input file, @lhs2TeX@ classifies the source file
-into different blocks:
-\begin{compactitem}
-\item Lines indicating a Bird-style literate program (i.e. lines beginning
-      with either @>@ or @<@) are considered as \defined{code blocks}.
-\item Lines that are surrounded by @\begin{code}@ and @\end{code}@
-      statements, or also by @\begin{spec}@ and @\end{spec}@
-      statements, are considered as \defined{code blocks}. (Note that
-      @lhs2TeX@ does not care if both styles of a literate program are
-      mixed in one file. In this sense, it is more liberal than
-      Haskell. However, in @code@ and @newcode@ mode, the initial
-      characters @>@ and @<@ will be replaced by spaces, so you have
-      to indent @code@ environments in order to create a properly indented
-      Haskell module.)
-\item Text between two \verb+@+ characters that is not in a code block
-      is considered \defined{inline verbatim}. If a \verb+@+ is desired
-      to appear in text, it needs to be escaped: \verb+@@+. There is no
-      need to escape \verb+@+'s in code blocks.
-\item Text between two @|@ characters that is not in a code block is
-      considered \defined{inline code}. Again, @|@ characters that should
-      appear literally outside of code blocks need to be escaped: @||@.
-\item A @%@ that is followed by the name of an @lhs2TeX@ directive is
-      considered as a \defined{directive} and may cause @lhs2TeX@ to
-      take special actions. Directives are described in detail later.
-\item Some constructs are treated specially, such as occurrences of
-      the \TeX\ commands @\eval@, @\perform@, @\verb@ or of the \LaTeX\
-      environment @verbatim@.
-\item All the rest is classified as \defined{plain text}.
-\end{compactitem}
-Depending on the style in which it is called, @lhs2TeX@ will treat
-these blocks in different ways.
+When run on a literate Haskell source file, @lhs2TeX@ classifies the
+input into different blocks.
+
+\paragraph{\bf Bird-style code blocks}
+%
+In the Bird-style of literate Haskell programming, all lines starting
+with @>@ are interpreted as code. (To be good literate code, you must
+always leave a blank line before and after the code block.)
+%
+\input{HelloWorldBirdInput}%
+%
+These lines are considered by @lhs2TeX@ as \textbf{code blocks} and
+are processed as such.
+
+Lines beginning with @>@ will be treated as code to be formatted by
+@lhs2TeX@ and code to be compiled by the compiler. If you wish to hide
+code from the compiler, but not from @lhs2TeX@, you can flip the @>@
+characters around.
+%
+\input{HelloWorldBirdSpecInput}%
+%
+There is no change in the output of @lhs2TeX@ (with the exception of
+code extraction through the \textbf{code} and \textbf{newcode}
+styles).
+
+\paragraph{\bf \LaTeX-style code blocks}
+%
+The \LaTeX-style of literate programming is to surround code blocks
+with @\begin{code}@ and @\end{code}@.
+%
+\input{HelloWorldCodeInput}%
+%
+These lines will be treated by @lhs2TeX@ (and a Haskell compiler) in
+the same way as lines beginning with @>@. The equivalent to lines
+beginning with @<@, is to surround the lines with @\begin{spec}@ and
+@\end{spec}@.
+%
+\input{HelloWorldSpecInput}%
+%
+Unlike a Haskell compiler, @lhs2TeX@ does not care if both styles of
+literate programming are used in the same file. \emph{But}, if you are
+using the \textbf{code} and \textbf{newcode} styles to produce Haskell
+source files, the initial characters @>@ and @<@ will be replaced by
+spaces, which means that you have to indent @code@ environments in
+order to create a properly indented Haskell module.
+
+\paragraph{\bf Inline verbatim}
+%
+Text between two \verb+@+ characters that is not in a code block is
+considered inline verbatim. If you actually want a \verb+@+ character
+to appear in the text, it needs to be escaped: \verb+@@+. There is no
+need to escape \verb+@+'s in code blocks. For example, \verb+@id :: a
+-> a@+ appears as @id :: a -> a@.
+
+\paragraph{\bf Inline code}
+%
+
+Text between two @|@ characters that is not in a code block is
+considered inline code. Again, @|@ characters that should appear
+literally outside of code blocks need to be escaped: @||@. For
+example, \verb+|id :: a -> a|+ appears as |id :: a -> a|.
+
+\paragraph{\bf Directives}
+%
+A \verb+%+ that is followed by the name of an @lhs2TeX@ directive is
+considered as a \textbf{directive} and may cause @lhs2TeX@ to take
+special actions. Directives are described in detail in
+Section~\ref{sec:directives}.
+
+\paragraph{\bf Special commands}
+%
+Some commands are treated specially, such as occurrences of the
+\TeX\ commands @\eval@, @\perform@, @\verb@ or of the \LaTeX\
+environment @verbatim@.
+%
+The treatment of the @\eval@ and @\perform@ commands is covered in
+Section~\ref{sec:call-interp}.
+%
+The @\verb@ command and the @verbatim@ environment are intercepted
+by @lhs2TeX@, however, they will behave as they would without
+@lhs2TeX@.
+
+\paragraph{\bf Everything else}
+%
+Everything in the input file that does not fall into one of the above
+cases is is classified as \textbf{plain text} and will simply pass
+straight through @lhs2TeX@.
+
 
 %---------------------------------------------------------------------------
 \section{Using @lhs2TeX@ with style}
@@ -557,6 +612,7 @@ documents. You should use \textbf{newcode} where possible.
 
 %---------------------------------------------------------------------------
 \section{Directives}
+\label{sec:directives}
 %---------------------------------------------------------------------------
 
 A number of directives are understood by @lhs2TeX@. Some of the are
@@ -1364,6 +1420,7 @@ produces
 
 %---------------------------------------------------------------------------
 \section{Calling @hugs@ or @ghci@}
+\label{sec:call-interp}
 %---------------------------------------------------------------------------
 
 It is possible to call @ghci@ or @hugs@ using the @%options@
