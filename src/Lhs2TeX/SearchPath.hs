@@ -24,7 +24,7 @@ modifySearchPath p np
 -- | A search path can contain a whole subtree by letting it end in
 -- two path separators (forward slashes on Unix).
 deep :: FilePath -> FilePath
-deep = (++ (replicate 2 pathSeparator))
+deep = (++ replicate 2 pathSeparator)
 
 -- | A search path can contain the value of an environment variable
 -- by placing it in curly braces.

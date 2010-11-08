@@ -27,8 +27,8 @@ lhs2TeX style state dirs files =
       do
         catchError
           (do
-             formats (List.map (No 0) dirs) -- process initial directives
-             formatStr (addEndEOF contents) -- process actual input doc
+             formats (List.map (Numbered 0) dirs) -- process initial directives
+             formatStr (addEndEOF contents)       -- process actual input doc
           )
           reportError
         stopExternals    -- clean up external processes
@@ -40,8 +40,6 @@ lhs2TeX style state dirs files =
 reportError :: Exc -> Lhs2TeX ()
 reportError (msg, context) =
   undefined
-
-data X a = No Int a
 
 -- | Normalizes the end of the input string.
 addEndEOF :: String -> String
@@ -55,7 +53,7 @@ closeOutputFile =
     liftIO $
       do
         isTerm  <- hIsTerminalDevice outfile
-        when (not isTerm) (hClose outfile)
+        unless isTerm (hClose outfile)
 
 -- | Tries to stop external processes. TODO: actually kill the processes
 -- gracefully would be better to recover from problematic situations.
@@ -66,7 +64,7 @@ stopExternals =
     ex  <- gets externals
     -- obtain the process ids of the processes we have started
     let pids = List.map snd $ toList ex
-    when (not (List.null pids)) $
+    unless (List.null pids) $
       do
         info "Stopping external processes."
         liftIO $

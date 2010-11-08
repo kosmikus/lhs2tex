@@ -14,7 +14,6 @@ import Lhs2TeX.Directive.Let    as Let
 import Lhs2TeX.SearchPath
 import Lhs2TeX.Version
 import Lhs2TeX.Representation
-import Lhs2TeX.Utils
 
 -- | All the program state for lhs2TeX. We currently do not distinguish between
 -- read-only state and state that can actually be updated during the program run.
@@ -25,9 +24,9 @@ data State =
       verbose    :: Bool,        -- ^ how much output should be generated
       searchpath :: [FilePath],  -- ^ where lhs2TeX looks for inputs
       file       :: FilePath,    -- ^ file currently being processed
-      lineno     :: LineNumber,  -- ^ current line number
-      ofile      :: FilePath,    -- ^ old file: file being processed before
-      olineno    :: LineNumber,  -- ^ old line number
+      linenumber :: LineNumber,  -- ^ current line number
+      ofile      :: FilePath,    -- ^ original file of the line last printed
+      olinenumber:: LineNumber,  -- ^ original number of the line last printed
       atnewline  :: Bool,        -- ^ at beginning of new line?
       fldir      :: Bool,        -- ^ whether we generate %file directives
       pragmas    :: Bool,        -- ^ whether we generate LINE pragmas
@@ -65,8 +64,8 @@ initialState =
       verbose    = False,   -- by default, we are relatively silent
       searchpath = defaultSearchPath,
                             -- defined elsewhere
-      lineno     = 0,       -- we start at the beginning
-      olineno    = 0,
+      linenumber = 0,       -- we start at the beginning
+      olinenumber= 0,
       atnewline  = True,    -- we start at a new line
       fldir      = False,   -- by default, no %file pragmas
       pragmas    = True,    -- by default, LINE pragmas

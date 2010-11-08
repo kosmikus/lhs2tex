@@ -43,3 +43,13 @@ instance Representation Directive where
       ("}",           End),
       ("subst",       Subst),
       ("EOF",         EOF) ]
+
+-- | Conditional directives affect the control flow, therefore we
+-- must be able to treat them in a special way.
+conditional :: Directive -> Bool
+conditional If    = True
+conditional Elif  = True
+conditional Else  = True
+conditional Endif = True
+conditional EOF   = True
+conditional _     = False

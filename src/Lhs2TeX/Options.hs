@@ -29,25 +29,25 @@ options =
 
 -- | A style generally has no arguments.
 mkStyle :: [Char] -> [String] -> Style -> String -> Lhs2TeXOption
-mkStyle shorts longs st desc =
-  Option shorts longs (NoArg (return, id, [st])) desc
+mkStyle shorts longs st =
+  Option shorts longs (NoArg (return, id, [st]))
 
 -- | An option that takes no arguments and changes the state.
 mkStateFlag :: [Char] -> [String] -> (State -> IO State) -> String -> Lhs2TeXOption
-mkStateFlag shorts longs sf desc =
-  Option shorts longs (NoArg (sf, id, [])) desc
+mkStateFlag shorts longs sf =
+  Option shorts longs (NoArg (sf, id, []))
 
 -- | An option with argument that transforms the state.
 mkStateMod :: [Char] -> [String] -> (String -> State -> IO State) ->
               String -> String -> Lhs2TeXOption
-mkStateMod shorts longs sf def desc =
-  Option shorts longs (ReqArg (\ xs -> (sf xs, id, [])) def) desc
+mkStateMod shorts longs sf def =
+  Option shorts longs (ReqArg (\ xs -> (sf xs, id, [])) def)
 
 -- | An option that generates a directive.
 mkDirective :: [Char] -> [String] -> (String -> Class) -> String -> String ->
                Lhs2TeXOption
-mkDirective shorts longs df def desc =
-  Option shorts longs (ReqArg (\ xs -> (return, (df xs :), [])) def) desc
+mkDirective shorts longs df def =
+  Option shorts longs (ReqArg (\ xs -> (return, (df xs :), [])) def)
 
 help     = mkStyle ['h', '?'] ["help"]       Help
                    "print this help message"
