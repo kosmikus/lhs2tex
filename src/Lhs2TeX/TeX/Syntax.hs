@@ -23,6 +23,14 @@ data Command =
   | Vrb Bool
   deriving (Eq, Ord, Show)
 
+instance Representation Command where
+  representation =
+    [ ("hs"     , Hs       ),
+      ("eval"   , Eval     ),
+      ("perform", Perform  ),
+      ("verb*"  , Vrb True ),
+      ("verb"   , Vrb False) ]
+
 -- | Known LaTeX environments.
 data Environment =
     Haskell
@@ -36,7 +44,11 @@ data Environment =
 
 instance Representation Environment where
   representation =
-    [ ("haskell" , Haskell ),
-      ("code"    , Code    ),
-      ("spec"    , Spec    ),
-      ("evaluate", Evaluate),
+    [ ("haskell"  , Haskell       ),
+      ("code"     , Code          ),
+      ("spec"     , Spec          ),
+      ("evaluate" , Evaluate      ),
+      ("hide"     , Hide          ),
+      ("ignore"   , Ignore        ),
+      ("verbatim*", Verbatim True ),
+      ("verbatim" , Verbatim False) ]

@@ -3,11 +3,17 @@ module Lhs2TeX.TeX.Parser where
 
 import Data.Char
 import Data.List as List
+import Control.Monad
 
 import Lhs2TeX.Utils
 import Lhs2TeX.Exception
 import Lhs2TeX.TeX.Syntax
 import Lhs2TeX.Representation
+
+-- | Hardcoded maximum size for arguments of recognized commands.
+-- TODO: fix this.
+maxChar :: Int
+maxChar = 1000
 
 -- | Hardcoded maximum size of recognized environments. TODO: fix this.
 maxLine :: Int
@@ -55,10 +61,13 @@ classify ('%' : s) =
     (t, u)   = break isSpace s
     (arg, v) = breakAfter (== '\n') u
 
--- Environments.
--- We scan for \begin and \end control sequences. Our TeX parser
--- does not deal with nested environments properly.
+-- Environments and control sequences both start with a backslash.
 classify str@('\\' : s) =
+
+  -- Environments.
+  -- We scan for \begin and \end control sequences. Our TeX parser
+  -- does not deal with nested environments properly.
+
   case span isIdChar s of
     ("begin", '{' : t) -> -- found the beginning of an environment
       case span isIdChar t of
@@ -74,10 +83,56 @@ classify str@('\\' : s) =
                   in  Environment cmd (arg ++ w) : classify x
             where
               end = "\\end{" ++ env ++ "}" -- the string to look for
+
+  -- We interpret inline verbatim commands. One practical reason is
+  -- that vertical bars are quite typical separation characters for
+  -- the \verb command, and we do not want to treat these as the starters
+  -- of inline code. Furthermore, interpreting verbatim on the lhs2TeX
+  -- level makes it more flexible than it is in TeX.
+  --
+  -- Inline verbatim commands are not handled together with all the
+  -- other commands, because they use special characters to delimit
+  -- their argument, rather than braces.
+
+    ("verb*", c : t) -> verbatim True  c t  -- print explicit spaces
+    ("verb" , c : t) -> verbatim False c t  -- no explicit spaces
+
+  -- All other TeX control sequences.
+  -- All the TeX commands we recognize (except verb, see above) take
+  -- a single argument, delimited by curly braces.
+
+    (cmd, '{' : t) ->
+      case encode cmd of
+        Nothing  -> cont -- unknown command, continue
+        Just cmd -> -- known command, look for one argument
+          case nested maxChar 0 t of
+            Just (a, u) -> Command cmd a : classify u
+            Nothing     -> notFound "matching '}'" str : cont
+    ([], '%' : t) -> Many "\\%" : classify t -- TODO: why handle this case?
+    _             -> cont
+
   where
     cont = One '\\' : classify s -- fallback, nothing recognized
-              
-        
+
+    -- Find the argument of a verb command.
+    verbatim = undefined
+
+-- Inline code
+classify ('|' : '|' : s) = One '|' : classify s  -- escaped vertical bar
+classify str@('|' : s) =
+  case inline maxChar s of
+    Just (arg, t) -> Inline arg : classify t  -- found the end
+    Nothing       -> notFound "matching `|'" str : One '|' : classify s
+
+-- Short verbatim
+classify ('@' : '@' : s) = One '@' : classify s  -- escaped at
+classify str@('Q' : s) =
+  case shortverb maxChar s of
+    Just (arg, t) -> Command (Vrb False) arg : classify t -- spaces never explicit
+    Nothing       -> notFound "matching `@'" str : One '@' : classify s
+
+-- Everything else is not interpreted in any special way
+classify (c : s) = One c : classify s
 
 
 -- | Recognize code sections marked by bird tracks. The first
@@ -134,6 +189,45 @@ number n (t : ts) = Numbered n t : number (n + inc) ts
 -- | Counts and returns the number of newline characters in a string.
 newlines :: String -> Int
 newlines = length . List.filter (== '\n')
+
+-- | Tries to recognize an argument enclosed in matching curly braces.
+-- Keeps track of nested, possibly backslash-escape, curly braces,
+-- and a maximum length.
+nested :: Int -> Int -> String -> Maybe (String, String)
+nested mx depth s = go mx s
+  where
+    go 0  s              = Nothing
+    go mx []             = Nothing
+    go mx ('}' : s)
+      | depth == 0       = return ([], s)
+      | otherwise        = liftM ('}' <|) (nested (mx - 1) (depth - 1) s)
+    go mx ('{' : s)      = liftM ('{' <|) (nested (mx - 1) (depth + 1) s)
+    go mx ('\\' : c : s) = liftM (\ x -> '\\' <| c <| x) (go (mx - 2) s)
+    go mx (c : s)        = liftM (c <|) (go (mx - 1) s)
+
+-- | Scans for an occurrence of the given character. The second
+-- argument gives the maximal number of characters to look ahead.
+-- The separator character may be escaped by itself.
+separated :: Char -> Int -> String -> Maybe (String, String)
+separated c = go
+  where
+    go 0 xs                   = Nothing
+    go n []                   = Nothing
+    go n (x : xs) | x == c    = -- one separator character found
+      case xs of
+        (y : ys)  | y == c   -> liftM (c <|) (go (n - 2) ys)
+                                -- escaped separator character found
+        _                    -> return ([], xs) -- end of scan
+                  | otherwise = liftM (x <|) (go (n - 1) xs)
+                                -- continue scan
+
+-- | An inline code block is separated by vertical bars.
+inline :: Int -> String -> Maybe (String, String)
+inline = separated '|'
+
+-- | An inline verbatim block is separated by at-characters.
+shortverb :: Int -> String -> Maybe (String, String)
+shortverb = separated '@'
 
 -- | Characters we allow for TeX control sequences and environment
 -- names are letters and the star. It's not important that this
