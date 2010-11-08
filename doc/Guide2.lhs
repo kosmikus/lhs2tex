@@ -34,8 +34,6 @@
 \newcommand*{\lhstoTeX}{\text{lhs}\textsf{2}\TeX}
 \setdefaultitem{\textbf{--}}{}{}{}
 
-\let\defined\textbf
-
 %let doc = True
 %include lhs2TeX.fmt
 %include Version.lhs
@@ -292,7 +290,7 @@ then the resulting \PDF file will look similar to
 \par\noindent
 %endif
 The behaviour of @lhs2TeX@ is highly customizable. The main mode of
-operation of @lhs2TeX@ is called the \defined{style}. By default,
+operation of @lhs2TeX@ is called the \textbf{style}. By default,
 @lhs2TeX@ operates in \textbf{poly} style. Other styles can be
 selected via command line flags.
 Depending on the selected style, @lhs2TeX@ can perform quite different
@@ -402,40 +400,97 @@ filename database.
 %%%
 
 %---------------------------------------------------------------------------
-\section{@lhs2TeX@ operation}
+\section{How to hit the ground running with @lhs2TeX@}
 %---------------------------------------------------------------------------
 
-When run on an input file, @lhs2TeX@ classifies the source file
-into different blocks:
-\begin{compactitem}
-\item Lines indicating a Bird-style literate program (i.e. lines beginning
-      with either @>@ or @<@) are considered as \defined{code blocks}.
-\item Lines that are surrounded by @\begin{code}@ and @\end{code}@
-      statements, or also by @\begin{spec}@ and @\end{spec}@
-      statements, are considered as \defined{code blocks}. (Note that
-      @lhs2TeX@ does not care if both styles of a literate program are
-      mixed in one file. In this sense, it is more liberal than
-      Haskell. However, in @code@ and @newcode@ mode, the initial
-      characters @>@ and @<@ will be replaced by spaces, so you have
-      to indent @code@ environments in order to create a properly indented
-      Haskell module.)
-\item Text between two \verb+@+ characters that is not in a code block
-      is considered \defined{inline verbatim}. If a \verb+@+ is desired
-      to appear in text, it needs to be escaped: \verb+@@+. There is no
-      need to escape \verb+@+'s in code blocks.
-\item Text between two @|@ characters that is not in a code block is
-      considered \defined{inline code}. Again, @|@ characters that should
-      appear literally outside of code blocks need to be escaped: @||@.
-\item A @%@ that is followed by the name of an @lhs2TeX@ directive is
-      considered as a \defined{directive} and may cause @lhs2TeX@ to
-      take special actions. Directives are described in detail later.
-\item Some constructs are treated specially, such as occurrences of
-      the \TeX\ commands @\eval@, @\perform@, @\verb@ or of the \LaTeX\
-      environment @verbatim@.
-\item All the rest is classified as \defined{plain text}.
-\end{compactitem}
-Depending on the style in which it is called, @lhs2TeX@ will treat
-these blocks in different ways.
+When run on a literate Haskell source file, @lhs2TeX@ classifies the
+input into different blocks.
+
+\paragraph{\bf Bird-style code blocks}
+%
+In the Bird-style of literate Haskell programming, all lines starting
+with @>@ are interpreted as code. (To be good literate code, you must
+always leave a blank line before and after the code block.)
+%
+\input{HelloWorldBirdInput}%
+%
+These lines are considered by @lhs2TeX@ as \textbf{code blocks} and
+are processed as such.
+
+Lines beginning with @>@ will be treated as code to be formatted by
+@lhs2TeX@ and code to be compiled by the compiler. If you wish to hide
+code from the compiler, but not from @lhs2TeX@, you can flip the @>@
+characters around.
+%
+\input{HelloWorldBirdSpecInput}%
+%
+There is no change in the output of @lhs2TeX@ (with the exception of
+code extraction through the \textbf{code} and \textbf{newcode}
+styles).
+
+\paragraph{\bf \LaTeX-style code blocks}
+%
+The \LaTeX-style of literate programming is to surround code blocks
+with @\begin{code}@ and @\end{code}@.
+%
+\input{HelloWorldCodeInput}%
+%
+These lines will be treated by @lhs2TeX@ (and a Haskell compiler) in
+the same way as lines beginning with @>@. The equivalent to lines
+beginning with @<@, is to surround the lines with @\begin{spec}@ and
+@\end{spec}@.
+%
+\input{HelloWorldSpecInput}%
+%
+Unlike a Haskell compiler, @lhs2TeX@ does not care if both styles of
+literate programming are used in the same file. \emph{But}, if you are
+using the \textbf{code} and \textbf{newcode} styles to produce Haskell
+source files, the initial characters @>@ and @<@ will be replaced by
+spaces, which means that you have to indent @code@ environments in
+order to create a properly indented Haskell module.
+
+\paragraph{\bf Inline verbatim}
+%
+Text between two \verb+@+ characters that is not in a code block is
+considered inline verbatim. If you actually want a \verb+@+ character
+to appear in the text, it needs to be escaped: \verb+@@+. There is no
+need to escape \verb+@+'s in code blocks. For example, \verb+@id :: a
+-> a@+ appears as @id :: a -> a@.
+
+\paragraph{\bf Inline code}
+%
+
+Text between two @|@ characters that is not in a code block is
+considered inline code. Again, @|@ characters that should appear
+literally outside of code blocks need to be escaped: @||@. For
+example, \verb+|id :: a -> a|+ appears as |id :: a -> a|.
+
+\paragraph{\bf Directives}
+%
+A \verb+%+ that is followed by the name of an @lhs2TeX@ directive is
+considered as a \textbf{directive} and may cause @lhs2TeX@ to take
+special actions. Directives are described in detail in
+Section~\ref{sec:directives}.
+
+\paragraph{\bf Special commands}
+%
+Some commands are treated specially, such as occurrences of the
+\TeX\ commands @\eval@, @\perform@, @\verb@ or of the \LaTeX\
+environment @verbatim@.
+%
+The treatment of the @\eval@ and @\perform@ commands is covered in
+Section~\ref{sec:call-interp}.
+%
+The @\verb@ command and the @verbatim@ environment are intercepted
+by @lhs2TeX@, however, they will behave as they would without
+@lhs2TeX@.
+
+\paragraph{\bf Everything else}
+%
+Everything in the input file that does not fall into one of the above
+cases is is classified as \textbf{plain text} and will simply pass
+straight through @lhs2TeX@.
+
 
 %---------------------------------------------------------------------------
 \section{Using @lhs2TeX@ with style}
@@ -499,7 +554,7 @@ style works for you, you should use it.
 %%%
 %%%
 
-\subsection{Customizing the``poly'' style}
+\subsection{Customizing the ``poly'' style}
 
 The following example demonstrates that the visual appearance of
 ``poly'' style is in no way dictated by @lhs2TeX@. There are several
@@ -534,7 +589,7 @@ documents. You should use \textbf{newcode} where possible.
 \paragraph{``code'' summary}
 \begin{compactitem}
 \item formatting directives are ignored
-\item conditionals and includes are handled (??)
+\item conditionals and includes are handled
 \item code blocks that are not specifications are copied unchanged
 \item plain text, inline code, specification code, 
       and inline verbatim are discarded
@@ -557,43 +612,62 @@ documents. You should use \textbf{newcode} where possible.
 
 %---------------------------------------------------------------------------
 \section{Directives}
+\label{sec:directives}
 %---------------------------------------------------------------------------
 
-A number of directives are understood by @lhs2TeX@. Some of the are
-ignored in some of the styles, though.  Directives can occur on all
-non-code lines and start with a @%@, the \TeX\ comment character,
-immediately followed by the name of the directive, plus a list of
-potential arguments.
+There are a number of directives that are understood by @lhs2TeX@.
+Some of these are specific to styles, and others are ignored in some
+styles. Directives can occur on all non-code lines and start with a
+@%@, the \TeX\ comment character, immediately followed by the name of
+the directive, plus a list of potential arguments.
 
-While @lhs2TeX@ will remove directives that it has interpreted, it will 
-simply ignore all normal \TeX comments that are no directives. 
-Therefore, if a directive is accidentally misspelled, 
-no error message will be raised in general.
+While @lhs2TeX@ will remove directives that it has interpreted, it
+will simply ignore all normal \TeX\ comments that are no directives.
+Therefore, if a directive is accidentally misspelled, no error message
+will be raised, in general.
 
 Table~\ref{directives} is a complete list of the directives 
 that @lhs2TeX@ knows about.
+%
 \begin{table}
 \input{CompleteDirectives}%
 \caption{All @lhs2TeX@ directives}\label{directives}
 \end{table}
-These directives will be explained in more or less detail in the
-following sections.
+%
+Many of these directive will be explained in more detail in the
+following sections:
+\begin{compactitem}
+  \item See Section~\ref{sec:include} for the @%include@ directive.
+  \item See Section~\ref{sec:format} for the @%format@ directive.
+  \item See Section~\ref{subsec:group-directive} for the @%{@ and @%}@ directives.
+  \item See Section~\ref{subsec:poly-alignment} for the @%separation@ and @%latency@ directives.
+  \item See Section~\ref{sec:variables} for the @%let@ directive.
+  \item See Section~\ref{sec:conditionals} for the @%if@, @%elif@, @%else@ and @%endif@ directives.
+  \item See Section~\ref{sec:call-interp} for the @%options@ directive.
+  \item See Section~\ref{sec:subst} for the @%subst@ directive.
+\end{compactitem}
+
 
 %---------------------------------------------------------------------------
 \section{Including files}
+\label{sec:include}
 %---------------------------------------------------------------------------
 
-Other files can be included by @lhs2TeX@. This is what the
-@%include@ directive is for:
+Other files can be included by @lhs2TeX@; this is what the @%include@
+directive is for:
+%
 \input{IncludeSyntax}%
-The specified file is searched for in the @lhs2TeX@ source path
-which can be modified using environment variables or
-the @-P@ command line option (see also page~\pageref{defaultsearchpath}).
-Included files are inserted literally at the position of the
-@%include@ directive. Because of that, the included files may not
-only contain other sources, but also other directives (in particular,
-an included file may contain an @%include@ directive again).
-The @lhs2TeX@ is entirely independent of \TeX\ or Haskell includes/imports.
+%
+The specified file is searched for in the @lhs2TeX@ source path, which
+can be modified using environment variables or the @-P@ command line
+option (see also page~\pageref{defaultsearchpath}).
+%
+The include directive causes the indicated file to be read and processed,
+exactly as if its contents had been inserted in the current file at that point.
+It is the @lhs2TeX@ equivalent of the \TeX\ command @\input@.
+%
+The include mechanism of @lhs2TeX@ is entirely independent of \TeX\ or
+Haskell includes/imports.
 
 \begin{important}[Warning]
 Although relative and absolute pathnames can be specified as part
@@ -610,43 +684,56 @@ paths of the files it is reading on screen while processing a file.
 
 \subsection{The @lhs2TeX@ ``prelude''}
 
-Several aspects of the behaviour of @lhs2TeX@ are not hardcoded,
-but configurable via directives. As a consequence,
-a minimal amount of functionality has to be defined for @lhs2TeX@
-to be able to operate normally.
+Several aspects of the behaviour of @lhs2TeX@ are not hardcoded, but
+configurable via directives. As a consequence, a minimal amount of
+functionality has to be defined for @lhs2TeX@ to be able to operate
+normally.
 
-Essential definitions are collected in the file @lhs2TeX.fmt@.
-\begin{important}[Note to users of previous versions]
-There used to be a file @lhs2TeX.sty@ that also contained a part
-of the prelude declarations. This file does still exist for
-compatibility reasons, but is now deprecated. It should \emph{not}
-be included directly in any of your documents anymore.
-\end{important}
-If you are using the \textbf{poly} or \textbf{newcode}
-styles, some of the defaults in @lhs2TeX.fmt@ are sub-optimal.
-In this case, there is a better prelude @polycode.fmt@ (which includes
-@lhs2TeX.fmt@ in turn). One of the two files @lhs2TeX.fmt@ or @polycode.fmt@
-should be included (using @%include@)
--- directly or indirectly -- in every file to be processed by
-@lhs2TeX@!
+Essential definitions are collected in the file @polycode.fmt@. You
+should include this file at the start of your document:
+%
+\input{PolyPrelude}
+%
+This is the appropriate prelude to use for the default \textbf{poly}
+style and the \textbf{newcode} style. If you intend to use one of the
+other styles, you should instead include the file @lhs2TeX.fmt@.
+%
 \input{IncludePrelude}%
-It is perfectly possible to design
-own libraries that replace or extend these basic files and to include
-those own libraries instead.  It is not recommended, though, to edit
-these two files directly.  If you are not satisfied with some of the
-default definitions, create your own file to redefine selected
-parts. This way, if @lhs2TeX@ is updated, you will still be able to
-benefit from improvements and changes in the ``prelude'' files.
+%
+The reason for this is that some of the defaults in @lhs2TeX.fmt@ are
+sub-optimal for the \textbf{poly} or \textbf{newcode} styles; the
+@polycode.fmt@ prelude file has been tailored specifically for them.
 
-It is possible to use @lhs2TeX@ in a setup where a \TeX\ document
-is split into several files, and each of the files should be processed
-separately by @lhs2TeX@. In this case, just include @lhs2TeX.fmt@
-(or @polycode.fmt@) in every single file source file.
+One of the two files @lhs2TeX.fmt@ or @polycode.fmt@ should be
+included---directly or indirectly---in every file
+to be processed by @lhs2TeX@!
+
+%
+\begin{important}[Note to users of previous versions]
+There used to be a file @lhs2TeX.sty@ that also contained a part of
+the prelude declarations. This file still exists for compatibility
+reasons, but it is now deprecated; it should \emph{not} be included in
+any of your documents anymore.
+\end{important}
+%
+
+It is perfectly possible to design your own libraries that replace or
+extend these basic files and to include these libraries instead. It is
+not recommended, though, to edit @polycode.fmt@ or@lhs2TeX.fmt@ files
+directly. If you are not satisfied with some of the default
+definitions, create your own file to redefine selected parts. This
+way, if @lhs2TeX@ is updated, you will still be able to benefit from
+improvements and changes in the `prelude' files.
+
+It is possible to use @lhs2TeX@ in a setup where a \TeX\ document is
+split into several files. In this case, each of the files will be
+processed separately by @lhs2TeX@, so you should must include
+@polycode.fmt@ (or @lhs2TeX.fmt@) in every single source file.
 
 \begin{important}[Warning]
-Note that both @lhs2TeX.fmt@ and @polycode.fmt@ contain @lhs2TeX@
-directives, and therefore \emph{cannot} be included using \TeX\ or \LaTeX\
-include mechanisms such as @\input@ or @\usepackage@.
+Note that both @polycode.fmt@ and @lhs2TeX.fmt@ contain @lhs2TeX@
+directives, and therefore \emph{cannot} be included using \TeX\ or
+\LaTeX\ include mechanisms such as @\input@ or @\usepackage@.
 \end{important}
 
 %%%
@@ -665,50 +752,67 @@ include mechanisms such as @\input@ or @\usepackage@.
 
 %---------------------------------------------------------------------------
 \section{Formatting}
+\label{sec:format}
 %---------------------------------------------------------------------------
 
-Using the @%format@ directive, tokens can be given a different
-appearance. The complete syntax that is supported by @lhs2TeX@ is
-quite complex, but we will look at many different cases in detail.
+The @%format@ directive is a powerful tool for transforming the source
+file. The complete syntax that is supported by @lhs2TeX@ is quite
+complex, but we will break it down by looking in detail at many
+different use cases.
+%
 \input{FormatSyntax}%
-There are three different forms of the
-formatting statement.  The first one can be used to change the
-appearance of most functions and operators and a few other
-symbols. The second form is restricted to named identifiers (both
-qualified and unqualified, but no symbolic operators); in turn,
-such formatting directives can be parametrized. Finally, the third 
-form provides a syntactically
-lightweight way of formatting certain identifiers using some
-heuristics. But let us look at some common examples first \dots
+%
+
+There are three different forms of the formatting statement. The first
+can be used to change the appearance of most functions and operators
+and a few other symbols (cf. Section~\ref{subsec:format-single}). The
+second form is restricted to named identifiers (both qualified and
+unqualified, but no symbolic operators); in turn, such formatting
+directives can be parametrized (cf.
+Section~\ref{subsec:format-param}). Finally, the third form provides a
+syntactically lightweight way of formatting certain identifiers using
+some heuristics (cf. Section~\ref{subsec:format-implicit}). Let us
+begin by looking at the first form.
 
 %%%
 %%%
 
 \subsection{Formatting single tokens}
+\label{subsec:format-single}
 
-The most important use for @%format@ is to assign a symbol to
-an identifier or an operator.
-The input
+The most important use for @%format@ is to assign a symbol to an
+identifier or an operator. The input
+%
 \input{FormatGreekIn}%
+%
 produces output similar to the following:
+%
 \input{FormatGreekOut}%
+%
 The occurrences of @alpha@ within the Haskell code portions of
 the input file are replaced by the \TeX\ command @\alpha@ and
 thus appear as ``$\alpha$'' in the output.
 
-A lot of formatting directives for frequently used identifiers
-or operators is already defined in the @lhs2TeX@ prelude.
-For instance, @++@ is formatted as ``|++|'', @undefined@ is
-formatted as ``|undefined|'', and @not@ is formatted
-as ``|not|''. If you look at @lhs2TeX.fmt@, you will find the
-following directives that do the job:
+A lot of formatting directives for frequently used identifiers or
+operators are already defined in the @lhs2TeX@ prelude. For instance,
+@++@ is formatted as ``|++|'', @undefined@ is formatted as
+``|undefined|'', and @not@ is formatted as ``|not|''. If you look at
+@lhs2TeX.fmt@, you will find the following directives that do the job:
+%
 \input{FormatIdentifierExamples}%
-Here, @\plus@ refers to a \LaTeX\ macro defined in the lhs2\TeX\ prelude:
+%
+Here, @\plus@ refers to a \LaTeX\ macro defined in the lhs2\TeX\
+prelude:
+%
 \input{PlusDefinition}%
-If you are not satisfied with any of the default definitions,
-just redefine them. A @%format@ directive scopes over the rest
-of the input, and if multiple directives for the same token
-are defined, the last one is used. Thus, after
+%
+
+If you are not satisfied with any of the default definitions, just
+redefine them (by overriding, not replacing them). A @%format@
+directive scopes over the rest of the input, and if multiple
+directives for the same token are defined, the last one is used. Thus,
+after
+%
 \input{FormatIdentifierRedefs}%
 %{
 %format ++        = "\mathbin{\mathbf{+}}"
@@ -719,6 +823,7 @@ Note that @\Varid@ is a macro defined in the lhs2\TeX\ prelude that
 can be used to typeset identifier names. It is predefined to
 be the same as @\mathit@, but can be changed. Do not use identifier
 names in \TeX\ replacements directly. For instance,
+%
 \input{FormatIdentifierWrong}%
 %{
 %format undefined  = "undefined"
@@ -727,9 +832,11 @@ by far less nice than
 %}
 ``|undefined|''.
 %}
-It is also possible to define a symbol for infix uses of a
-function. The file @lhs2TeX.fmt@ contains:
+It is also possible to define a symbol for infix uses of a function.
+The file @lhs2TeX.fmt@ contains:
+%
 \input{FormatElem}%
+%
 This causes @2 `elem` [1,2]@ to be typeset as ``|2 `elem` [1,2]|'',
 whereas @elem 2 [1,2]@ will still be typeset as ``|elem 2 [1,2]|''.
 
@@ -738,23 +845,27 @@ whereas @elem 2 [1,2]@ will still be typeset as ``|elem 2 [1,2]|''.
 
 \subsection{Nested formatting}
 
-The right hand sides of formatting directives are not restricted
-to (\TeX-)strings. They can in fact be sequences of such strings or
-other tokens, separated by space. Such other tokens will be replaced
-by their formatting again. For example, if you have already defined
-a specific formatting
+The right hand sides of formatting directives are not restricted to
+(\TeX-)strings. They can in fact be sequences of such strings or other
+tokens, separated by space. Such other tokens will be replaced by
+their formatting again. For example, if you have already defined a
+specific formatting
+%
 \input{FormatArrow}%
 %format ~> = "\leadsto "
 then you can later reuse that formatting while defining variants:
+%
 \input{FormatArrow2}%
 %format ~>* = ~> "^{" * "}"
 As you can see, in this definition we reuse both the current formatting
 for @~>@ and for @*@. We now get ``|~>*|'' for @~>*@, but should we
 decide to define
+%
 \input{FormatStar}%
 %format * = "\star "
 later, we then also get ``|~>*|''. Of course, you can use the same
 mechanism for non-symbolic identifiers:
+%
 \input{FormatId}%
 %{
 %format new      = "\mathbf{new}"
@@ -767,7 +878,9 @@ appear as ``|text_new|''.
 There is no check for recursion in the formatting directives.
 Formatting directives are expanded on-demand, therefore a directive
 such as
+%
 \input{FormatRecurse}%
+%
 will not produce ``$\mathsf{text}$'' for @text@, but rather 
 cause an infinite loop in
 @lhs2TeX@ once used.
@@ -777,29 +890,34 @@ cause an infinite loop in
 %%%
 
 \subsection{Parametrized formatting directives}
+\label{subsec:format-param}
 
 Formatting directives can be parametrized. The parameters may occur
-once or more on the right hand side. This form of a formatting
+one or more times on the right hand side. This form of the format
 directive is only available for alphanumeric identifiers. For
 example, the input
+%
 \input{CardIn}%
+%
 produces output similar to
+%
 \begin{colorsurround}
 \input{Card}
 \end{colorsurround}
+%
 If the function is used with too few arguments as in the text,
 a default symbol is substituted (usually a @\cdot@, but that is
-customizable, cf. Section~\ref{subst}).
+customizable, cf. Section~\ref{sec:subst}).
 
 %%%
 %%%
 
 \subsection{(No) nesting with parametrized directives}
 
-You cannot use a parametrized directive on the right hand side
-of another directive. 
-In summary,
-the right-hand sides of formatting directives are processed as follows:
+You cannot use a parametrized directive on the right hand side of
+another directive. In summary, the right-hand sides of formatting
+directives are processed as follows:
+%
 \begin{compactitem}
 \item A string, enclosed in @"@, will be reproduced literally (without
       the quotes).
@@ -809,8 +927,9 @@ the right-hand sides of formatting directives are processed as follows:
       will be replaced by that directive's replacement.
 \item Any other name will be replaced by its standard formatting.
 \end{compactitem}
+%
 Note that the spaces between the tokens do not occur in the output.
-If you want spaces, insert them explicitly.
+If you want spaces, insert them explicitly with quotes.
 
 %%%
 %%%
@@ -818,82 +937,129 @@ If you want spaces, insert them explicitly.
 \subsection{Parentheses}
 
 Sometimes, due to formatting an identifier as a symbol, parentheses
-around arguments or the entire function become unnecessary.
-Therefore, @lhs2TeX@ can be instructed to drop parentheses around an
-argument by enclosing the argument on the left hand side of the
-directive in parentheses. Parentheses around the entire function are
-dropped if the entire left hand side of the directive is enclosed in
-parentheses. Let us look at another example:
+around arguments, or the entire function, become unnecessary. Therefore,
+@lhs2TeX@ can be instructed to drop parentheses around an argument by
+enclosing the argument on the left hand side of the directive in
+parentheses. Parentheses around the entire function are dropped if the
+entire left hand side of the directive is enclosed in parentheses. Let
+us look at another example:
+%
 \input{ParensExampleIn}%
+%
 The above input produces the following output:
+%
 \begin{colorsurround}
 \input{ParensExample}
 \end{colorsurround}
-Note that in this example a special purpose operator, @^^@, is used
-to facilitate the insertion of spaces on the right hand side of a
-formatting directive. Read more about influencing spacing using formatting
-directives in Section~\ref{spacing}.
-Another example involving parentheses: the input
+%
+In the first line there are no parentheses to drop. In the second
+line, the parentheses around the arguments @a@ and @b@ are dropped, as
+are the parentheses around the function @ptest@. In the third line,
+the source has double parentheses around each argument as well as the
+function. One set of parentheses are dropped in each case, except for
+the @b@ argument.
+
+Note that in this example, a special purpose operator, @^^@, is used to
+facilitate the insertion of spaces on the right hand side of a
+formatting directive. You can read more about influencing spacing using
+formatting directives in Section~\ref{spacing}.
+
+Let us consider another example involving parentheses with the
+following input:
+%
 \input{ParensExample2In}%
-results in       
+%
+This results in
+%
 \begin{colorsurround}
 \input{ParensExample2}
 \end{colorsurround}
+%
+In the second format directive we have redefined the eval function to
+drop the redundant parentheses.
 
 
 %%%
 %%%
 
 \subsection{Local formatting directives}
+\label{subsec:group-directive}
 
-Usually, formatting directives scope over the rest of the input.
-If that is not desired, formatting directives can be placed into
+Usually, formatting directives scope over the rest of the input. If
+that is not desired, formatting directives can be placed into
 \textbf{groups}. Groups look as follows:
+%
 \input{GroupSyntax}%
-Formatting directives that are defined in a group scope only over
-the rest of the current group. Groups can be nested. Groups in
-@lhs2TeX@ do not interact with \TeX\ groups, so these different
-kinds of groups do not have to occur properly nested.
+%
+Formatting directives that are defined in a group only scope over the
+remainder of that group. Groups can also be nested. (Groups in @lhs2TeX@
+do not interact with \TeX\ groups, so these different kinds of groups
+do not have to occur properly nested.)
 
-The effect of groups is made visible by the example input
-\input{GroupExampleIn}
-which appears as follows:
+Let us demonstrate the effect of groups with the following example input:
+%
+\input{GroupExampleIn}%
+%
+This is appears as:
+%
 \begin{colorsurround}
-\input{GroupExample}
+\input{GroupExample}%
 \end{colorsurround}
+%
+On the first line, the string ``one'' has been formatted in italics as
+@lhs2TeX@ has treated it, by default, as a Haskell identifier. On the
+second line of output, the first format directive from the source file
+has come into effect, so ``one'' has been rendered as a numeral in a
+sans-serif font. On the third line, the corresponding source is inside
+the group and second formatting directive is in effect. Thus, ``one''
+has been rendered in a sans-serif font. Finally, on the fourth line,
+the group has closed, along with the scope of the second format
+directive. The original format directive applies again (as its scope
+extends to the end of the source file), thus, ``one'' has again been
+rendered as a numeral in a sans-serif font.
+
 
 %%%
 %%%
 
 \subsection{Implicit formatting}
+\label{subsec:format-implicit}
 
-The third syntactic form of the formatting directive, lacking a
+The third syntactic form of the formatting directive, which lacks a
 right hand side, can be used to easily format a frequently occurring
-special case:
-only a variable (or constructor) name that ends in a number or a prime @'@
-can be used in an implicit formatting statement.
-The prefix will then be formatted as determined by the formatting directives
-in the input so far. The number will be added as an index, the prime 
-character as itself.
+special case, where a token is to be given a numeric subscript, or is
+primed.
+%
+Only a variable (or constructor) name that ends in a number or
+a prime @'@ can be used in an implicit formatting statement. The
+prefix will then be formatted as determined by the formatting
+directives in the input so far. The number will be added as an index,
+the prime character as itself.
 
-The following input contains some example:
-\input{ImplicitIn}
+Let us demonstrate implicit formatting with the follow input:
+%
+\input{ImplicitIn}%
+%
 The corresponding output is:
+%
 \begin{colorsurround}
-\input{Implicit}
+\input{Implicit}%
 \end{colorsurround}
 
-Another form of implicit formatting only takes place only if the token to
-be formatted does not end in primes, and only if digits at the end are 
-immediately preceded by an underscore. The reason for these conditions is
-compatibility. If the conditions are met, then the token is split at
-underscores, and the part to the right of an underscore is typeset as
-subscript to the part on the left, recursively. Again, let us look at an
-example:
-\input{ImplicitUnderscoreIn}
+Another form of implicit formatting only takes place only if the token
+to be formatted does not end in primes, and only if digits at the end
+are immediately preceded by an underscore. The reason for these
+conditions is compatibility. If the conditions are met, then the token
+is split at underscores, and the part to the right of an underscore is
+typeset as subscript to the part on the left, recursively. Again, let
+us look at an example:
+%
+\input{ImplicitUnderscoreIn}%
+%
 And its output:
+%
 \begin{colorsurround}
-\input{ImplicitUnderscore}
+\input{ImplicitUnderscore}%
 \end{colorsurround}
 
 %%%
@@ -907,8 +1073,9 @@ And its output:
 \item In \textbf{tt} style, only non-parametrized directives apply.
 \item In \textbf{verb} and \textbf{code} styles, formatting directives are ignored.
 \end{compactitem}
-A document can be prepared for processing in different styles 
-using conditionals (cf.~Section~\ref{conditionals}).
+%
+A document can be prepared for processing in different styles using
+conditionals (cf.~Section~\ref{sec:conditionals}).
 
 %%%
 %%%
@@ -986,6 +1153,7 @@ This input produces the correct output:
 %%%
 
 \subsection{The full story}
+\label{subsec:poly-alignment}
 
 If you further want to customize the alignment behaviour, you can.
 Here is exactly what happens:
@@ -1161,7 +1329,8 @@ of the @polytable@ package that tell you to rerun \LaTeX!
 \end{important}
 
 %---------------------------------------------------------------------------
-\section{Defining variables}\label{variables}
+\section{Defining variables}
+\label{sec:variables}
 %---------------------------------------------------------------------------
 
 One can define or define flags (or variables) by means of the
@@ -1178,7 +1347,7 @@ Variables can also be passed to @lhs2TeX@ from the operating
 system level by using the @-l@ or @-s@ command line options.
 
 The main use of variables is in conditionals 
-(cf.~Section~\ref{conditionals}).
+(cf.~Section~\ref{sec:conditionals}).
 At the moment, there is no way to directly use the value of a
 variable in a @%format@ directive.
 
@@ -1202,7 +1371,8 @@ new @lhs2TeX@ features by checking its version first.
 %%%
 
 %---------------------------------------------------------------------------
-\section{Conditionals}\label{conditionals}
+\section{Conditionals}
+\label{sec:conditionals}
 %---------------------------------------------------------------------------
 
 Boolean expressions can be used in conditionals. The syntax of an
@@ -1226,7 +1396,7 @@ These are some of the most common uses of conditionals:
       source file(s). Depending
       on a flag, @lhs2TeX@ can produce either the one or the other. 
       Because the flag can be defined via a command 
-      line option (cf.~Section~\ref{variables}), 
+      line option (cf.~Section~\ref{sec:variables}), 
       no modification of the source is necessary to switch versions.
 \item Code that is needed to make the Haskell program work but that
       should not appear in the formatted article (module headers,
@@ -1289,7 +1459,7 @@ automatic spacing of @lhs2TeX@ would usually place one.
 Conversely, use @^^@ everywhere where a space \emph{is} desired,
 but @lhs2TeX@ does usually not place one.
 
-As described in Section~\ref{conditionals}, one can use conditionals
+As described in Section~\ref{sec:conditionals}, one can use conditionals
 to format such annotated input code in both \textbf{poly} 
 (or \textbf{math}) and \text{newcode} style to generate both typeset
 document and code with annotation remove from a single source file.
@@ -1364,6 +1534,7 @@ produces
 
 %---------------------------------------------------------------------------
 \section{Calling @hugs@ or @ghci@}
+\label{sec:call-interp}
 %---------------------------------------------------------------------------
 
 It is possible to call @ghci@ or @hugs@ using the @%options@
@@ -1454,7 +1625,8 @@ This is the corresponding output:
 
 
 %---------------------------------------------------------------------------
-\section{Advanced customization}\label{subst}
+\section{Advanced customization}
+\label{sec:subst}
 %---------------------------------------------------------------------------
 
 There is one directive that has not yet been described: @%subst@.

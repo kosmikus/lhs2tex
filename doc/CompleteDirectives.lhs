@@ -17,9 +17,9 @@ dir(^if^)                 -- test a condition
 dir(^else^)               -- second part of conditional
 dir(elif)                 -- @else@ combined with @if@
 dir(endif)                -- end of a conditional
-dir(latency)              -- tweak alignment in \textbf{poly} mode
-dir(separation)     ^^^   -- tweak alignment in \textbf{poly} mode
-dir(align)                -- set alignment column in \textbf{math} mode
+dir(latency)              -- tweak alignment in \textbf{poly} style
+dir(separation)     ^^^   -- tweak alignment in \textbf{poly} style
+dir(align)                -- set alignment column in \textbf{math} style
 dir(options)              -- set options for call of external program
 dir(subst)                -- primitive formatting directive
 dir(file)                 -- set filename
