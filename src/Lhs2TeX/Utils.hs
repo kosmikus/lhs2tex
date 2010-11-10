@@ -2,6 +2,7 @@ module Lhs2TeX.Utils
   (module Lhs2TeX.Utils, module Data.ListTrie.Map)
   where
 
+import Data.Char
 import Data.Map
 import Data.ListTrie.Map
 import System.IO
@@ -46,4 +47,16 @@ match n pred xs@(s : ss)
                     rec <- match (n - 1) pred ss
                     return (s <| rec)
 
+-- | Delete up to one leading and trailing blank line.
+trim :: String -> String
+trim = reverse . skip . reverse . skip
+  where
+    skip :: String -> String
+    skip txt
+      | all isSpace xs = ys
+      | otherwise      = txt
+      where
+        (xs, ys) = breakAfter (== '\n') txt
+
+-- | Type of tries that is used for most lookup tables in lhs2TeX.
 type Trie a = TrieMap Map Char a

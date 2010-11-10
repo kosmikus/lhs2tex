@@ -45,7 +45,9 @@ instance Representation Directive where
       ("EOF",         EOF) ]
 
 -- | Conditional directives affect the control flow, therefore we
--- must be able to treat them in a special way.
+-- must be able to treat them in a special way. The EOF directive
+-- is treated as a conditional directive, because we use it as a
+-- trigger to check for unbalanced if statements.
 conditional :: Directive -> Bool
 conditional If    = True
 conditional Elif  = True

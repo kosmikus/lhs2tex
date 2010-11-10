@@ -1,6 +1,7 @@
 -- | The actual interpreter for the lhs2TeX input language.
 module Lhs2TeX.Formatting where
 
+import System.FilePath
 import Data.List as List
 
 import Lhs2TeX.Utils
@@ -16,6 +17,9 @@ import Lhs2TeX.Directive.Subst as Subst
 import Lhs2TeX.Math.Classic    as Math
 import Lhs2TeX.Math.Poly       as Poly
 import Lhs2TeX.Typewriter      as Typewriter
+import Lhs2TeX.NewCode         as NewCode
+
+-- TODO: Look at the hardcoded 120 for `Verbatim.display' invocations.
 
 -- | Format a string.
 formatStr :: String -> Lhs2TeX ()
@@ -62,8 +66,6 @@ format (Environment (Verbatim b) s) = out (Verbatim.display 120 b s)
 eval = undefined
 perform = undefined
 evaluate = undefined
-display = undefined
-spec = undefined
 
 -- | Handles the formatting of inline code.
 inline :: String -> Lhs2TeX ()
@@ -78,6 +80,43 @@ inline txt = eject =<< select =<< gets style
     -- inline code is discarded in code modes
     select CodeOnly   = return Empty
     select NewCode    = return Empty
+
+-- | Handles the formatting of displayed code.
+display :: String -> Lhs2TeX ()
+display txt = eject =<< select =<< gets style
+  where
+    select :: Style -> Lhs2TeX Doc
+    select Verb       = return (Verbatim.display 120 False txt)
+                          -- spaces not explicit
+    select Typewriter = Typewriter.display txt
+    select Math       = Math.display txt
+    select Poly       = Poly.display txt
+    -- displayed code is included in code modes
+    select NewCode    = insertLinePragma `ap` NewCode.display txt
+    select CodeOnly   = return (Text (trim txt))
+
+-- | Handles the formatting of spec code. Such code is handled like
+-- displayed code, except that it is discarded in code modes.
+spec :: String -> Lhs2TeX ()
+spec txt = select =<< gets style
+  where
+    select :: Style -> Lhs2TeX ()
+    select NewCode  = return ()
+    select CodeOnly = return ()
+    select _        = Lhs2TeX.Formatting.display txt
+
+-- | Insert a line pragma at the beginning of a document when requested.
+-- TODO: be more clever about when a pragma is needed?
+insertLinePragma :: Lhs2TeXPure (Doc -> Doc)
+insertLinePragma =
+  do
+    st <- get
+    let pragma = sub'pragma $ Text $
+                   "LINE " ++ show (linenumber st + 1) ++ " " ++
+                   show (takeFileName $ file st)
+    return $ if pragmas st
+               then \ d -> pragma <> sub'nl <> d
+               else id
 
 -- | Prints a document to the output file except is one of the
 -- code modes has been selected.
@@ -130,7 +169,7 @@ emitFilePragma txt =
         put (st { ofile = file st, olinenumber = linenumber st })
           -- update the position information
 
-adjustPositionInfo :: String -> Lhs2TeX ()
+adjustPositionInfo :: String -> Lhs2TeXPure ()
 adjustPositionInfo txt =
   let
     ls  :: Int           -- lines to add
@@ -148,5 +187,17 @@ adjustPositionInfo txt =
                          atnewline   = enl (atnewline st) })
 
 
-conditionalDirective :: Directive -> String -> [Numbered Class] -> Lhs2TeX ()
-conditionalDirective = undefined
+conditionalDirective :: Directive -> String -> [Numbered Class] ->
+                        Lhs2TeXPure ()
+conditionalDirective d s ts =
+  let
+    dir :: Directive -> [CondInfo] -> Lhs2TeXPure ()
+    dir If                      bs  = undefined
+    dir Elif  ((f, l, b2, b1) : bs) = undefined
+    dir Else  ((f, l, b2, b1) : bs) = undefined
+    dir Endif ((f, l, b2, b1) : bs) = undefined
+    dir EOF                     []  = return ()
+    dir EOF                     bs  = throwError undefined
+    dir d                       _   = undefined
+  in
+    dir d =<< gets conds
