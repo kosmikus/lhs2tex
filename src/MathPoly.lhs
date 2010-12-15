@@ -365,6 +365,7 @@ As a final step, the current line is placed on the stack.
 >       Poly (((n,c),ts,ind):rs@(((nn,_),_,_):_))
 >                               -> mkFromTo stack n nn  c ts rs ls 
 >
+>   mkFromTo                    :: Stack -> String -> String -> Col -> [Pos Token] -> [((String, Int), [Pos Token], Bool)] -> [Line [Pos Token]] -> (Doc, Stack)
 >   mkFromTo stack bn en c ts rs ls
 >     | bn == en                =  -- this can happen at the beginning of a line due to indentation
 >                                  (rest,stack')

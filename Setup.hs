@@ -292,9 +292,9 @@ getProgram progName programConf =
              do  let mProg = lookupProgram (simpleProgram progName) programConf
                  case mProg of
                    Just (ConfiguredProgram { programLocation = UserSpecified p,
-                                             programArgs = args })  -> return (p,args)
+                                             programDefaultArgs = args })  -> return (p,args)
                    Just (ConfiguredProgram { programLocation = FoundOnSystem p,
-                                             programArgs = args })  -> return (p,args)
+                                             programDefaultArgs = args })  -> return (p,args)
                    _ -> (die (progName ++ " command not found"))
 
 -- | Run a command in a specific environment and return the output and errors.
