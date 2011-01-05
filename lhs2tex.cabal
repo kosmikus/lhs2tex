@@ -15,6 +15,7 @@ build-type:     Custom
 executable lhs2TeX
   main-is:              Main.lhs
   hs-source-dirs:       src
+  default-language:     Haskell98
   build-depends:        base >= 4.2 && < 5,
                         regex-compat,
                         mtl,

@@ -12,7 +12,9 @@
 >                               ) where
 >
 > import Prelude hiding         (  catch, readFile )
-> import System.IO              (  openFile, IOMode(..), hSetEncoding, hGetContents, utf8, Handle() )
+> import System.IO              (  openFile, IOMode(..), hPutStrLn, stderr,
+>                                  hSetEncoding, hGetContents, utf8, Handle() )
+> import System.IO.Error        (  isDoesNotExistError, isPermissionError )
 > import System.Directory
 > import System.Environment
 > import Data.List
@@ -123,16 +125,23 @@ more than one directory separator, all subpaths are added ...
 
 > chaseFile                     :: [String]    {- search path -}
 >                               -> FilePath -> IO (String,FilePath)
-> chaseFile p fn | isAbsolute fn=  t fn
+> chaseFile p fn | isAbsolute fn=  catch (t fn) (handle fn (err "."))
 >                | p == []      =  chaseFile ["."] fn
->                | otherwise    =  s $ map (\d -> t (md d ++ fn)) p
+>                | otherwise    =  s $ map (\ d -> md d ++ fn) p
 >   where
 >   md cs | isPathSeparator (last cs)
 >                               =  cs
 >         | otherwise           =  addTrailingPathSeparator cs
->   t f                         =  catch (readTextFile f >>= \x -> return (x,f))
->                                        (\ (_ :: IOException) -> ioError $ userError $ "File `" ++ fn ++ "' not found.\n")
->   s []                        =  ioError 
->                               $  userError $ "File `" ++ fn ++ "' not found in search path:\n" ++ showpath
->   s (x:xs)                    =  catch x (\ (_ :: IOException) -> s xs)
+>   t f                         =  readTextFile f >>= \x -> return (x,f)
+>   s []                        =  err $ " in search path:\n" ++ showpath
+>   s (x:xs)                    =  catch (t x) (handle x (s xs))
+>   err extra                   =  ioError
+>                               $  userError $ "File `" ++ fn ++ "' not found or not readable" ++ extra
+>   handle :: FilePath -> IO (String,FilePath) -> IOException -> IO (String,FilePath)
+>   handle x k e                =
+>                                    if isDoesNotExistError e then k
+>                                    else if isPermissionError e then do
+>                                      hPutStrLn stderr $ "Warning: could not access " ++ x ++ " due to permission error."
+>                                      k
+>                                    else ioError e
 >   showpath                    =  concatMap (\x -> "   " ++ x ++ "\n") p
