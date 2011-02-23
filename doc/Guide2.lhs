@@ -1084,19 +1084,23 @@ conditionals (cf.~Section~\ref{sec:conditionals}).
 \section{Alignment in ``poly'' style}
 %---------------------------------------------------------------------------
 
-The second important feature of |lhs2TeX| next to the ability to
-change the appearance of tokens is the possibility to maintain
-alignment in the code while using a proportional font.
+While the ability to transform the appearance of the source file is
+probably the most important feature of |lhs2TeX|, certainly the next
+most important is the ability to maintain alignment of code elements,
+while using a proportional font. 
 
-Use of this feature is relatively simple:
+Using this feature is relatively simple:
+%
 \begin{compactitem}
 \item Alignment is computed per code block.
 \item All tokens that start on the same column and are preceded by at
-      least \textbf{2} spaces are horizontally aligned in the output.
+      least \textbf{2} spaces will appear beginning from the same
+      vertical axis in the output.
 \end{compactitem}
+%
 Using these simple rules, (almost) everything is possible, but it
 is very important to verify the results and watch out for accidental
-alignments (i.e.~tokens that get aligned against intention).
+alignments (i.e.~tokens that get aligned unintentionally).
 
 %%%
 %%%
@@ -1105,18 +1109,21 @@ alignments (i.e.~tokens that get aligned against intention).
 
 The following example shows some of the potential. This is the
 input:
+%
 \input{RepAlgIn}%
-Look at the highlighted (grey) tokens. The @lt@ will not appear
-aligned with the two equality symbols, because it is preceded by
-only one space. Similarly, the @m@ in the first line after the
-@Leaf@ constructor will not be aligned with the declarations and
-the body of the let-statement, because it is preceded by only
-one space. Note furthermore that the equality symbols for the
-main functions @rep_alg@ and @replace_min'@ are surrounded by two
-spaces on both sides, also on the right. This causes the comma
-and the closing parenthesis to be aligned correctly.
-
-Indeed, the output looks as follows:
+%
+Look at the highlighted (gray) tokens. The @lt@ will not appear
+aligned with the two equality symbols, because it is preceded by only
+one space. Similarly, the @m@ in the first line after the @Leaf@
+constructor will not be aligned with the declarations and the body of
+the let-statement, because it is preceded by only one space. Note
+furthermore that the equality symbols for the main functions @rep_alg@
+and @replace_min'@ are surrounded by two spaces on both sides, also on
+the right. This causes the comma and the closing parenthesis to be
+aligned correctly.
+%
+The output looks as follows:
+%
 \input{RepAlg}%
 
 
@@ -1125,28 +1132,33 @@ Indeed, the output looks as follows:
 
 \subsection{Accidental alignment}
 
-The main danger of the alignment heuristic is that it results
-in \emph{more} alignments than are intended. The following
-example input contains such a case:
+The main danger of the alignment heuristic is that it may result in
+some tokens being aligned unintentionally. The following example
+contains illustrates this possibility:
+%
 \input{AccidentalIn}%
-The grey tokens will be unintentionally aligned because
-they start on the same column, with two or more preceding spaces
-each. The output looks as follows:
+%
+The gray tokens will be unintentionally aligned because they start on
+the same column, with two or more preceding spaces each. The output
+looks as follows:
+%
 \input{Accidental}%
+%
 The ``|::|'' and the ``|=|'' have been aligned with the declarations
-of the where-clause. This results in too much space between
-the two |options| tokens and the symbols. Even worse, in this
-case the \emph{centering} of the two symbols is destroyed by
-the alignment (cf. Section~\ref{centering}), therefore ``|::|''
-and ``|=|'' appear left-aligned, but not cleanly, because
-\TeX\ inserts a different amount of whitespace around the two
-symbols.
+of the where-clause. This results in too much space between the two
+|options| tokens and the symbols. Another problems is that in this
+case the \emph{centering} of the two symbols is destroyed by the
+alignment (cf. Section~\ref{centering}). As a result, ``|::|'' and
+``|=|'' appear left-aligned, but not cleanly, because \TeX\ inserts a
+different amount of whitespace around the two symbols.
 
 The solution to all this is surprisingly simple: just insert extra
 spaces in the input to ensure that unrelated tokens start on different
 columns:
+%
 \input{AccidentalCIn}%
-This input produces the correct output:
+%
+This produces the correct output:
 \input{AccidentalC}%
 
 %%%
@@ -1155,8 +1167,9 @@ This input produces the correct output:
 \subsection{The full story}
 \label{subsec:poly-alignment}
 
-If you further want to customize the alignment behaviour, you can.
-Here is exactly what happens:
+If you want to customize the alignment behaviour further, you can. Here
+is exactly what happens:
+%
 \begin{compactitem}
 \item Alignment is computed per code block.
 \item Per code block there are a number of \textbf{alignment columns}.
@@ -1169,13 +1182,16 @@ Here is exactly what happens:
 \item All tokens that are aligned at a specific column will appear aligned
       (i.e. at the same horizontal position) in the output.
 \end{compactitem}
+%
 Both latency and separation can be modified by means of associated
 directives:
+%
 \input{SepLatSyntax}%
+%
 It can occasionally be useful to increase the default settings of 2 and
-2 for large code blocks where accidental alignments become very
+2 for large code blocks where accidental alignments can become very
 likely! It does not really make sense to set latency to a value that
-is strictly smaller than the separation, but you can do so -- there
+is strictly smaller than the separation, but you can do so---there
 are no checks that the specified settings are sensible.
 
 %%%
@@ -1183,35 +1199,43 @@ are no checks that the specified settings are sensible.
 
 \subsection{Indentation in ``poly'' style}
 
-Sometimes, |lhs2TeX| will insert additional space at the beginning
-of a line to reflect indentation. The rule is described in the
-following.
+Sometimes, |lhs2TeX| will insert additional space at the beginning of
+a line to reflect indentation. The rule is as follows.
 
-If a line is indented in column |n|, then
-the \emph{previous} code line is taken into account:
+If a line is indented in column |n|, then the \emph{previous} code
+line is taken into account:
+%
 \begin{compactitem} 
-\item If there is an aligned token at column |n| in the previous
-      line, then the indented line will be aligned normally.
-\item Otherwise, the line will be indented with respect to the
-      first aligned token in the previous line to the left of column |n|.
+\item If there is an aligned token at column |n| in the previous line,
+      then the indented line will be aligned normally.
+\item Otherwise, the line will be indented with respect to the first
+      aligned token in the previous line to the left of column |n|.
 \end{compactitem}
 
 The first example demonstrates the first case:
+%
 \input{Indent1In}%
+%
 In this example, there is an aligned token in the previous line
 at the same column, so everything is normal.
 The two highlighted parentheses are aligned, causing the
 second line to be effectively indented:
+%
 \input{Indent1}%
+%
 The next example demonstrates the second case. It is the same
 example, with one space before the two previously aligned parentheses
 removed:
+%
 \input{Indent2In}%
+%
 Here, there is no aligned token in the previous line
 at the same column. Therefore, the third line is indented with
 respect to the first aligned token in the previous line to the
 left of that column, which in this case happens to be the @xs@:
+%
 \input{Indent2}%
+%
 Sometimes, this behaviour might not match the intention of
 the user, especially in cases as
 above, where there really starts a token at the same position
@@ -1226,14 +1250,26 @@ indented, and the base token. In the situation of the
 above example, the call is @\hsindent{12}@. The default definition
 in the lhs2\TeX\ prelude
 ignores the argument and inserts a fixed amount of space:
+%
 \input{HsIndent}%
 
 Here is another example that shows indentation in action, the
 Haskell standard function |scanr1| written using only basic
 pattern matching:
+%
 \input{Indent2aIn}%
+%
 And the associated output:
+%
 \input{Indent2a}%
+%
+The third line, which begins with |x:xs|, is an indented line, but it
+does not start at an alignment column from the previous line. Thus,
+the second rule applies and it is indented relative to the first
+aligned token to the left in the previous line, which is |case|. The
+same explanation applies for the pattern |[]|. The indentation of the
+line beginning with |_| is an example of the first rule. It is
+indented so as to be aligned with the token |[]|.
 
 %%%
 %%%
