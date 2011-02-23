@@ -192,11 +192,11 @@ lhs2texPostCopy a (CopyFlags { copyDest = cdf, copyVerbosity = vf }) pd lbi =
         createDirectoryIfMissing True dataPref
         let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
         -- lhs2TeX.{fmt,sty}
-        mapM_ (\f -> copyFileVerbose v (lhs2texDir `joinFileName` f) (dataPref `joinFileName` f))
+        mapM_ (\f -> installOrdinaryFile v (lhs2texDir `joinFileName` f) (dataPref `joinFileName` f))
               ["lhs2TeX.fmt","lhs2TeX.sty"]
         -- lhs2TeX library
         fmts <- fmap (filter (".fmt" `isSuffixOf`)) (getDirectoryContents "Library")
-        mapM_ (\f -> copyFileVerbose v ("Library" `joinFileName` f) (dataPref `joinFileName` f))
+        mapM_ (\f -> installOrdinaryFile v ("Library" `joinFileName` f) (dataPref `joinFileName` f))
               fmts
         -- documentation difficult due to lack of docdir
         let lhs2texDocDir = lhs2texDir `joinFileName` "doc"
@@ -207,10 +207,10 @@ lhs2texPostCopy a (CopyFlags { copyDest = cdf, copyVerbosity = vf }) pd lbi =
                        then dataPref `joinFileName` "Documentation"
                        else datadir (absoluteInstallDirs pd lbi cd) `joinFileName` ".." `joinFileName` "man" `joinFileName` "man1"
         createDirectoryIfMissing True docDir
-        copyFileVerbose v (lhs2texDocDir `joinFileName` "Guide2.pdf") (docDir `joinFileName` "Guide2.pdf")
+        installOrdinaryFile v (lhs2texDocDir `joinFileName` "Guide2.pdf") (docDir `joinFileName` "Guide2.pdf")
         when (not isWindows) $
           do createDirectoryIfMissing True manDir
-             copyFileVerbose v ("lhs2TeX.1") (manDir `joinFileName` "lhs2TeX.1")
+             installOrdinaryFile v ("lhs2TeX.1") (manDir `joinFileName` "lhs2TeX.1")
         -- polytable
         case (installPolyTable ebi) of
           Just texmf -> do  let texmfDir = texmf
@@ -219,8 +219,8 @@ lhs2texPostCopy a (CopyFlags { copyDest = cdf, copyVerbosity = vf }) pd lbi =
                             createDirectoryIfMissing True ptDir
                             stys <- fmap (filter (".sty" `isSuffixOf`))
                                          (getDirectoryContents "polytable")
-                            mapM_ (\f -> copyFileVerbose v ("polytable" `joinFileName` f)
-                                                           (ptDir `joinFileName` f))
+                            mapM_ (\f -> installOrdinaryFile v ("polytable" `joinFileName` f)
+                                                               (ptDir `joinFileName` f))
                                   stys
           Nothing    -> return ()
 
@@ -292,9 +292,9 @@ getProgram progName programConf =
              do  let mProg = lookupProgram (simpleProgram progName) programConf
                  case mProg of
                    Just (ConfiguredProgram { programLocation = UserSpecified p,
-                                             programArgs = args })  -> return (p,args)
+                                             programDefaultArgs = args })  -> return (p,args)
                    Just (ConfiguredProgram { programLocation = FoundOnSystem p,
-                                             programArgs = args })  -> return (p,args)
+                                             programDefaultArgs = args })  -> return (p,args)
                    _ -> (die (progName ++ " command not found"))
 
 -- | Run a command in a specific environment and return the output and errors.
