@@ -249,16 +249,17 @@
 \author{{Ralf Hinze}\\
   \smaller \tabular{c}
            Computing Laboratory, University of Oxford\\
-           Wolfson Building, Parks Road, Oxford, OX1 3QD, England\\
+           %Wolfson Building, Parks Road, Oxford, OX1 3QD, England\\
            \verb|ralf.hinze@comlab.ox.ac.uk|
            \endtabular
   \and
   {Andres L\"oh}\\
   \smaller \tabular{c}
-           Institute of Information and Computing Sciences\\
-           Utrecht University, P.O.~Box 80.089\\
-           3508 TB Utrecht, The Netherlands\\
-           \verb|andres@cs.uu.nl|
+           Well-Typed LLP\\
+           %Institute of Information and Computing Sciences\\
+           %Utrecht University, P.O.~Box 80.089\\
+           %3508 TB Utrecht, The Netherlands\\
+           \verb|mail@andres-loeh.de|
            \endtabular}%
 \date{\today}
 \maketitle

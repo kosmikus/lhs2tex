@@ -9,7 +9,7 @@ import Distribution.Simple.Configure (configCompilerAux)
 import Distribution.PackageDescription (PackageDescription(..))
 import Distribution.Simple.InstallDirs
                             (InstallDirs(..))
-import Distribution.Simple.Program 
+import Distribution.Simple.Program
                             (Program(..),ConfiguredProgram(..),ProgramConfiguration(..),
                              ProgramLocation(..),simpleProgram,lookupProgram,
                              rawSystemProgramConf)
@@ -28,15 +28,14 @@ import System.IO.Error (try)
 import System.Process (runInteractiveProcess,waitForProcess)
 import System.Directory
 import System.Info (os)
-  
 
 lhs2tex = "lhs2TeX"
 minPolytableVersion = [0,8,2]
 shortversion = show (numversion `div` 100) ++ "." ++ show (numversion `mod` 100)
 version = shortversion ++ if ispre then "pre" ++ show pre else ""
 numversion = 117
-ispre = True
-pre = 1
+ispre = False
+pre = 2
 
 main = defaultMainWithHooks lhs2texHooks
 
