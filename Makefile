@@ -161,12 +161,14 @@ endif
 srcdist : INSTALL doc
 	if test -d $(DISTDIR); then $(RM) -rf $(DISTDIR); fi
 	$(MKINSTDIR) $(DISTDIR)
+	$(MKINSTDIR) $(DISTDIR)/src
 	$(MKINSTDIR) $(DISTDIR)/doc
 	$(MKINSTDIR) $(DISTDIR)/polytable
 	$(MKINSTDIR) $(DISTDIR)/Testsuite
 	$(MKINSTDIR) $(DISTDIR)/Examples
 	$(MKINSTDIR) $(DISTDIR)/Library
-	$(INSTALL) -m 644 $(psources) Version.lhs.in $(snipssrc) $(DISTDIR)
+	$(INSTALL) -m 644 $(psources) src/Version.lhs.in $(DISTDIR)/src
+	$(INSTALL) -m 644 $(snipssrc) $(DISTDIR)
 	$(INSTALL) -m 644 Setup.hs lhs2tex.cabal $(DISTDIR)
 	$(INSTALL) -m 644 lhs2TeX.fmt.lit lhs2TeX.sty.lit $(DISTDIR)
 	$(INSTALL) -m 644 Makefile common.mk config.mk.in $(DISTDIR)
