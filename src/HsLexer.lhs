@@ -6,7 +6,7 @@
 
 > module HsLexer                (  module HsLexer ) --Token(..), isVarid, isConid, isNotSpace, string, tokenize  )
 > where
-> import Data.Char 	(  isSpace, isUpper, isLower, isDigit, isAlphaNum, isPunctuation  )
+> import Data.Char      (  isSpace, isUpper, isLower, isDigit, isAlphaNum, isPunctuation  )
 > import qualified Data.Char ( isSymbol )
 > import Control.Monad
 > import Control.Monad.Error ()
@@ -110,7 +110,7 @@ ks, 28.08.2008: New: Agda and Haskell modes.
 >   | otherwise                 =  return (Comment t, u)
 >   where (d, s') = span (== '-') s
 >         (t, u)  = break (== '\n') s'
-> lex' lang ('{' : '-' : '"' : s) 
+> lex' lang ('{' : '-' : '"' : s)
 >                               =  do let (t, u) = inlineTeX s
 >                                     v <- match "\"-}" u
 >                                     return (TeX True (Text t), v)
