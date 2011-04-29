@@ -52,8 +52,8 @@
 \numberwidth{0pt}
 \newcommand*{\numberstep}[1]{\def\linenumstep{#1}}
 \numberstep{1}
-\newcommand{\numberson}{\let\printline\printlineyes}
-\newcommand{\numbersoff}{\let\printline\empty}
+\newcommand{\numberson}{\global\let\printline\printlineyes}
+\newcommand{\numbersoff}{\global\let\printline\empty}
 \newcommand{\numbersreset}{\setcounter{linenum}{0}}
 \numberson
 %
