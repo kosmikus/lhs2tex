@@ -36,14 +36,13 @@
 \newcommand{\linenumsetupleft}{\column{line}{@@{}l@@{}}\column{lineend}{}\column{B}{}}
 %\newcommand{\linenumsetupleft}{\column{line}{@@{}>{\setbox0=\hbox\bgroup}l<{\egroup\makebox[0pt][r]{\box0\ }}@@{}}\column{lineend}{}\column{B}{}}
 \newcommand{\linenumsetupright}{\setlength{\linetemp}{\linewidth-\mathindent}\column[\linetemp]{line}{@@{}l@@{}}\column{lineend}{}\column{B}{}}
-\newcommand{\linenumfromtoleft}{\fromto{line}{lineend}}
-\newcommand{\linenumfromtoright}{\fromto{line}{lineend}}
+\newcommand{\linenumfromtoleft}{\refstepcounter{linenum}\fromto{line}{lineend}}
+\newcommand{\linenumfromtoright}{\refstepcounter{linenum}\fromto{line}{lineend}}
 \newcommand{\numbersright}{\let\linenumsetup\linenumsetupright\let\printlinebegin\empty\def\printlineend{\printline}\let\linenumfromto\linenumfromtoright\def\linenumalign{l}}
 \newcommand{\numbersleft}{\let\linenumsetup\linenumsetupleft\def\printlinebegin{\printline}\let\printlineend\empty\let\linenumfromto\linenumfromtoleft\def\linenumalign{r}}
 \numbersleft
 \newcommand{\printlineyes}{%
   \linenumfromto{%
-    \stepcounter{linenum}%
     \stepcounter{linestep}%
     \ifthenelse{\value{linestep}<\linenumstep}{}{%
       \formatlinenum{\thelinenum}%
@@ -53,8 +52,8 @@
 \numberwidth{0pt}
 \newcommand*{\numberstep}[1]{\def\linenumstep{#1}}
 \numberstep{1}
-\newcommand{\numberson}{\let\printline\printlineyes}
-\newcommand{\numbersoff}{\let\printline\empty}
+\newcommand{\numberson}{\global\let\printline\printlineyes}
+\newcommand{\numbersoff}{\global\let\printline\empty}
 \newcommand{\numbersreset}{\setcounter{linenum}{0}}
 \numberson
 %

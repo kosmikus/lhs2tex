@@ -17,8 +17,8 @@ This is a demo. Look at the lhs2\TeX\ sources to see how each of the examples is
 Let's start with an example having numbers every five lines.
 \numberstep{5}%
 \begin{code}
-zipWithM            ::  Monad m => (a -> b -> m c) -> [a] -> [b] -> m [c] 
-zipWithM   f xs ys  =   sequence (zipWith f xs ys)
+zipWithM            ::  Monad m => (a -> b -> m c) -> [a] -> [b] -> m [c] {-"\label{zipWithMs}"-}
+zipWithM   f xs ys  =   sequence (zipWith f xs ys) {-"\label{zipWithMe}"-}
 
 zipWithM_           ::  Monad m => (a -> b -> m c) -> [a] -> [b] -> m ()
 zipWithM_  f xs ys  =   sequence_ (zipWith f xs ys)
@@ -27,13 +27,17 @@ foldM               ::  Monad m => (a -> b -> m a) -> a -> [b] -> m a
 foldM f a []        =   return a
 foldM f a (x : xs)  =   f a x >>= \ y -> foldM f y xs
 
-filterM             ::  Monad m => (a -> m Bool) -> [a] -> m [a]
+filterM             ::  Monad m => (a -> m Bool) -> [a] -> m [a] {-"\label{filterMs}"-}
 filterM p []        =   return []
 filterM p (x : xs)  =   do
                            b   <- p x
                            ys  <- filterM p xs
-                           return (if b then (x : ys) else ys)
+                           return (if b then (x : ys) else ys) {-"\label{filterMe}"-}
 \end{code}
+
+We can also reference lines by number: @zipWithM@'s definition appears on Line~\ref{zipWithMs} and
+Line~\ref{zipWithMe}. @filterM@'s is on Lines~\ref{filterMs} -- \ref{filterMe}. 
+
 Normally, the numbering will just continue in the next code block:
 \begin{code}
 liftM    ::  Monad m => (a -> b) -> (m a -> m b)
