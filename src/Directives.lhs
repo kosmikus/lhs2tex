@@ -148,12 +148,14 @@ substitution directive should be invoked here.
 > parseSubst                    :: Lang -> String -> Either Exc (String, Subst)
 > parseSubst lang s             =  parse lang (substitution lang) (convert s)
 >
+> substitution                  :: Lang -> Parser Token (String, Subst)
 > substitution lang             =  do s <- varid
 >                                     args <- many varid
 >                                     _ <- varsym lang "="
 >                                     rhs <- many (satisfy isVarid `mplus` satisfy isTeX)
 >                                     return (s, subst args rhs)
 >   where
+>   subst :: [String] -> [Token] -> Subst
 >   subst args rhs ds           =  catenate (map sub rhs)
 >       where sub (TeX _ d)     =  d
 >             sub (Varid x)     =  FM.fromList (zip args ds) ! x
