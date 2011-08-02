@@ -8,6 +8,7 @@
 > where
 >
 > import Data.Char              (  isSpace, isAlpha, isDigit  )
+> import Data.List
 > import Control.Monad
 > import Parser
 > import TeXCommands
@@ -57,12 +58,16 @@ Format directives. \NB @%format ( = "(\;"@ is legal.
 >                                          _ <- varsym lang "="
 >                                          r <- many item
 >                                          return (string f, (False, [], [], r))
+>                               -- no RHS, try implicit formatting rules
 >                               `mplus` do f <- satisfy isVarid `mplus` satisfy isConid
 >                                          return (string f, (False, [], [], tex f))
 
 \Todo{@%format `div1`@ funktioniert nicht.}
 
 >     where
+>     agda                      =  lang == Agda
+>     tex (Varid s) | agda      =  operator s
+>     tex (Conid s) | agda      =  operator s
 >     tex (Varid s)             =  subscript Varid s
 >     tex (Conid s)             =  subscript Conid s
 >     tex (Qual [] s)           =  tex s
@@ -82,6 +87,13 @@ Format directives. \NB @%format ( = "(\;"@ is legal.
 >         where s'              =  reverse s
 >               (t, u)          =  span (== '\'') s'
 >               (v, w)          =  span isDigit u
+
+>     operator s                =  let parts = splitOn (=='_') s
+>                                      start = "_" `isPrefixOf` s
+>                                      end   = "_" `isSuffixOf` s
+>                                  in  (if start then [Varid "_"] else []) ++
+>                                      Data.List.intersperse (Varid "_") (map Varid parts) ++
+>                                      (if end   then [Varid "_"] else [])
 
 ks, 02.02.2004: I have added implicit formatting via |underscore|.
 The above condition should guarantee that it is (almost) only used in 

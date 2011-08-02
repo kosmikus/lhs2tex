@@ -23,6 +23,8 @@
 >                               (  try, catch, IOException )
 > import System.FilePath
 > import System.Info
+>
+> import Auxiliaries
 
 A searchpath can be added to the front or to the back of the current path
 by pre- or postfixing it with a path separator. Otherwise the new search
@@ -106,12 +108,6 @@ more than one directory separator, all subpaths are added ...
 >                                     return $ either (\ (_ :: IOException) -> [])
 >                                                     (map (\x -> a ++ x ++ o) . splitOn isSearchPathSeparator)
 >                                                     er
-
-> splitOn                       :: (Char -> Bool) -> String -> [String]
-> splitOn p s                   =  case dropWhile p s of
->                                    "" -> []
->                                    s' -> w : splitOn p s''
->                                            where (w,s'') = break p s'
 
 > readTextFile                  :: FilePath -> IO String
 > readTextFile f                =  do h <- openFile f ReadMode
