@@ -159,6 +159,7 @@ substitution directive should be invoked here.
 >   subst args rhs ds           =  catenate (map sub rhs)
 >       where sub (TeX _ d)     =  d
 >             sub (Varid x)     =  FM.fromList (zip args ds) ! x
+> -- TODO: The above lookup can fail badly if unknown variables are used on the rhs of a subst.
 
 \Todo{unbound variables behandeln.}
 ks, 24.10.2008: A bit messy: For Agda, we explicitly exclude "=" from the set
