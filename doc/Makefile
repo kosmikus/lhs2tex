@@ -28,9 +28,9 @@ polytable.sty :
 	$(LN_S) ../polytable/lazylist.sty .
 
 RawSearchPath.lhs : ../src/Version.lhs
-	echo '\begin{code}' > $@
+	echo '\\begin{code}' > $@
 	$(LHS2TEX) --searchpath >> $@
-	echo '\end{code}' >> $@
+	echo '\\end{code}' >> $@
 
 SearchPath.lhs : RawSearchPath.lhs
 	touch $@
