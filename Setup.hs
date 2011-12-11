@@ -124,6 +124,7 @@ lhs2texPostConf a cf pd lbi =
                                                   replace "@VERSION@" version .
                                                   replace "@SHORTVERSION@" shortversion .
                                                   replace "@NUMVERSION@" (show numversion) .
+                                                  replace "@SEP@" sep .
                                                   replace "@PRE@" (show pre) >>= writeFile f)
               generatedFiles
   where runKpseWhich v = runCommandProgramConf silent "kpsewhich" (withPrograms lbi) [v]

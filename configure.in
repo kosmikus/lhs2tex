@@ -75,6 +75,10 @@ AC_SUBST(stydir)
 LHS2TEX="../lhs2TeX"
 AC_SUBST(LHS2TEX)
 
+# search path separator
+SEP=":"
+AC_SUBST(SEP)
+
 AC_CONFIG_FILES(config.mk src/Version.lhs lhs2TeX.1 doc/InteractiveHugs.lhs doc/InteractivePre.lhs)
 AC_OUTPUT
 
