@@ -4,6 +4,7 @@
 
 %if codeOnly || showModuleHeader
 
+> {-# LANGUAGE NPlusKPatterns #-}
 > module HsLexer                (  module HsLexer ) --Token(..), isVarid, isConid, isNotSpace, string, tokenize  )
 > where
 > import Data.Char      (  isSpace, isUpper, isLower, isDigit, isAlphaNum, isPunctuation  )
