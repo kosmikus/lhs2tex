@@ -77,7 +77,7 @@ lhs2texPostConf a cf pd lbi =
                          else do  (_,b,_) <- (runKpseWhichVar "TEXMFMAIN")
                                   return . stripQuotes . stripNewlines $ b
         ex      <- return (not . all isSpace $ b) -- or check if directory exists?
-        i       <- if ex then 
+        i       <- if ex then
                    do  (_,p,_) <- runKpseWhich "polytable.sty"
                        p       <- return . stripNewlines $ p
                        ex      <- doesFileExist p
@@ -251,7 +251,7 @@ replace re t x = subRegex (mkRegexWithOpts re True True) x (escapeRegex t)
     escapeRegex []        = []
     escapeRegex ('\\':xs) = '\\':'\\': escapeRegex xs
     escapeRegex (x:xs)    = x : escapeRegex xs
-    
+
 escapeChars :: String -> String
 escapeChars t = foldr showLitChar [] t
 
@@ -273,9 +273,9 @@ callLhs2tex v lbi params outf =
                      ++ [ "-o" ++ outf ]
                      ++ (if v == deafening then ["-v"] else [])
                      ++ params
-	(ex,_,err) <- runCommand v lhs2texBin args
-	hPutStr stderr (unlines . lines $ err)
-	maybeExit (return ex)
+        (ex,_,err) <- runCommand v lhs2texBin args
+        hPutStr stderr (unlines . lines $ err)
+        maybeExit (return ex)
 
 runCommandProgramConf  ::  Verbosity              -- ^ verbosity
                        ->  String                 -- ^ program name
@@ -287,7 +287,7 @@ runCommandProgramConf v progName programConf extraArgs =
         runCommand v prog (args ++ extraArgs)
 
 getProgram :: String -> ProgramConfiguration -> IO (String, [String])
-getProgram progName programConf = 
+getProgram progName programConf =
              do  let mProg = lookupProgram (simpleProgram progName) programConf
                  case mProg of
                    Just (ConfiguredProgram { programLocation = UserSpecified p,
@@ -302,7 +302,7 @@ runCommandInEnv  ::  Verbosity             -- ^ verbosity
                  ->  [String]              -- ^ args
                  ->  [(String,String)]     -- ^ the environment
                  ->  IO (ExitCode,String,String)
-runCommandInEnv v cmd args env = 
+runCommandInEnv v cmd args env =
                  do  when (v >= verbose) $ putStrLn (cmd ++ concatMap (' ':) args)
                      let env' = if null env then Nothing else Just env
                      (cin,cout,cerr,pid) <- runInteractiveProcess cmd args Nothing env'
@@ -352,7 +352,7 @@ joinFileName dir ""    = dir
 joinFileName dir fname
   | isPathSeparator (last dir) = dir++fname
   | otherwise                  = dir++pathSeparator:fname
-  where 
+  where
  isPathSeparator :: Char -> Bool
  isPathSeparator | isWindows = ( `elem` "/\\" )
                  | otherwise = ( == '/' )
@@ -360,4 +360,4 @@ joinFileName dir fname
                  | otherwise = '/'
 
 -- It would be nice if there'd be a predefined way to detect this
-isWindows = "mingw" `isPrefixOf` os || "win" `isPrefixOf` os 
+isWindows = "mingw" `isPrefixOf` os || "win" `isPrefixOf` os
