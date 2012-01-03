@@ -60,3 +60,6 @@ trim = reverse . skip . reverse . skip
 
 -- | Type of tries that is used for most lookup tables in lhs2TeX.
 type Trie a = TrieMap Map Char a
+
+-- | Proxy argument when the type checker needs additional guidance.
+data Proxy a = Proxy

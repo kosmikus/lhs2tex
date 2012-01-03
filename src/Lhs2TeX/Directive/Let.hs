@@ -9,8 +9,9 @@ import Lhs2TeX.Value
 
 -- | Evaluation of boolean expressions
 eval :: String -> Lhs2TeXPure Value
-eval = undefined
+eval = error "Lhs2TeX.Directive.Let.eval"
 
-parse = undefined
+parse = error "Lhs2TeX.Directive.Let.parse"
+
 expression :: Lang -> Parser (Toggles -> Value)
-expression = undefined
+expression = error "Lhs2TeX.Directive.Let.expression"

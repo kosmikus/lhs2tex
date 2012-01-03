@@ -114,13 +114,13 @@ setupState newstyle newfile newpath state =
       -- The following flags are always the same. Since (for historic
       -- reasons?) the style and lang toggles are numeric and not strings,
       -- we have to have things to compare them with.
-      toggleList (undefined :: Style) ++
-      toggleList (undefined :: Lang)
+      toggleList (Proxy :: Proxy Style) ++
+      toggleList (Proxy :: Proxy Lang)
 
 -- | Helper function to generate a number of numeric values from
 -- a given enumeration type. The argument is a dummy for the type
 -- checker.
 toggleList :: (Bounded a, Enum a, Representation a) =>
-              a {- dummy -} -> [(String, Value)]
+              Proxy a -> [(String, Value)]
 toggleList x = [ (decode s, Int (fromEnum s)) |
                  s <- [minBound `asTypeOf` x .. maxBound] ]

@@ -63,9 +63,9 @@ format (Environment Hide         s) = return ()
 format (Environment Ignore       s) = return ()
 format (Environment (Verbatim b) s) = out (Verbatim.display 120 b s)
 
-eval = undefined
-perform = undefined
-evaluate = undefined
+eval     = error "Lhs2TeX.Formatting.eval"
+perform  = error "Lhs2TeX.Formatting.perform"
+evaluate = error "Lhs2TeX.Formatting.evaluate"
 
 -- | Handles the formatting of inline code.
 inline :: String -> Lhs2TeX ()
@@ -147,7 +147,7 @@ substitute s ds =
   do
     ss <- gets substs
     case Subst.lookup s ss of
-      Nothing  -> throwError undefined
+      Nothing  -> throwError (error "Lhs2TeX.Formatting.substitute")
       Just sub -> eject (sub ds)
 
 -- | Prints a %file pragma to the output file if %file
@@ -192,12 +192,12 @@ conditionalDirective :: Directive -> String -> [Numbered Class] ->
 conditionalDirective d s ts =
   let
     dir :: Directive -> [CondInfo] -> Lhs2TeXPure ()
-    dir If                      bs  = undefined
-    dir Elif  ((f, l, b2, b1) : bs) = undefined
-    dir Else  ((f, l, b2, b1) : bs) = undefined
-    dir Endif ((f, l, b2, b1) : bs) = undefined
+    dir If                      bs  = error "Lhs2TeX.Formatting.dir.If"
+    dir Elif  ((f, l, b2, b1) : bs) = error "Lhs2TeX.Formatting.dir.Elif"
+    dir Else  ((f, l, b2, b1) : bs) = error "Lhs2TeX.Formatting.dir.Else"
+    dir Endif ((f, l, b2, b1) : bs) = error "Lhs2TeX.Formatting.dir.Endif"
     dir EOF                     []  = return ()
-    dir EOF                     bs  = throwError undefined
-    dir d                       _   = undefined
+    dir EOF                     bs  = throwError (error "Lhs2TeX.Formatting.dir.EOF")
+    dir d                       _   = error "Lhs2TeX.Formatting.dir"
   in
     dir d =<< gets conds

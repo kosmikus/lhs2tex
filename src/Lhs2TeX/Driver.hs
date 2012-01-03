@@ -39,7 +39,7 @@ lhs2TeX style state dirs files =
 -- | Print an error message.
 reportError :: Exc -> Lhs2TeX ()
 reportError (msg, context) =
-  undefined
+  error "Lhs2TeX.Driver.reportError"
 
 -- | Normalizes the end of the input string.
 addEndEOF :: String -> String
@@ -87,6 +87,6 @@ input (file : _) = chaseFile [] file  -- search path does not apply
 
 -- | When preprocessing, we perform a little bit of extra work. TODO: explain.
 preprocess :: State -> [Class] -> PreprocessorStyle -> [FilePath] -> IO a
-preprocess state dirs files = undefined
+preprocess state dirs files = "Lhs2TeX.Driver.preprocess"
 
 data PreprocessorStyle = PGMF | PGML

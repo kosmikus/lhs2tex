@@ -44,7 +44,7 @@ classifyLine n ('<' : s) = Environment Spec (n ++ ' ' : t) :
 classifyLine n s         = Many n : classify s
 
 -- | Detect directives, environments, control sequences etc.
-classify :: String -> [Class]                           
+classify :: String -> [Class]
 classify []         = []
 classify ('\n' : s) = classifyLine "\n" s
 
@@ -115,7 +115,7 @@ classify str@('\\' : s) =
     cont = One '\\' : classify s -- fallback, nothing recognized
 
     -- Find the argument of a verb command.
-    verbatim = undefined
+    verbatim = error "Lhs2TeX.TeX.Parser.classify.verbatim"
 
 -- Inline code
 classify ('|' : '|' : s) = One '|' : classify s  -- escaped vertical bar
@@ -143,7 +143,7 @@ classify (c : s) = One c : classify s
 unbird :: Char -> String -> (String, String)
 unbird c xs = go xs
   where
-    go :: String -> (String, String) 
+    go :: String -> (String, String)
     go []                       = ([], [])
     go ('\n' : x : xs) | c == x = '\n' <| ' ' <| go xs
     go ('\n'     : xs)          = '\n' <| blank xs

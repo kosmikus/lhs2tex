@@ -1,4 +1,4 @@
 module Lhs2TeX.Typewriter where
 
-inline = undefined
-display = undefined
+inline  = error "Lhs2TeX.Typewriter.inline"
+display = error "Lhs2TeX.Typewriter.display"
