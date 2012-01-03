@@ -87,6 +87,6 @@ input (file : _) = chaseFile [] file  -- search path does not apply
 
 -- | When preprocessing, we perform a little bit of extra work. TODO: explain.
 preprocess :: State -> [Class] -> PreprocessorStyle -> [FilePath] -> IO a
-preprocess state dirs files = "Lhs2TeX.Driver.preprocess"
+preprocess state dirs files = error "Lhs2TeX.Driver.preprocess"
 
 data PreprocessorStyle = PGMF | PGML
