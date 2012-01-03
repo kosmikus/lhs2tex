@@ -10,8 +10,8 @@ import Lhs2TeX.Math.Classic     as Math
 import Lhs2TeX.Math.Poly        as Poly
 import Lhs2TeX.Directive.Format as Format
 import Lhs2TeX.Directive.Subst  as Subst
-import Lhs2TeX.Directive.Let    as Let
 import Lhs2TeX.SearchPath
+import Lhs2TeX.Value
 import Lhs2TeX.Version
 import Lhs2TeX.Representation
 
@@ -41,16 +41,16 @@ data State =
       stack      :: [FilePath],  -- ^ %format directives of surrounding groups
       toggles    :: Toggles,     -- ^ %let directives currently active
       conds      :: [CondInfo],  -- ^ for %if directives
-      
+
       -- The rest is style-specific state.
-      
+
       align      :: Maybe Int,   -- ^ math style: alignment column
       stacks     :: (Math.Stack, Math.Stack),
                                  -- ^ math : indentation stacks
       separation :: Int,         -- ^ poly style: separation
       latency    :: Int,         -- ^ poly style: latency
       pstack     :: Poly.Stack   -- ^ poly style: indentation stack
-    }  
+    }
 
 -- | Information for conditionals. TODO: turn this into a datatype.
 type CondInfo = (FilePath, LineNumber, Bool, Bool)
