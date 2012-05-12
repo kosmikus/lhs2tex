@@ -20,6 +20,9 @@
 
 > newtype XIO exc st a          =  MkXIO (st -> IO (Either exc a, st))
 
+-- XIO exc st a ~= StateT st IO (Either exc a)
+--              ~= ErrorT exc (StateT st IO) a
+
 %if style /= math
 
 > unXIO (MkXIO f)               =  f
