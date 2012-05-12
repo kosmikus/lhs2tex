@@ -40,6 +40,7 @@ executable lhs2TeX
                         MathPoly
                         NewCode
                         Parser
+                        State
                         StateT
                         TeXCommands
                         TeXParser

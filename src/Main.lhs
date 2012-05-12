@@ -16,7 +16,6 @@
 > import System.Environment
 > import System.Exit
 > import System.Process
-> import Version
 > import Control.Arrow
 > import Control.Monad
 > import Control.Monad.Error
@@ -24,7 +23,7 @@
 > import Control.Monad.Trans
 > import Prelude hiding ( getContents )
 >
-> -- import IOExts
+> import Version
 > import TeXCommands
 > import TeXParser
 > import qualified Verbatim
@@ -34,6 +33,7 @@
 > import qualified NewCode
 > import Directives
 > import Document
+> import State
 > import StateT
 > import qualified FiniteMap as FM
 > import Auxiliaries
@@ -86,70 +86,6 @@
 >                                     ++ unwords (map (\s -> "--" ++ decode s) ss) ++ "\n"
 
 > type Formatter                =  XIO Exc State ()
-
-State.
-
-> type CondInfo                 =  (FilePath, LineNo, Bool, Bool)
-
-> data State                    =  State { style      :: Style,
->                                          lang       :: Lang,          -- Haskell or Agda, currently
->                                          verbose    :: Bool,
->                                          searchpath :: [FilePath],
->                                          file       :: FilePath,      -- also used for `hugs'
->                                          lineno     :: LineNo,
->                                          ofile      :: FilePath,
->                                          olineno    :: LineNo,
->                                          atnewline  :: Bool,
->                                          fldir      :: Bool,          -- file/linenumber directives
->                                          pragmas    :: Bool,          -- generate LINE pragmas?
->                                          output     :: Handle,
->                                          opts       :: String,        -- options for `hugs'
->                                          files      :: [(FilePath, LineNo)], -- includees (?)
->                                          path       :: FilePath,      -- for relative includes
->                                          fmts       :: Formats,
->                                          subst      :: Substs,
->                                          stack      :: [Formats],     -- for grouping
->                                          toggles    :: Toggles,       -- @%let@ defined toggles
->                                          conds      :: [CondInfo],    -- for conditional directives
->                                          align      :: Maybe Int,     -- math: internal alignment column
->                                          stacks     :: (Math.Stack, Math.Stack),      -- math: indentation stacks
->                                          separation :: Int,           -- poly: separation
->                                          latency    :: Int,           -- poly: latency
->                                          pstack     :: Poly.Stack,    -- poly: indentation stack
->                                          externals  :: Externals      -- catchErrors for external processes (hugs,ghci)
->                                        }
-
-Initial state.
-
-> state0                        :: State
-> state0                        =  State { lang       = Haskell,
->                                          verbose    = False,
->                                          searchpath = searchPath,
->                                          lineno     = 0,
->                                          olineno    = 0,
->                                          atnewline  = True,
->                                          fldir      = False,
->                                          pragmas    = True,
->                                          output     = stdout,
->                                          opts       = "",
->                                          files      = [],
->                                          path       = "",
->                                          fmts       = FM.empty,
->                                          subst      = FM.empty,
->                                          stack      = [],
->                                          conds      = [],
->                                          align      = Nothing,
->                                          stacks     = ([], []),
->                                          separation = 2,
->                                          latency    = 2,
->                                          pstack     = [],
->                                          -- ks, 03.01.04: added to prevent warnings during compilation
->                                          style      = error "uninitialized style",
->                                          file       = error "uninitialized filename",
->                                          ofile      = error "uninitialized filename",
->                                          toggles    = error "uninitialized toggles",
->                                          externals  = FM.empty
->                                        }
 
 > initState                     :: Style -> FilePath -> [FilePath] -> State -> State
 > initState sty filePath ep s   =  s { style = sty,
@@ -560,9 +496,6 @@ New, 26.01.2006: we're now starting an external process @ghci@ or @hugs@
 using the System.Process library. The process is then reused for subsequent
 computations, which should dramatically improve compilation time for
 documents that make extensive use of @\eval@ and @\perform@.
-
-> type Externals    =  FM.FiniteMap Char ProcessInfo
-> type ProcessInfo  =  (Handle, Handle, Handle, ProcessHandle)
 
 The function |external| can be used to call the process. It is discouraged
 to call any programs except @ghci@ or @hugs@, because we make a number of
