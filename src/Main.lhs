@@ -19,6 +19,9 @@
 > import Version
 > import Control.Arrow
 > import Control.Monad
+> import Control.Monad.Error
+> import Control.Monad.State ( MonadState(..), modify )
+> import Control.Monad.Trans
 > import Prelude hiding ( getContents )
 >
 > -- import IOExts
@@ -112,7 +115,7 @@ State.
 >                                          separation :: Int,           -- poly: separation
 >                                          latency    :: Int,           -- poly: latency
 >                                          pstack     :: Poly.Stack,    -- poly: indentation stack
->                                          externals  :: Externals      -- handles for external processes (hugs,ghci)
+>                                          externals  :: Externals      -- catchErrors for external processes (hugs,ghci)
 >                                        }
 
 Initial state.
@@ -183,8 +186,8 @@ Initial state.
 > lhs2TeX                       :: Style -> State -> [Class] -> [String] -> IO ()
 > lhs2TeX s flags dirs files    =  do (str, file) <- input files
 >                                     expandedpath <- expandPath (searchpath flags)
->                                     toIO (do store (initState s file expandedpath flags)
->                                              formats (map (No 0) dirs) `handle` abort
+>                                     toIO (do put (initState s file expandedpath flags)
+>                                              formats (map (No 0) dirs) `catchError` abort
 >                                              formatStr (addEndEOF str)
 >                                              stopexternals)
 >   where   addEndEOF           =  (++"%EOF\n") . unlines . lines
@@ -242,7 +245,7 @@ because with some versions of GHC it triggers ambiguity errors with
 >   ]
 >
 > formatStr                     :: String -> Formatter
-> formatStr str                 =  formats (texparse 1 str) `handle` abort
+> formatStr str                 =  formats (texparse 1 str) `catchError` abort
 
 Compatibility mode option handling.
 
@@ -270,9 +273,9 @@ Compatibility mode option handling.
 We abort immediately if an error has occured.
 
 > abort                         :: Exc -> Formatter
-> abort (msg, context)          =  do st <- fetch
->                                     fromIO (hPutStrLn stderr (text st))
->                                     fromIO (exitWith (ExitFailure 1))
+> abort (msg, context)          =  do st <- get
+>                                     liftIO (hPutStrLn stderr (text st))
+>                                     liftIO (exitWith (ExitFailure 1))
 >     where text st             =  "*** Error in " ++ at (file st) (lineno st) ++ ": \n"
 >                               ++ unlines [ "included from " ++ at f l | (f, l) <- files st ]
 >                               ++ msg ++ "\n"
@@ -286,12 +289,12 @@ We abort immediately if an error has occured.
 > formats                       :: [Numbered Class] -> Formatter
 > formats []                    =  return ()
 > formats (No n  (Directive d s) : ts)
->     | conditional d           =  do update (\st -> st{lineno = n})
->                                     st <- fetch
+>     | conditional d           =  do modify (\st -> st{lineno = n})
+>                                     st <- get
 >                                     directive (lang st)
 >                                               d s (file st,n)
 >                                               (conds st) (toggles st) ts
-> formats (No n t : ts)         =  do update (\st -> st{lineno = n})
+> formats (No n t : ts)         =  do modify (\st -> st{lineno = n})
 >                                     format t
 >                                     formats ts
 
@@ -301,20 +304,20 @@ We abort immediately if an error has occured.
 > format (Inline s)             =  inline s
 > format (Command Hs s)         =  inline s
 > format (Command (Vrb b) s)    =  out (Verbatim.inline b s)
-> format (Command Eval s)       =  do st <- fetch
+> format (Command Eval s)       =  do st <- get
 >                                     unless (style st `elem` [CodeOnly,NewCode]) $
 >                                       do result <- external (map unNL s)
 >                                          inline result
-> format (Command Perform s)    =  do st <- fetch
+> format (Command Perform s)    =  do st <- get
 >                                     unless (style st `elem` [CodeOnly,NewCode]) $
 >                                       do result <- external (map unNL s)
->                                          update (\st@State{file = f', lineno = l'} ->
+>                                          modify (\st@State{file = f', lineno = l'} ->
 >                                                    st{file = "<perform>", files = (f', l') : files st})
->                                          fromIO (when (verbose st) (hPutStr stderr $ "(" ++ "<perform>"))
+>                                          liftIO (when (verbose st) (hPutStr stderr $ "(" ++ "<perform>"))
 >                                          formatStr (addEndNL result)
->                                          update (\st'@State{files = (f, l) : fs} ->
+>                                          modify (\st'@State{files = (f, l) : fs} ->
 >                                                    st'{file = f, lineno = l, files = fs})
->                                          fromIO (when (verbose st) (hPutStrLn stderr $ ")"))
+>                                          liftIO (when (verbose st) (hPutStrLn stderr $ ")"))
 >     where
 >     addEndNL                  =  (++"\n") . unlines . lines
 
@@ -329,11 +332,11 @@ Remove trailing blank line.
 > format (Environment Haskell_ s)
 >                               =  display s
 > format (Environment Code s)   =  display s
-> format (Environment Spec s)   =  do st <- fetch
+> format (Environment Spec s)   =  do st <- get
 >                                     unless (style st `elem` [CodeOnly,NewCode]) $
 >                                       display s
 > format (Environment Evaluate s)
->                               =  do st <- fetch
+>                               =  do st <- get
 >                                     unless (style st `elem` [CodeOnly,NewCode]) $
 >                                       do result <- external s
 >                                          display result
@@ -341,27 +344,27 @@ Remove trailing blank line.
 > format (Environment Ignore s) =  return ()
 > format (Environment (Verbatim b) s)
 >                               =  out (Verbatim.display 120 b s)
-> format (Directive Format s)   =  do st <- fetch
+> format (Directive Format s)   =  do st <- get
 >                                     b@(n,e) <- fromEither (parseFormat (lang st) s)
->                                     store (st{fmts = FM.add b (fmts st)})
-> format (Directive Subst s)    =  do st <- fetch
+>                                     put (st{fmts = FM.add b (fmts st)})
+> format (Directive Subst s)    =  do st <- get
 >                                     b <- fromEither (parseSubst (lang st) s)
->                                     store (st{subst = FM.add b (subst st)})
-> format (Directive Include arg)=  do st <- fetch
+>                                     put (st{subst = FM.add b (subst st)})
+> format (Directive Include arg)=  do st <- get
 >                                     let d  = path st
 >                                     let sp = searchpath st
->                                     update (\st@State{file = f', lineno = l'} ->
+>                                     modify (\st@State{file = f', lineno = l'} ->
 >                                         st{file = f, files = (f', l') : files st, path = d ++ dir f})
->                                     -- |d <- fromIO getCurrentDirectory|
->                                     -- |fromIO (setCurrentDirectory (dir f))|
->                                     (str,f) <- fromIO (chaseFile sp (d ++ f))
->                                     update (\st -> st { file = f })
->                                     fromIO (when (verbose st) (hPutStr stderr $ "(" ++ f))
+>                                     -- |d <- liftIO getCurrentDirectory|
+>                                     -- |liftIO (setCurrentDirectory (dir f))|
+>                                     (str,f) <- liftIO (chaseFile sp (d ++ f))
+>                                     modify (\st -> st { file = f })
+>                                     liftIO (when (verbose st) (hPutStr stderr $ "(" ++ f))
 >                                     formatStr (addEndNL str)
->                                     -- |fromIO (setCurrentDirectory d)|
->                                     update (\st'@State{files = (f, l) : fs} ->
+>                                     -- |liftIO (setCurrentDirectory d)|
+>                                     modify (\st'@State{files = (f, l) : fs} ->
 >                                         st'{file = f, lineno = l, files = fs, path = d})
->                                     fromIO (when (verbose st) (hPutStrLn stderr $ ")"))
+>                                     liftIO (when (verbose st) (hPutStrLn stderr $ ")"))
 >     where f                   =  withoutSpaces arg
 >           addEndNL            =  (++"\n") . unlines . lines
 
@@ -379,24 +382,24 @@ to make sure that exactly one linebreak ends up in the output, but not
 more, as a double newline is interpreted as a \par by TeX, and that might 
 also not be desired.
 
-> format (Directive Begin _)    =  update (\st -> st{stack = fmts st : stack st})
-> format (Directive End _)      =  do st <- fetch
+> format (Directive Begin _)    =  modify (\st -> st{stack = fmts st : stack st})
+> format (Directive End _)      =  do st <- get
 >                                     when (null (stack st)) $
->                                       do fromIO (hPutStrLn stderr $ "unbalanced %} in line "
+>                                       do liftIO (hPutStrLn stderr $ "unbalanced %} in line "
 >                                                                       ++ show (lineno st))
->                                          update (\st -> st{stack = [fmts st]})
->                                     update (\st@State{stack = d:ds} -> st{fmts = d, stack = ds})
+>                                          modify (\st -> st{stack = [fmts st]})
+>                                     modify (\st@State{stack = d:ds} -> st{fmts = d, stack = ds})
 
 ks, 11.09.03: added exception handling for unbalanced grouping
 
 \Todo{|toggles| should be saved, as well.}
 
-> format (Directive Let s)      =  do st <- fetch
+> format (Directive Let s)      =  do st <- get
 >                                     t <- fromEither (define (lang st) (toggles st) s)
->                                     store st{toggles = FM.add t (toggles st)}
+>                                     put st{toggles = FM.add t (toggles st)}
 > format (Directive Align s)
->     | all isSpace s           =  update (\st -> st{align = Nothing, stacks  = ([], [])})
->     | otherwise               =  update (\st -> st{align = Just (read s), stacks  = ([], [])})
+>     | all isSpace s           =  modify (\st -> st{align = Nothing, stacks  = ([], [])})
+>     | otherwise               =  modify (\st -> st{align = Just (read s), stacks  = ([], [])})
 
 \NB @%align@ also resets the left identation stacks.
 
@@ -404,14 +407,14 @@ Also, the @poly@ directives @%separation@ and @%latency@ reset
 the corresponding indentation stack |pstack|.
 
 > format (Directive Separation s )
->                               =  update (\st -> st{separation = read s, pstack = []})
-> format (Directive Latency s)  =  update (\st -> st{latency = read s, pstack = []})
+>                               =  modify (\st -> st{separation = read s, pstack = []})
+> format (Directive Latency s)  =  modify (\st -> st{latency = read s, pstack = []})
 
-> format (Directive File s)     =  update (\st -> st{file = withoutSpaces s})
-> format (Directive Options s)  =  update (\st -> st{opts = trim s})
+> format (Directive File s)     =  modify (\st -> st{file = withoutSpaces s})
+> format (Directive Options s)  =  modify (\st -> st{opts = trim s})
 >     where trim                =  dropWhile isSpace >>> reverse >>> dropWhile isSpace >>> reverse
 
-> format (Error exc)            =  raise exc
+> format (Error exc)            =  throwError exc
 
 Printing documents.
 %{
@@ -420,14 +423,14 @@ Printing documents.
 
 > eject                         :: Doc -> Formatter
 > eject Empty                   =  return ()
-> eject (Text s)                =  do  st <- fetch
+> eject (Text s)                =  do  st <- get
 >                                      let (ls,enl) = checkNLs 0 s
 >                                      when (fldir st && not (null s) && atnewline st && (ofile st /= file st || olineno st /= lineno st)) $
->                                        do  fromIO (hPutStr (output st) ("%file " ++ show (lineno st) ++ " " ++ show (file st) ++ "\n"))
->                                            store (st { ofile = file st, olineno = lineno st })
+>                                        do  liftIO (hPutStr (output st) ("%file " ++ show (lineno st) ++ " " ++ show (file st) ++ "\n"))
+>                                            put (st { ofile = file st, olineno = lineno st })
 >
->                                      fromIO (hPutStr (output st) s)
->                                      update (\st -> st { olineno = olineno st + ls, atnewline = enl (atnewline st)})
+>                                      liftIO (hPutStr (output st) s)
+>                                      modify (\st -> st { olineno = olineno st + ls, atnewline = enl (atnewline st)})
 >     where
 >     checkNLs n ('\n':[])      =  (n+1,const True)
 >     checkNLs n (_:[])         =  (n,const False)
@@ -436,10 +439,10 @@ Printing documents.
 >     checkNLs n (_:xs)         =  checkNLs n xs
 > eject (d1 :^: d2)             =  eject d1 >> eject d2
 > eject (Embedded s)            =  formatStr s
-> eject (Sub s ds)              =  do st <- fetch; substitute (subst st)
+> eject (Sub s ds)              =  do st <- get; substitute (subst st)
 >     where
 >     substitute d              =  case FM.lookup s d of
->         Nothing               -> raise (undef s, "")
+>         Nothing               -> throwError (undef s, "")
 >         Just sub              -> eject (sub ds)
 >
 > undef                         :: String -> String
@@ -453,13 +456,13 @@ Printing documents.
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
 > out                           :: Doc -> Formatter
-> out d                         =  do st <- fetch; eject (select (style st))
+> out d                         =  do st <- get; eject (select (style st))
 >     where select CodeOnly     =  Empty
 >           select NewCode      =  Empty
 >           select _            =  d
 
 > inline, display               :: String -> Formatter
-> inline s                      =  do st <- fetch
+> inline s                      =  do st <- get
 >                                     d <- fromEither (select (style st) st)
 >                                     eject d
 >   where select Verb st        =  Right (Verbatim.inline False s)
@@ -469,9 +472,9 @@ Printing documents.
 >         select CodeOnly st    =  return Empty
 >         select NewCode st     =  return Empty   -- generate PRAGMA or something?
 
-> display s                     =  do st <- fetch
+> display s                     =  do st <- get
 >                                     (d, st') <- fromEither (select (style st) st)
->                                     store st'
+>                                     put st'
 >                                     eject d
 >   where select Verb st        =  return (Verbatim.display 120 False s, st)
 >         select Typewriter st  =  do d <- Typewriter.display (lang st) (fmts st) s; return (d, st)
@@ -524,11 +527,11 @@ groups.
 >   dir Else _ ((f,l,b2,b1):bs) =  skipOrFormat ((f, l, not b2 && b1, True) : bs) ts
 >   dir Endif _ ((f,l,b2,b1):bs)=  skipOrFormat bs ts
 >   dir EOF _ []                =  return ()  -- nothing left to do
->   dir EOF s bs                =  raise (init $ unlines (map unBalancedIf bs), s)
->   dir d s _                   =  raise ("spurious %" ++ decode d, s)
+>   dir EOF s bs                =  throwError (init $ unlines (map unBalancedIf bs), s)
+>   dir d s _                   =  throwError ("spurious %" ++ decode d, s)
 
 > skipOrFormat                  :: [CondInfo] -> [Numbered Class] -> Formatter
-> skipOrFormat stack ts         =  do  update (\st -> st{conds = stack})
+> skipOrFormat stack ts         =  do  modify (\st -> st{conds = stack})
 >                                      if andS stack  then formats ts
 >                                                     else skip ts
 
@@ -566,7 +569,7 @@ assumptions about the program being called. Input is the expression to evaluate.
 Output is the result in string form.
 
 > external                      :: String -> XIO Exc State String
-> external expr                 =  do st <- fetch
+> external expr                 =  do st <- get
 >                                     let os  =  opts st
 >                                         f   =  file st
 >                                         ex  =  externals st
@@ -580,13 +583,13 @@ Output is the result in string form.
 >                                     pi <- case FM.lookup f ex of
 >                                             Just pi  ->  return pi
 >                                             Nothing  ->  -- start new external process
->                                                          fromIO $ do
+>                                                          liftIO $ do
 >                                                            when (verbose st) $
 >                                                              hPutStrLn stderr $ "Starting external process: " ++ cmd
 >                                                            runInteractiveCommand cmd
->                                     store (st {externals = FM.add (f,pi) ex})
+>                                     put (st {externals = FM.add (f,pi) ex})
 >                                     let (pin,pout,_,_) = pi
->                                     fromIO $ do
+>                                     liftIO $ do
 >                                       -- hPutStrLn stderr ("sending: " ++ script)
 >                                       hPutStr pin script
 >                                       hFlush pin
@@ -596,10 +599,10 @@ This function can be used to stop all external processes by sending the
 @:q@ command to them.
 
 > stopexternals                 :: Formatter
-> stopexternals                 =  do st <- fetch
+> stopexternals                 =  do st <- get
 >                                     let ex   =  externals st
 >                                         pis  =  map (ex FM.!) (FM.keys ex)
->                                     when (not . null $ pis) $ fromIO $ do
+>                                     when (not . null $ pis) $ liftIO $ do
 >                                       when (verbose st) $
 >                                         hPutStrLn stderr $ "Stopping external processes."
 >                                       mapM_ (\(pin,_,_,pid) -> do  hPutStrLn pin ":q"
