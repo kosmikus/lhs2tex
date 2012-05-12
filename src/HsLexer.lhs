@@ -79,7 +79,7 @@ This should probably be either documented better or be removed again.
 The main function.
 
 > tokenize                      :: Lang -> String -> Either Exc [Token]
-> tokenize lang                 =  lift tidyup @@ lift qualify @@ lexify lang
+> tokenize lang                 =  lift tidyup <=< lift qualify <=< lexify lang
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Phase 1}

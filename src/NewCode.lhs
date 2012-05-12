@@ -13,6 +13,7 @@ way that is compatible with the @poly@ or @math@ formatters.
 > module NewCode                (  module NewCode  )
 > where
 >
+> import Control.Monad          (  (>=>) )
 > import Data.List              (  partition )
 >
 > import Verbatim               (  trim, expand )
@@ -34,17 +35,17 @@ way that is compatible with the @poly@ or @math@ formatters.
 in the ``real'' program code. All comments are deleted.
 
 > display                       :: Lang -> Formats -> String -> Either Exc Doc
-> display lang fmts             =  lift trim
->                               @> lift (expand 0)
->                               @> tokenize lang
->                               @> lift (number 1 1)
->                               @> lift (partition (\t -> catCode t /= White))
->                               @> exprParse *** return
->                               @> lift (substitute fmts False) *** return
->                               @> lift (uncurry merge)
->                               @> lift (fmap token)
->                               @> lift (latexs sub'space sub'nl fmts)
->                               @> lift sub'code
+> display lang fmts             =   lift trim
+>                               >=> lift (expand 0)
+>                               >=> tokenize lang
+>                               >=> lift (number 1 1)
+>                               >=> lift (partition (\t -> catCode t /= White))
+>                               >=> exprParse *** return
+>                               >=> lift (substitute fmts False) *** return
+>                               >=> lift (uncurry merge)
+>                               >=> lift (fmap token)
+>                               >=> lift (latexs sub'space sub'nl fmts)
+>                               >=> lift sub'code
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Encoding}

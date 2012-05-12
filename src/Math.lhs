@@ -10,7 +10,7 @@
 > import Prelude hiding         (  lines )
 > import Data.List              (  partition )
 > import Numeric                (  showFFloat )
-> import Control.Monad          (  MonadPlus(..) )
+> import Control.Monad          (  MonadPlus(..), (>=>) )
 >
 > import Verbatim               (  expand, trim )
 > import Typewriter             (  latex )
@@ -30,35 +30,35 @@
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
 > inline                        :: Lang -> Formats -> Bool -> String -> Either Exc Doc
-> inline lang fmts auto         =  fmap unNL
->                               .> tokenize lang
->                               @> lift (number 1 1)
->                               @> when auto (lift (filter (isNotSpace . token)))
->                               @> lift (partition (\t -> catCode t /= White))
->                               @> exprParse *** return
->                               @> lift (substitute fmts auto) *** return
->                               @> lift (uncurry merge)
->                               @> lift (fmap token)
->                               @> when auto (lift addSpaces)
->                               @> lift (latexs fmts)
->                               @> lift sub'inline
+> inline lang fmts auto         =   fmap unNL
+>                               .>  tokenize lang
+>                               >=> lift (number 1 1)
+>                               >=> when auto (lift (filter (isNotSpace . token)))
+>                               >=> lift (partition (\t -> catCode t /= White))
+>                               >=> exprParse *** return
+>                               >=> lift (substitute fmts auto) *** return
+>                               >=> lift (uncurry merge)
+>                               >=> lift (fmap token)
+>                               >=> when auto (lift addSpaces)
+>                               >=> lift (latexs fmts)
+>                               >=> lift sub'inline
 
 > display                       :: Lang -> Formats -> Bool -> (Stack, Stack) -> Maybe Int
 >                               -> String -> Either Exc (Doc, (Stack,Stack))
-> display lang fmts auto sts col=  lift trim
->                               @> lift (expand 0)
->                               @> tokenize lang
->                               @> lift (number 1 1)
->                               @> when auto (lift (filter (isNotSpace . token)))
->                               @> lift (partition (\t -> catCode t /= White))
->                               @> exprParse *** return
->                               @> lift (substitute fmts auto) *** return
->                               @> lift (uncurry merge)
->                               @> lift lines
->                               @> lift (align col)
->                               @> when auto (lift (fmap (fmap addSpaces)))
->                               @> lift (leftIndent fmts auto sts)
->                               @> lift sub'code *** return
+> display lang fmts auto sts col=   lift trim
+>                               >=> lift (expand 0)
+>                               >=> tokenize lang
+>                               >=> lift (number 1 1)
+>                               >=> when auto (lift (filter (isNotSpace . token)))
+>                               >=> lift (partition (\t -> catCode t /= White))
+>                               >=> exprParse *** return
+>                               >=> lift (substitute fmts auto) *** return
+>                               >=> lift (uncurry merge)
+>                               >=> lift lines
+>                               >=> lift (align col)
+>                               >=> when auto (lift (fmap (fmap addSpaces)))
+>                               >=> lift (leftIndent fmts auto sts)
+>                               >=> lift sub'code *** return
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{A very simple Haskell Parser}

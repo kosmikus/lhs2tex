@@ -16,7 +16,7 @@ are subtle differences, and they will grow over time \dots
 > import Prelude hiding         (  lines )
 > import Data.List              (  partition, nub, insert, sort, transpose )
 > import Numeric                (  showFFloat )
-> import Control.Monad          (  MonadPlus(..) )
+> import Control.Monad          (  MonadPlus(..), (>=>) )
 >
 > import Verbatim               (  expand, trim )
 > import Typewriter             (  latex )
@@ -37,47 +37,47 @@ are subtle differences, and they will grow over time \dots
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
 > inline                        :: Lang -> Formats -> Bool -> String -> Either Exc Doc
-> inline lang fmts auto         =  fmap unNL
->                               .> tokenize lang
->                               @> lift (number 1 1)
->                               @> when auto (lift (filter (isNotSpace . token)))
->                               @> lift (partition (\t -> catCode t /= White))
->                               @> exprParse *** return
->                               @> lift (substitute fmts auto) *** return
->                               @> lift (uncurry merge)
->                               @> lift (fmap token)
->                               @> when auto (lift addSpaces)
->                               @> lift (latexs fmts)
->                               @> lift sub'inline
+> inline lang fmts auto         =   fmap unNL
+>                               .>  tokenize lang
+>                               >=> lift (number 1 1)
+>                               >=> when auto (lift (filter (isNotSpace . token)))
+>                               >=> lift (partition (\t -> catCode t /= White))
+>                               >=> exprParse *** return
+>                               >=> lift (substitute fmts auto) *** return
+>                               >=> lift (uncurry merge)
+>                               >=> lift (fmap token)
+>                               >=> when auto (lift addSpaces)
+>                               >=> lift (latexs fmts)
+>                               >=> lift sub'inline
 
 > display                       :: Lang -> Int -> Formats -> Bool -> Int -> Int -> Stack
 >                               -> String -> Either Exc (Doc, Stack)
 > display lang line fmts auto sep lat stack
->                               =  lift trim
->                               @> lift (expand 0)
->                               @> tokenize lang
->                               @> lift (number line 1)
->       --                     |@> when auto (lift (filter (isNotSpace . token)))|
->                               @> lift (partition (\t -> catCode t /= White))
->                               @> exprParse *** return
->                               @> lift (substitute fmts auto) *** return
->                               @> lift (uncurry merge)
->                               @> lift lines
->                               @> when auto (lift (fmap addSpaces))
->                               @> lift (\ts -> (autoalign sep ts,ts))
->       --                     |@> lift (\(x,y) -> trace ((unlines $ map show $ y) ++ "\n" ++ show x) (x,y))|
->                               @> lift (\(cs,ts) -> let ats = align cs sep lat ts
->                                                        cs' = [("B",0)] ++ cs 
->                                                           ++ [("E",error "E column")]
->                                                    in  (autocols cs' ats,ats)
->                                       )
->                               @> return *** when auto (lift (fmap (fmap (filter (isNotSpace . token)))))
->       --                     |@> return *** when auto (lift (fmap (fmap (addSpaces . filter (isNotSpace . token)))))|
->                               @> lift (\((cs,z),ats) -> (cs,(z,ats)))
->                               @> return *** lift (\(z,ats) -> leftIndent fmts auto z [] ats)
+>                               =   lift trim
+>                               >=> lift (expand 0)
+>                               >=> tokenize lang
+>                               >=> lift (number line 1)
+>       --                     |>=> when auto (lift (filter (isNotSpace . token)))|
+>                               >=> lift (partition (\t -> catCode t /= White))
+>                               >=> exprParse *** return
+>                               >=> lift (substitute fmts auto) *** return
+>                               >=> lift (uncurry merge)
+>                               >=> lift lines
+>                               >=> when auto (lift (fmap addSpaces))
+>                               >=> lift (\ts -> (autoalign sep ts,ts))
+>       --                     |>=> lift (\(x,y) -> trace ((unlines $ map show $ y) ++ "\n" ++ show x) (x,y))|
+>                               >=> lift (\(cs,ts) -> let ats = align cs sep lat ts
+>                                                         cs' = [("B",0)] ++ cs 
+>                                                            ++ [("E",error "E column")]
+>                                                     in  (autocols cs' ats,ats)
+>                                        )
+>                               >=> return *** when auto (lift (fmap (fmap (filter (isNotSpace . token)))))
+>       --                     |>=> return *** when auto (lift (fmap (fmap (addSpaces . filter (isNotSpace . token)))))|
+>                               >=> lift (\((cs,z),ats) -> (cs,(z,ats)))
+>                               >=> return *** lift (\(z,ats) -> leftIndent fmts auto z [] ats)
 >       -- ks, 17.07.2003: i've changed "stack" into "[]" and thereby disabled
 >       -- the global stack for now as it leads to unexepected behaviour
->                               @> lift (\(cs,(d,stack)) -> (sub'code (columns cs <> d),stack))
+>                               >=> lift (\(cs,(d,stack)) -> (sub'code (columns cs <> d),stack))
 >
 > columns                       :: [(String,Doc)] -> Doc
 > columns                       =  foldr (<>) Empty 

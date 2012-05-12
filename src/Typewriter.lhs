@@ -7,6 +7,8 @@
 > module Typewriter             (  module Typewriter  )
 > where
 >
+> import Control.Monad
+>
 > import Verbatim ( trim, expand )
 > import Document
 > import Directives
@@ -22,15 +24,15 @@
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
 > inline, display               :: Lang -> Formats -> String -> Either Exc Doc
-> inline lang dict              =  tokenize lang
->                               @> lift (latexs sub'thin sub'thin dict)
->                               @> lift sub'inline
+> inline lang dict              =   tokenize lang
+>                               >=> lift (latexs sub'thin sub'thin dict)
+>                               >=> lift sub'inline
 
-> display lang dict             =  lift trim
->                               @> lift (expand 0)
->                               @> tokenize lang
->                               @> lift (latexs sub'space sub'nl dict)
->                               @> lift sub'code
+> display lang dict             =   lift trim
+>                               >=> lift (expand 0)
+>                               >=> tokenize lang
+>                               >=> lift (latexs sub'space sub'nl dict)
+>                               >=> lift sub'code
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{\LaTeX\ encoding}

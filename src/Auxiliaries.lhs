@@ -15,7 +15,6 @@
 
 > infixr 9 {-"\;"-} .>  -- same fixity as `|.|'
 > infixr 5 {-"\;"-} <|  -- same fixity as `|:|'
-> infixr 0 {-"\;"-} @@, @>
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Operations on chars}
@@ -88,14 +87,6 @@ i], [sub a (i+1),..,sub a n])| such that |p (sub a i) = True| and |p
 > lift                          :: (Monad m) => (a -> b) -> (a -> m b)
 > lift f a                      =  return (f a)
 
-Kleisli and reverse Kleisli composition.
-
-> (@@)                          :: (Monad m) => (a -> m b) -> (c -> m a) -> c -> m b
-> f @@ g                        =  \a -> g a >>= f
->
-> (@>)                          :: (Monad m) => (a -> m b) -> (b -> m c) -> a -> m c
-> f @> g                        =  \a -> f a >>= g
->
 > (***)                         :: Monad m => (a -> m a') -> (b -> m b') -> (a, b) -> m (a', b')
 > m *** n                       =  \(a, b) -> do { a' <- m a; b' <- n b; return (a', b') }
 
