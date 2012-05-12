@@ -8,6 +8,7 @@ psources        := $(main) src/TeXCommands.lhs src/TeXParser.lhs \
 		   src/Directives.lhs src/HsLexer.lhs src/FileNameUtils.lhs \
 		   src/Parser.lhs src/FiniteMap.lhs src/Auxiliaries.lhs \
 		   src/StateT.lhs src/Document.lhs src/Verbatim.lhs src/Value.lhs
+		   src/License.lhs
 sources         := $(psources) src/Version.lhs
 snipssrc        := sorts.snip id.snip cata.snip spec.snip
 snips	        := sorts.tt sorts.math id.math cata.math spec.math
