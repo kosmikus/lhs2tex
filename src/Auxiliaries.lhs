@@ -8,12 +8,13 @@
 > where
 >
 > import Data.Char              (  isSpace  )
+> import Control.Arrow          (  (>>>), Kleisli(..) )
+> import qualified Control.Arrow as A
 > import Control.Monad          (  MonadPlus(..)  )
 > import Control.Monad.Error
 
 %endif
 
-> infixr 9 {-"\;"-} .>  -- same fixity as `|.|'
 > infixr 5 {-"\;"-} <|  -- same fixity as `|:|'
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
@@ -73,7 +74,7 @@ i], [sub a (i+1),..,sub a n])| such that |p (sub a i) = True| and |p
 > withoutSpaces s               =  filter (not . isSpace) s
 
 > group                         :: Int -> [a] -> [[a]]
-> group n                       =  repSplit (repeat n) .> takeWhile (not . null)
+> group n                       =  repSplit (repeat n) >>> takeWhile (not . null)
 
 > repSplit                      :: [Int] -> [a] -> [[a]]
 > repSplit [] xs                =  []
@@ -87,8 +88,8 @@ i], [sub a (i+1),..,sub a n])| such that |p (sub a i) = True| and |p
 > lift                          :: (Monad m) => (a -> b) -> (a -> m b)
 > lift f a                      =  return (f a)
 
-> (***)                         :: Monad m => (a -> m a') -> (b -> m b') -> (a, b) -> m (a', b')
-> m *** n                       =  \(a, b) -> do { a' <- m a; b' <- n b; return (a', b') }
+> (***)                         :: (Monad m) => (a -> m a') -> (b -> m b') -> (a, b) -> m (a', b')
+> f *** g                       =  runKleisli (Kleisli f A.*** Kleisli g)
 
 > instance (Error a, Error b) => Error (a,b) where
 >
@@ -108,9 +109,6 @@ Some useful type abbreviations.
 
 Reverse Composition.
 
-> (.>)                          :: (a -> b) -> (b -> c) -> a -> c
-> f .> g                        =  \a -> g (f a)
->
 > (<|)                          :: a -> ([a], b) -> ([a], b)
 > a <| (as, b)                  =  (a : as, b)
 >

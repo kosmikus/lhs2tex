@@ -11,6 +11,7 @@
 > import Data.List              (  partition )
 > import Numeric                (  showFFloat )
 > import Control.Applicative    (  many )
+> import Control.Arrow          (  (>>>) )
 > import Control.Monad          (  MonadPlus(..), (>=>) )
 >
 > import Verbatim               (  expand, trim )
@@ -32,7 +33,7 @@
 
 > inline                        :: Lang -> Formats -> Bool -> String -> Either Exc Doc
 > inline lang fmts auto         =   fmap unNL
->                               .>  tokenize lang
+>                               >>> tokenize lang
 >                               >=> lift (number 1 1)
 >                               >=> when auto (lift (filter (isNotSpace . token)))
 >                               >=> lift (partition (\t -> catCode t /= White))

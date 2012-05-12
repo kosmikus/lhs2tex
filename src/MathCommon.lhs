@@ -18,6 +18,7 @@ therefore there has been much overlap between the two modules.
 >
 > import Control.Monad
 
+> when :: Monad m => Bool -> (a -> m a) -> (a -> m a)
 > when True f                   =  f
 > when False f                  =  return
 

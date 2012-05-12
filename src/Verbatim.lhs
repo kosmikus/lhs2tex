@@ -7,8 +7,9 @@
 > module Verbatim               (  module Verbatim  )
 > where
 >
+> import Control.Arrow          (  (>>>) )
 > import Data.Char
-> import Data.List (intersperse)
+> import Data.List              (  intersperse )
 >
 > import Document
 > import Auxiliaries
@@ -22,18 +23,18 @@
 The Boolean flag indicates whether a space should be typeset as \verb*| | (|True|) or not.
 
 > inline                        :: Bool -> String -> Doc
-> inline b                      =  latexs b .> sub'verb
+> inline b                      =  latexs b >>> sub'verb
 >
 > display                       :: Int -> Bool -> String -> Doc
-> display width b               =  trim
->                               .> expand 0
->                               .> lines
->                               .> map (group width)
->                               .> map (map (latexs b))
->                               .> map splice
->                               .> intersperse sub'verbnl
->                               .> catenate
->                               .> sub'verbatim
+> display width b               =   trim
+>                               >>> expand 0
+>                               >>> lines
+>                               >>> map (group width)
+>                               >>> map (map (latexs b))
+>                               >>> map splice
+>                               >>> intersperse sub'verbnl
+>                               >>> catenate
+>                               >>> sub'verbatim
 >
 > splice                        :: [Doc] -> Doc
 > splice ds                     =  Text "~" <> catenate (intersperse nl ds)
@@ -63,7 +64,7 @@ Haskell code.
 Delete leading and trailing blank line(s).
 
 > trim                          :: String -> String
-> trim                          =  skip .> reverse .> skip .> reverse
+> trim                          =  skip >>> reverse >>> skip >>> reverse
 >
 > skip                          :: String -> String
 > skip ""                       =  ""

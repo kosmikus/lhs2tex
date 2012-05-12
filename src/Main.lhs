@@ -17,6 +17,7 @@
 > import System.Exit
 > import System.Process
 > import Version
+> import Control.Arrow
 > import Control.Monad
 > import Prelude hiding ( getContents )
 >
@@ -319,7 +320,7 @@ We abort immediately if an error has occured.
 
 Remove trailing blank line.
 
->     trim                      =  reverse .> skip .> reverse
+>     trim                      =  reverse >>> skip >>> reverse
 >
 >     skip s | all isSpace t    =  u
 >            | otherwise        =  s
@@ -408,7 +409,7 @@ the corresponding indentation stack |pstack|.
 
 > format (Directive File s)     =  update (\st -> st{file = withoutSpaces s})
 > format (Directive Options s)  =  update (\st -> st{opts = trim s})
->     where trim                =  dropWhile isSpace .> reverse .> dropWhile isSpace .> reverse
+>     where trim                =  dropWhile isSpace >>> reverse >>> dropWhile isSpace >>> reverse
 
 > format (Error exc)            =  raise exc
 
@@ -489,7 +490,7 @@ Printing documents.
 Delete leading and trailing blank line (only the first!).
 
 > trim                          :: String -> String
-> trim                          =  skip .> reverse .> skip .> reverse
+> trim                          =  skip >>> reverse >>> skip >>> reverse
 >     where
 >     skip                      :: String -> String
 >     skip ""                   =  ""
