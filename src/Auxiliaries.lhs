@@ -98,19 +98,6 @@ i], [sub a (i+1),..,sub a n])| such that |p (sub a i) = True| and |p
 > optional m                    =  do { a <- m; return (Just a) }
 >                                  `mplus` return Nothing
 
-
-|Either| as an exception monad.
-
-> {-
-> instance Functor (Either a) where
->     fmap f (Left  a)          =  Left  a
->     fmap f (Right b)          =  Right (f b)
->
-> instance Monad (Either a) where
->     Left  a >>= k             =  Left a
->     Right b >>= k             =  k b
->     return                    =  Right
-> -}
 > instance (Error a, Error b) => Error (a,b) where
 >
 > fromRight                     :: Either a b -> b
