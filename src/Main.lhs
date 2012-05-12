@@ -648,11 +648,9 @@ and the second |magic| plus prompt is the result we look for.
 \subsubsection{Reading files}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
-> dir, nondir                   :: FilePath -> FilePath
+> dir                           :: FilePath -> FilePath
 > dir filePath
 >     | null d                  =  ""
 >     | otherwise               =  reverse d
 >     where d                   =  dropWhile (/= '/') (reverse filePath)
->
-> nondir                        =  reverse . takeWhile (/= '/') . reverse
 
