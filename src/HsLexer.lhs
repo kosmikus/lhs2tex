@@ -147,7 +147,7 @@ ks, 28.08.2008: New: Agda and Haskell modes.
 >                                     (ds, u) <- lexDigits' t
 >                                     (e, v)  <- lexExp u
 >                                     return ('.' : ds ++ e, v)
->                               `mplus` Just ("", s)
+>                               `mplus` lexExp s
 >
 > lexExp                        :: String -> Maybe (String, String)
 > lexExp (e:s)
