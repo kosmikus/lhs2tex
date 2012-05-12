@@ -53,7 +53,7 @@
 >   (o,n,[])                    -> do hSetEncoding stdin  utf8
 >                                     hSetEncoding stdout utf8
 >                                     hSetEncoding stderr utf8
->                                     (flags,initdirs,styles) 
+>                                     (flags,initdirs,styles)
 >                                        <- foldM (\(s,d,x) (sf,df,ns) -> do s' <- sf s
 >                                                                            return (s',df d,ns ++ x))
 >                                                 (state0,[],[]) o
@@ -289,7 +289,7 @@ We abort immediately if an error has occured.
 >     | conditional d           =  do update (\st -> st{lineno = n})
 >                                     st <- fetch
 >                                     directive (lang st)
->                                               d s (file st,n) 
+>                                               d s (file st,n)
 >                                               (conds st) (toggles st) ts
 > formats (No n t : ts)         =  do update (\st -> st{lineno = n})
 >                                     format t
@@ -382,7 +382,7 @@ also not be desired.
 > format (Directive Begin _)    =  update (\st -> st{stack = fmts st : stack st})
 > format (Directive End _)      =  do st <- fetch
 >                                     when (null (stack st)) $
->                                       do fromIO (hPutStrLn stderr $ "unbalanced %} in line " 
+>                                       do fromIO (hPutStrLn stderr $ "unbalanced %} in line "
 >                                                                       ++ show (lineno st))
 >                                          update (\st -> st{stack = [fmts st]})
 >                                     update (\st@State{stack = d:ds} -> st{fmts = d, stack = ds})
@@ -405,7 +405,7 @@ the corresponding indentation stack |pstack|.
 
 > format (Directive Separation s )
 >                               =  update (\st -> st{separation = read s, pstack = []})
-> format (Directive Latency s)  =  update (\st -> st{latency = read s, pstack = []})  
+> format (Directive Latency s)  =  update (\st -> st{latency = read s, pstack = []})
 
 > format (Directive File s)     =  update (\st -> st{file = withoutSpaces s})
 > format (Directive Options s)  =  update (\st -> st{opts = trim s})
@@ -425,7 +425,7 @@ Printing documents.
 >                                      when (fldir st && not (null s) && atnewline st && (ofile st /= file st || olineno st /= lineno st)) $
 >                                        do  fromIO (hPutStr (output st) ("%file " ++ show (lineno st) ++ " " ++ show (file st) ++ "\n"))
 >                                            store (st { ofile = file st, olineno = lineno st })
->                                            
+>
 >                                      fromIO (hPutStr (output st) s)
 >                                      update (\st -> st { olineno = olineno st + ls, atnewline = enl (atnewline st)})
 >     where
@@ -511,7 +511,7 @@ conditions of the current @%if@-chain.
 ks, 16.08.2004: At the end of the input, we might want to check for unbalanced if's or
 groups.
 
-> directive                     :: Lang -> Directive -> String 
+> directive                     :: Lang -> Directive -> String
 >                               -> (FilePath,LineNo) -> [CondInfo] -> Toggles
 >                               -> [Numbered Class] -> Formatter
 > directive lang d s (f,l) stack togs ts
