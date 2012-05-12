@@ -4,6 +4,7 @@
 
 %if codeOnly || showModuleHeader
 
+> {-# LANGUAGE TypeSynonymInstances #-}
 > module Auxiliaries            (  module Auxiliaries  )
 > where
 >
@@ -91,8 +92,6 @@ i], [sub a (i+1),..,sub a n])| such that |p (sub a i) = True| and |p
 > (***)                         :: (Monad m) => (a -> m a') -> (b -> m b') -> (a, b) -> m (a', b')
 > f *** g                       =  runKleisli (Kleisli f A.*** Kleisli g)
 
-> instance (Error a, Error b) => Error (a,b) where
->
 > fromRight                     :: Either a b -> b
 > fromRight (Left _)            =  error "fromRight"
 > fromRight (Right b)           =  b
@@ -106,6 +105,10 @@ Some useful type abbreviations.
 > type LineNo                   =  Int
 > type Message                  =  String
 > type Exc                      =  (Message, String)
+
+> instance Error Exc where
+>   noMsg    = ("unknown error", "")
+>   strMsg s = (s, "")
 
 Reverse Composition.
 

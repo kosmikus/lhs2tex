@@ -19,6 +19,7 @@ executable lhs2TeX
   other-extensions:     ScopedTypeVariables
                         NPlusKPatterns
                         GeneralizedNewtypeDeriving
+                        TypeSynonymInstances
   build-depends:        base >= 4.2 && < 5,
                         regex-compat,
                         mtl,
