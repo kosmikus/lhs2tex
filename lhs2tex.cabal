@@ -23,4 +23,23 @@ executable lhs2TeX
                         directory,
                         process,
                         extensible-exceptions
-
+  other-modules:        Auxiliaries
+                        Directives
+                        Document
+                        FileNameUtils
+                        FiniteMap
+                        HsLexer
+                        LaTeX
+                        License
+                        MathCommon
+                        Math
+                        MathPoly
+                        NewCode
+                        Parser
+                        StateT
+                        TeXCommands
+                        TeXParser
+                        Typewriter
+                        Value
+                        Verbatim
+                        Version
