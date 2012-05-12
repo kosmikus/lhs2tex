@@ -8,6 +8,7 @@
 > where
 >
 > import Data.Char
+> import Data.List (intersperse)
 >
 > import Document
 > import Auxiliaries

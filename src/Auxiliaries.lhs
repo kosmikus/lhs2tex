@@ -73,12 +73,6 @@ i], [sub a (i+1),..,sub a n])| such that |p (sub a i) = True| and |p
 > withoutSpaces                 :: String -> String
 > withoutSpaces s               =  filter (not . isSpace) s
 
-> intersperse                   :: a -> [a] -> [a]
-> intersperse s []              =  []
-> intersperse s (a : as)        =  a : intersperse1 as
->   where intersperse1 []       =  []
->         intersperse1 (a : as) =  s : a : intersperse1 as
-
 > group                         :: Int -> [a] -> [[a]]
 > group n                       =  repSplit (repeat n) .> takeWhile (not . null)
 
