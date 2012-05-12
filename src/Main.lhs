@@ -152,11 +152,11 @@ Initial state.
 >                                        }
 
 > initState                     :: Style -> FilePath -> [FilePath] -> State -> State
-> initState sty filePath ep s   =  s { style = sty, 
+> initState sty filePath ep s   =  s { style = sty,
 >                                      file = filePath,
 >                                      ofile = filePath,
 >                                      searchpath = ep,
->                                      toggles = FM.fromList toggles0 
+>                                      toggles = FM.fromList toggles0
 >                                    }
 >     where toggles0            =  --[(decode CodeOnly, Bool (sty == CodeOnly))]
 >                                  [("style", Int (fromEnum sty))]
@@ -237,7 +237,7 @@ because with some versions of GHC it triggers ambiguity errors with
 >   , Option ['l'] ["let"]     (ReqArg (\s -> (return, (Directive Let s:), [])) "equation") "assume <equation>"
 >   , Option ['s'] ["set"]     (ReqArg (\s -> (return, (Directive Let (s ++ " = True"):), [])) "flag")  "set <flag>"
 >   , Option ['u'] ["unset"]   (ReqArg (\s -> (return, (Directive Let (s ++ " = False"):), [])) "flag") "unset <flag>"
->   , Option ['P'] ["path"]    (ReqArg (\p -> (\s -> return $ s { searchpath = modifySearchPath (searchpath s) p }, id , [])) "path") 
+>   , Option ['P'] ["path"]    (ReqArg (\p -> (\s -> return $ s { searchpath = modifySearchPath (searchpath s) p }, id , [])) "path")
 >                                                                                       "modify search path"
 >   , Option []    ["searchpath"]
 >                              (NoArg (return, id, [SearchPath]))                           "show searchpath"
