@@ -16,6 +16,9 @@ executable lhs2TeX
   main-is:              Main.lhs
   hs-source-dirs:       src
   default-language:     Haskell98
+  other-extensions:     ScopedTypeVariables
+                        NPlusKPatterns
+                        GeneralizedNewtypeDeriving
   build-depends:        base >= 4.2 && < 5,
                         regex-compat,
                         mtl,
