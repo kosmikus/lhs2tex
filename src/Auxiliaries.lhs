@@ -90,14 +90,6 @@ i], [sub a (i+1),..,sub a n])| such that |p (sub a i) = True| and |p
 > (***)                         :: Monad m => (a -> m a') -> (b -> m b') -> (a, b) -> m (a', b')
 > m *** n                       =  \(a, b) -> do { a' <- m a; b' <- n b; return (a', b') }
 
-> many                          :: (MonadPlus m) => m a -> m [a]
-> many m                        =  do { a <- m; as <- many m; return (a : as) }
->                                  `mplus` return []
->
-> optional                      :: (MonadPlus m) => m a -> m (Maybe a)
-> optional m                    =  do { a <- m; return (Just a) }
->                                  `mplus` return Nothing
-
 > instance (Error a, Error b) => Error (a,b) where
 >
 > fromRight                     :: Either a b -> b

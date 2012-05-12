@@ -9,7 +9,8 @@
 >
 > import Data.Char              (  isSpace  )
 > import Auxiliaries
-> import Control.Monad          (  MonadPlus(..), filterM  )
+> import Control.Applicative
+> import Control.Monad          (  MonadPlus(..), filterM, ap  )
 
 %endif
 Deterministische Mini-Parser.
@@ -37,6 +38,12 @@ Deterministische Mini-Parser.
 > instance MonadPlus  (Parser tok) where
 >     mzero                     =  MkParser (\inp -> Nothing)
 >     m `mplus` n               =  MkParser (\inp -> unParser m inp `mplus` unParser n inp)
+> instance Applicative (Parser tok) where
+>     pure                      =  return
+>     (<*>)                     =  ap
+> instance Alternative (Parser tok) where
+>     empty                     =  mzero
+>     (<|>)                     =  mplus
 >
 > satisfy                       :: (tok -> Bool) -> Parser tok tok
 > satisfy pred                  =  MkParser (\inp -> case inp of

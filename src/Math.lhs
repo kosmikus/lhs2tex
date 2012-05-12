@@ -10,6 +10,7 @@
 > import Prelude hiding         (  lines )
 > import Data.List              (  partition )
 > import Numeric                (  showFFloat )
+> import Control.Applicative    (  many )
 > import Control.Monad          (  MonadPlus(..), (>=>) )
 >
 > import Verbatim               (  expand, trim )

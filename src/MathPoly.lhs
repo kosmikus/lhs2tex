@@ -16,6 +16,7 @@ are subtle differences, and they will grow over time \dots
 > import Prelude hiding         (  lines )
 > import Data.List              (  partition, nub, insert, sort, transpose )
 > import Numeric                (  showFFloat )
+> import Control.Applicative    (  many )
 > import Control.Monad          (  MonadPlus(..), (>=>) )
 >
 > import Verbatim               (  expand, trim )
