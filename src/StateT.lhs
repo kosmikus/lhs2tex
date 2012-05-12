@@ -11,7 +11,7 @@
 
 %endif
 
-|IO| mit internem Zustand und Fehlerbehandlung.
+|IO| with internal state and error handling.
 
 %if style == math
 %format MkXIO (m) = m
