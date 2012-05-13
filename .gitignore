@@ -2,6 +2,7 @@
 *.hi
 *~
 *.ld
+*.swp
 /src/Version.lhs
 /doc/*.tex
 /doc/*.sty
@@ -15,8 +16,11 @@
 *.ptb
 *.toc
 *.out
+*.tar.gz
+.setup-*-config
 /lhs2TeX.1
 /lhs2TeX.fmt
 /lhs2TeX.sty
 /lhs2TeX
 /Lhs2TeX
+/dist
