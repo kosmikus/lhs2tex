@@ -21,8 +21,8 @@
 %if lang == agda
 
 \RequirePackage[T1]{fontenc}
+\RequirePackage[mathletters]{ucs}
 \RequirePackage[utf8x]{inputenc}
-\RequirePackage{ucs}
 \RequirePackage{amsfonts}
 
 \providecommand\mathbbm{\mathbb}
