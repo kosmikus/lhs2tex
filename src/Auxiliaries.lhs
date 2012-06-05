@@ -4,6 +4,7 @@
 
 %if codeOnly || showModuleHeader
 
+> {-# LANGUAGE FlexibleInstances #-}
 > {-# LANGUAGE TypeSynonymInstances #-}
 > module Auxiliaries            (  module Auxiliaries  )
 > where
