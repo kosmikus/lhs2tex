@@ -19,12 +19,12 @@ import Data.Char (isSpace, showLitChar)
 import Data.List (isSuffixOf,isPrefixOf)
 import Data.Maybe (listToMaybe,isJust)
 import Data.Version
+import Control.Exception (try)
 import Control.Monad (when,unless)
 import Text.Regex (matchRegex,matchRegexAll,mkRegex,mkRegexWithOpts,subRegex)
 import Text.ParserCombinators.ReadP (readP_to_S)
 import System.Exit
 import System.IO (hGetContents,hClose,hPutStr,stderr)
-import System.IO.Error (try)
 import System.Process (runInteractiveProcess,waitForProcess)
 import System.Directory
 import System.Info (os)
@@ -237,8 +237,8 @@ lhs2texRegHook pd lbi _ (RegisterFlags { regVerbosity = vf }) =
 
 lhs2texCleanHook pd lbi v pshs =
     do  cleanHook simpleUserHooks pd lbi v pshs
-        try $ removeFile lhs2texBuildInfoFile
-        mapM_ (try . removeFile) generatedFiles
+        tryIO $ removeFile lhs2texBuildInfoFile
+        mapM_ (tryIO . removeFile) generatedFiles
 
 matchRegexRepeatedly re str =
     case matchRegexAll re str of
@@ -341,6 +341,9 @@ writePersistLhs2texBuildConfig :: Lhs2texBuildInfo -> IO ()
 writePersistLhs2texBuildConfig lbi = do
   writeFile lhs2texBuildInfoFile (show lbi)
 
+
+tryIO :: IO a -> IO (Either IOError a)
+tryIO = try
 
 -- HACKS because the Cabal API isn't sufficient:
 

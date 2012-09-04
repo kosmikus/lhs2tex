@@ -11,7 +11,7 @@
 >                               , module System.FilePath
 >                               ) where
 >
-> import Prelude hiding         (  catch, readFile )
+> import Prelude
 > import System.IO              (  openFile, IOMode(..), hPutStrLn, stderr,
 >                                  hSetEncoding, hGetContents, utf8, Handle() )
 > import System.IO.Error        (  isDoesNotExistError, isPermissionError )
@@ -19,7 +19,7 @@
 > import System.Environment
 > import Data.List
 > import Control.Monad (filterM)
-> import Control.Exception.Extensible
+> import Control.Exception.Extensible as E
 >                               (  try, catch, IOException )
 > import System.FilePath
 > import System.Info
@@ -87,15 +87,15 @@ more than one directory separator, all subpaths are added ...
 >                                           else descendFrom s'
 
 > descendFrom                   :: String -> IO [String]
-> descendFrom s                 =  catch (do  d <- getDirectoryContents s
->                                             {- no hidden files, no parents -}
->                                             let d' = map (\x -> s </> x)
->                                                    . filter ((/='.') . head) . filter (not . null) $ d
->                                             d'' <- filterM doesDirectoryExist d'
->                                             d''' <- mapM descendFrom d''
->                                             return (s : concat d''')
->                                        )
->                                        (\ (_ :: IOException) -> return [s])
+> descendFrom s                 =  E.catch (do  d <- getDirectoryContents s
+>                                               {- no hidden files, no parents -}
+>                                               let d' = map (\x -> s </> x)
+>                                                      . filter ((/='.') . head) . filter (not . null) $ d
+>                                               d'' <- filterM doesDirectoryExist d'
+>                                               d''' <- mapM descendFrom d''
+>                                               return (s : concat d''')
+>                                          )
+>                                          (\ (_ :: IOException) -> return [s])
 
 > expandEnvironment             :: String -> IO [String]
 > expandEnvironment s           =  case break (=='{') s of
@@ -121,7 +121,7 @@ more than one directory separator, all subpaths are added ...
 
 > chaseFile                     :: [String]    {- search path -}
 >                               -> FilePath -> IO (String,FilePath)
-> chaseFile p fn | isAbsolute fn=  catch (t fn) (handle fn (err "."))
+> chaseFile p fn | isAbsolute fn=  E.catch (t fn) (handle fn (err "."))
 >                | p == []      =  chaseFile ["."] fn
 >                | otherwise    =  s $ map (\ d -> md d ++ fn) p
 >   where
@@ -130,7 +130,7 @@ more than one directory separator, all subpaths are added ...
 >         | otherwise           =  addTrailingPathSeparator cs
 >   t f                         =  readTextFile f >>= \x -> return (x,f)
 >   s []                        =  err $ " in search path:\n" ++ showpath
->   s (x:xs)                    =  catch (t x) (handle x (s xs))
+>   s (x:xs)                    =  E.catch (t x) (handle x (s xs))
 >   err extra                   =  ioError
 >                               $  userError $ "File `" ++ fn ++ "' not found or not readable" ++ extra
 >   handle :: FilePath -> IO (String,FilePath) -> IOException -> IO (String,FilePath)
