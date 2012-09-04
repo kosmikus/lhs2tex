@@ -19,7 +19,7 @@
 > import System.Environment
 > import Data.List
 > import Control.Monad (filterM)
-> import Control.Exception.Extensible as E
+> import Control.Exception as E
 >                               (  try, catch, IOException )
 > import System.FilePath
 > import System.Info
