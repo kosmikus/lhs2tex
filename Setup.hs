@@ -70,33 +70,37 @@ lhs2texHooks = simpleUserHooks
 lhs2texPostConf a cf pd lbi =
     do  let v = fromFlagOrDefault normal (configVerbosity cf)
         -- check polytable
-        (_,b,_) <- runKpseWhichVar "TEXMFLOCAL"
-        b       <- return . stripQuotes . stripNewlines $ b
-        ex      <- return (not . all isSpace $ b) -- or check if directory exists?
-        b       <- if ex then return b
-                         else do  (_,b,_) <- (runKpseWhichVar "TEXMFMAIN")
-                                  return . stripQuotes . stripNewlines $ b
-        ex      <- return (not . all isSpace $ b) -- or check if directory exists?
-        i       <- if ex then
-                   do  (_,p,_) <- runKpseWhich "polytable.sty"
-                       p       <- return . stripNewlines $ p
-                       ex      <- doesFileExist p
-                       nec     <- if ex then do  info v $ "Found polytable package at: " ++ p
-                                                 x  <- readFile p
-                                                 let vp = do  vs <- matchRegex (mkRegexWithOpts " v(.*) .polytable. package" True True) x
-                                                              listToMaybe [ r | v <- vs, (r,"") <- readP_to_S parseVersion v ]
-                                                 let (sv,nec) = case vp of
-                                                                  Just n  -> (showVersion n,versionBranch n < minPolytableVersion)
-                                                                  Nothing -> ("unknown",True)
-                                                 info v $ "Package polytable version: " ++ sv
-                                                 return nec
-                                        else return True
-                       info v $ "Package polytable installation necessary: " ++ showYesNo nec
-                       when nec $ info v $ "Using texmf tree at: " ++ b
-                       return (if nec then Just b else Nothing)
-                   else
-                   do  warn v "No texmf tree found, polytable package cannot be installed"
-                       return Nothing
+        tmft    <- do let kpseExists = lookupProgram (simpleProgram "kpsewhich") (withPrograms lbi)
+                      case kpseExists of
+                        Nothing -> return Nothing
+                        Just _  -> do  (_,b,_) <- runKpseWhichVar "TEXMFLOCAL"
+                                       b       <- return . stripQuotes . stripNewlines $ b
+                                       ex      <- return (not . all isSpace $ b) -- or check if directory exists?
+                                       b       <- if ex then return b
+                                                        else do  (_,b,_) <- (runKpseWhichVar "TEXMFMAIN")
+                                                                 return . stripQuotes . stripNewlines $ b
+                                       if not . all isSpace $ b -- or check if directory exists?
+                                         then return (Just b)
+                                         else return Nothing
+        i       <- case tmft of
+                     Just b  -> do  (_,p,_) <- runKpseWhich "polytable.sty"
+                                    p       <- return . stripNewlines $ p
+                                    ex      <- doesFileExist p
+                                    nec     <- if ex then do  info v $ "Found polytable package at: " ++ p
+                                                              x  <- readFile p
+                                                              let vp = do  vs <- matchRegex (mkRegexWithOpts " v(.*) .polytable. package" True True) x
+                                                                           listToMaybe [ r | v <- vs, (r,"") <- readP_to_S parseVersion v ]
+                                                              let (sv,nec) = case vp of
+                                                                               Just n  -> (showVersion n,versionBranch n < minPolytableVersion)
+                                                                               Nothing -> ("unknown",True)
+                                                              info v $ "Package polytable version: " ++ sv
+                                                              return nec
+                                                     else return True
+                                    info v $ "Package polytable installation necessary: " ++ showYesNo nec
+                                    when nec $ info v $ "Using texmf tree at: " ++ b
+                                    return (if nec then Just b else Nothing)
+                     Nothing -> do  warn v "No texmf tree found, polytable package cannot be installed"
+                                    return Nothing
         -- check documentation
         ex      <- doesFileExist $ "doc" `joinFileName` "Guide2.dontbuild"
         r       <- if ex then do info v "Documentation will not be rebuilt unless you remove the file \"doc/Guide2.dontbuild\""
