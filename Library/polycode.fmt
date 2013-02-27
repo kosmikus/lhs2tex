@@ -8,7 +8,7 @@
 % literally into other documents, regardless of the conditions or 
 % license applying to these documents.
 %
-% Andres Loeh, November 2008, ver 1.11
+% Andres Loeh, February 2013, ver 1.12
 %
 % TODO: use \[ \] in arrayhs (fleqn problem)
 %       think about penalties and better pagebreaks
@@ -19,7 +19,7 @@
 %let lhs2tex_polycode_fmt_read = True
 %include lhs2TeX.fmt
 %
-%if style /= newcode
+%if style == poly
 %
 %if False
 % The follwing subst replaces the bad default from lhs2TeX.fmt.
