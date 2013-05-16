@@ -124,7 +124,7 @@ ks, 28.08.2008: New: Agda and Haskell modes.
 >                                     return (Nested t, v)
 > lex' lang (c : s)
 >     | isSpace c               =  let (t, u) = span isSpace s in return (Space (c : t), u)
->     | isSpecial c             =  Just (Special c, s)
+>     | isSpecial lang c        =  Just (Special c, s)
 >     | isUpper c               =  let (t, u) = span (isIdChar lang) s in return (Conid (c : t), u)
 >     | isLower c || c == '_'   =  let (t, u) = span (isIdChar lang) s in return (classify (c : t), u)
 >     | c == ':'                =  let (t, u) = span (isSymbol lang) s in return (consymid lang (c : t), u)
@@ -204,15 +204,16 @@ I don't expect this to be a problem, though.
 > lexLitStr ('\\' : c : s)      =  '\\' <| c <| lexLitStr s
 > lexLitStr (c : s)             =  c <| lexLitStr s
 
-> isSpecial                     :: Char -> Bool
+> isSpecial                     :: Lang -> Char -> Bool
 > isIdChar, isSymbol            :: Lang -> Char -> Bool
-> isSpecial c                   =  c `elem` ",;()[]{}`"
-> isSymbol Haskell c            =  not (isSpecial c) && notElem c "'\"" &&
+> isSpecial Haskell c           =  c `elem` ",;()[]{}`"
+> isSpecial Agda c              =  c `elem` ";(){}"
+> isSymbol Haskell c            =  not (isSpecial Haskell c) && notElem c "'\"" &&
 >                                  (c `elem` "!@#$%&*+./<=>?\\^|:-~" ||
 >                                   Data.Char.isSymbol c || Data.Char.isPunctuation c)
 > isSymbol Agda c               =  isIdChar Agda c
 > isIdChar Haskell c            =  isAlphaNum c || c `elem` "_'"
-> isIdChar Agda c               =  not (isSpecial c || isSpace c)
+> isIdChar Agda c               =  not (isSpecial Agda c || isSpace c)
 
 > match                         :: String -> String -> Maybe String
 > match p s
