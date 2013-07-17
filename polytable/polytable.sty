@@ -9,14 +9,18 @@
 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{polytable}%
-   [2009/11/01 v0.8.4 `polytable' package (Andres Loeh)]
+   [2013/07/18 v0.8.5 `polytable' package (Andres Loeh)]
 \let\PT@original@And\And
+\let\PT@original@Not\Not
 \RequirePackage{lazylist}
 \let\PT@And\And
+\let\PT@Not\Not
 \def\PT@prelazylist
-  {\let\And\PT@And}
+  {\let\And\PT@And
+   \let\Not\PT@Not}
 \def\PT@postlazylist
-  {\let\And\PT@original@And}
+  {\let\And\PT@original@And
+   \let\Not\PT@original@Not}
 \PT@postlazylist
 \RequirePackage{array}
 \DeclareOption{debug} {\AtEndOfPackage\PT@debug}
