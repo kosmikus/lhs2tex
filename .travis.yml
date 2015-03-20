@@ -1,5 +1,5 @@
 language: haskell
-before-script:
+before_script:
   - touch doc/Guide2.pdf
 ghc:
   - 7.8
