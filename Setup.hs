@@ -1,3 +1,4 @@
+{-# LANGUAGE PackageImports #-}
 import Distribution.Simple.Setup (CopyDest(..),ConfigFlags(..),BuildFlags(..),
                                   CopyFlags(..),RegisterFlags(..),InstallFlags(..),
                                   defaultRegisterFlags,fromFlagOrDefault,Flag(..),
@@ -21,7 +22,7 @@ import Data.Maybe (listToMaybe,isJust)
 import Data.Version
 import Control.Exception (try)
 import Control.Monad (when,unless)
-import Text.Regex (matchRegex,matchRegexAll,mkRegex,mkRegexWithOpts,subRegex)
+import "regex-compat" Text.Regex (matchRegex,matchRegexAll,mkRegex,mkRegexWithOpts,subRegex)
 import Text.ParserCombinators.ReadP (readP_to_S)
 import System.Exit (ExitCode)
 import System.IO (hGetContents,hClose,hPutStr,stderr)
