@@ -31,7 +31,7 @@
 
 \newcommand*{\PDF}{{\smaller{PDF}}\xspace}
 \newcommand*{\CTAN}{{\smaller{CTAN}}\xspace}
-%format lhs2TeX = "\textrm{lhs}\textsf{2}\TeX"
+%format lhs2TeX = "\text{\textrm{lhs}\textsf{2}\TeX}"
 \setdefaultitem{\textbf{--}}{}{}{}
 
 %let doc = True
