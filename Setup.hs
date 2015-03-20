@@ -23,7 +23,7 @@ import Control.Exception (try)
 import Control.Monad (when,unless)
 import Text.Regex (matchRegex,matchRegexAll,mkRegex,mkRegexWithOpts,subRegex)
 import Text.ParserCombinators.ReadP (readP_to_S)
-import System.Exit
+import System.Exit (ExitCode)
 import System.IO (hGetContents,hClose,hPutStr,stderr)
 import System.Process (runInteractiveProcess,waitForProcess)
 import System.Directory
