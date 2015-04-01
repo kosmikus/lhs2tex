@@ -10,7 +10,7 @@ module InteractiveGhci where
 %format forall a = "\forall" a
 
 \begin{code}
-%options ghci -fglasgow-exts
+%options ghci -XRankNTypes -fprint-explicit-foralls
 
 > fix    ::  forall a. (a -> a) -> a
 > fix f  =   f (fix f)
