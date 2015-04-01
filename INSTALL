@@ -48,18 +48,18 @@ lhs2TeX formatting directives) that need to be found by the
 lhs2TeX binary. The default search path is as follows:
 
 .
-{HOME}/lhs2tex-1.18.1//
+{HOME}/lhs2tex-1.19//
 {HOME}/lhs2tex//
 {HOME}/lhs2TeX//
-{HOME}/.lhs2tex-1.18.1//
+{HOME}/.lhs2tex-1.19//
 {HOME}/.lhs2tex//
 {HOME}/.lhs2TeX//
 {LHS2TEX}//
-/usr/local/share/lhs2tex-1.18.1//
-/usr/local/share/lhs2tex-1.18.1//
-/usr/local/lib/lhs2tex-1.18.1//
-/usr/share/lhs2tex-1.18.1//
-/usr/lib/lhs2tex-1.18.1//
+/usr/local/share/lhs2tex-1.19pre1//
+/usr/local/share/lhs2tex-1.19//
+/usr/local/lib/lhs2tex-1.19//
+/usr/share/lhs2tex-1.19//
+/usr/lib/lhs2tex-1.19//
 /usr/local/share/lhs2tex//
 /usr/local/lib/lhs2tex//
 /usr/share/lhs2tex//
