@@ -11,6 +11,38 @@ synopsis:       Preprocessor for typesetting Haskell sources with LaTeX
 description:    Preprocessor for typesetting Haskell sources with LaTeX
 category:       Development, Language
 build-type:     Custom
+extra-source-files:     AUTHORS
+                        CHANGELOG
+                        INSTALL
+                        TODO
+                        doc/*.lhs
+                        doc/*.fmt
+                        doc/Guide2.lhs
+                        doc/Guide2.pdf
+                        doc/Makefile
+                        doc/lhs2TeXpre
+                        Examples/*.lhs
+                        Examples/lhs2TeXpre
+                        Library/*.fmt
+                        polytable/*.sty
+                        polytable/*.pdf
+                        src/Version.lhs.in
+                        Testsuite/*.snip
+                        Testsuite/*.lhs
+                        Testsuite/Makefile
+                        sorts.snip
+                        id.snip
+                        cata.snip
+                        spec.snip
+                        lhs2TeX.fmt.lit
+                        lhs2TeX.sty.lit
+                        lhs2TeX.1.in
+                        Makefile
+                        common.mk
+                        config.mk.in
+                        configure
+                        mkinstalldirs
+                        install-sh
 
 executable lhs2TeX
   main-is:              Main.lhs

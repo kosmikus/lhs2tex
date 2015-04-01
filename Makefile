@@ -181,7 +181,7 @@ srcdist : INSTALL doc
 	chmod 644 $(DISTDIR)/INSTALL
 	cd doc; $(MAKE) srcdist
 	$(INSTALL) -m 644 polytable/*.{sty,pdf} $(DISTDIR)/polytable
-	$(INSTALL) -m 644 Testsuite/*.{lhs,snip} Makefile $(DISTDIR)/Testsuite
+	$(INSTALL) -m 644 Testsuite/*.{lhs,snip} Testsuite/Makefile $(DISTDIR)/Testsuite
 	$(INSTALL) -m 644 Examples/*.lhs $(DISTDIR)/Examples
 	$(INSTALL) -m 755 Examples/lhs2TeXpre $(DISTDIR)/Examples
 	$(INSTALL) -m 644 Library/*.fmt $(DISTDIR)/Library
@@ -211,7 +211,7 @@ bindist: lhs2TeX lhs2TeX.fmt lhs2TeX.sty doc
 	chmod 644 $(DISTDIR)/INSTALL
 	cd doc; $(MAKE) srcdist
 	$(INSTALL) -m 644 polytable/*.{sty,pdf} $(DISTDIR)/polytable
-	$(INSTALL) -m 644 Testsuite/*.{lhs,snip} Makefile $(DISTDIR)/Testsuite
+	$(INSTALL) -m 644 Testsuite/*.{lhs,snip} Testsuite/Makefile $(DISTDIR)/Testsuite
 	$(INSTALL) -m 644 Examples/*.lhs $(DISTDIR)/Examples
 	$(INSTALL) -m 755 Examples/lhs2TeXpre $(DISTDIR)/Examples
 	$(INSTALL) -m 644 Library/*.fmt $(DISTDIR)/Library
