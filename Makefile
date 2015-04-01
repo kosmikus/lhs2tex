@@ -185,7 +185,7 @@ srcdist : INSTALL doc
 	$(INSTALL) -m 644 Examples/*.lhs $(DISTDIR)/Examples
 	$(INSTALL) -m 755 Examples/lhs2TeXpre $(DISTDIR)/Examples
 	$(INSTALL) -m 644 Library/*.fmt $(DISTDIR)/Library
-	tar cvzf $(DISTDIR).tar.gz $(DISTDIR)
+	tar --format=ustar -cvzf $(DISTDIR).tar.gz $(DISTDIR)
 	chmod 644 $(DISTDIR).tar.gz
 
 ifdef DISTTYPE
