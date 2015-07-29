@@ -1,8 +1,8 @@
 \begin{code}
 %if False
 %
-% Permission is granted to include this file (or parts of this file) 
-% literally into other documents, regardless of the conditions or 
+% Permission is granted to include this file (or parts of this file)
+% literally into other documents, regardless of the conditions or
 % license applying to these documents.
 %
 %endif
@@ -343,7 +343,8 @@ in a conditional checking |anyMath|.
 %format !          = "\mathbin{!}"
 %format //         = "\mathbin{//}"
 %format undefined  = "\bot "
-%format not	   = "\neg "
+%format not        = "\neg "
+%format forall     = "\forall "
 \end{code}
 %
 Problem: |!| wird sowohl als Infix-Operator als auch prefix f"ur
