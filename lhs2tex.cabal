@@ -44,6 +44,13 @@ extra-source-files:     AUTHORS
                         mkinstalldirs
                         install-sh
 
+custom-setup
+  setup-depends:        base,
+                        Cabal,
+                        directory,
+                        process,
+                        regex-compat
+
 executable lhs2TeX
   main-is:              Main.lhs
   hs-source-dirs:       src
