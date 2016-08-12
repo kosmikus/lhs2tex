@@ -13,6 +13,7 @@ way that is compatible with the @poly@ or @math@ formatters.
 > module NewCode                (  module NewCode  )
 > where
 >
+> import Control.Arrow          (  (>>>) )
 > import Control.Monad          (  (>=>) )
 > import Data.List              (  partition )
 >
@@ -46,6 +47,22 @@ in the ``real'' program code. All comments are deleted.
 >                               >=> lift (fmap token)
 >                               >=> lift (latexs sub'space sub'nl fmts)
 >                               >=> lift sub'code
+
+ks, 2016-08-12:
+Since we're now reusing this for markdown mode, we need an |inline| function
+after all:
+
+> inline                        :: Lang -> Formats -> String -> Either Exc Doc
+> inline lang fmts              =   fmap unNL
+>                               >>> tokenize lang
+>                               >=> lift (number 1 1)
+>                               >=> lift (partition (\t -> catCode t /= White))
+>                               >=> exprParse *** return
+>                               >=> lift (substitute fmts False) *** return
+>                               >=> lift (uncurry merge)
+>                               >=> lift (fmap token)
+>                               >=> lift (latexs sub'space sub'nl fmts)
+>                               >=> lift sub'inline
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Encoding}
