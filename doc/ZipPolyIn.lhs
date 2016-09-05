@@ -1,8 +1,8 @@
 %include verbatim.fmt
 
 \begingroup
-\let\origtt=\tt
-\def\tt#1{\origtt\makebox[0pt]{\phantom{X}}}
+\let\origtt=\ttfamily
+\def\ttfamily#1{\origtt\makebox[0pt]{\phantom{X}}}
 \begin{code}
 zip                        ::  [a] -> [b] -> [(a,b)]
 zip                        =   zipWith  (\a b -> (a,b))

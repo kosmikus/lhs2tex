@@ -1,8 +1,8 @@
 %include verbatim.fmt
 
 \begingroup
-\let\origtt=\tt
-\def\tt#1{\origtt}
+\let\origtt=\ttfamily
+\def\ttfamily#1{\origtt}
 %if style == newcode
 
 module InteractivePre where

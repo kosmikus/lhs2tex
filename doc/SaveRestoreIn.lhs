@@ -1,8 +1,8 @@
 %include verbatim.fmt
 
 \begingroup
-\let\origtt=\tt
-\def\tt#1#2{\origtt}
+\let\origtt=\ttfamily
+\def\ttfamily#1#2{\origtt}
 >\savecolumns
 >\begin{code}
 >intersperse               ::  a -> [a] -> [a]

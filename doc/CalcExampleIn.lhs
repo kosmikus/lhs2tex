@@ -1,10 +1,10 @@
 %include verbatim.fmt
 \begingroup
-\let\origtt=\tt
+\let\origtt=\ttfamily
 %if stc
 \let\small\scriptsize
 %endif
-\def\tt#1#2{\origtt\makebox[0pt]{\phantom{X}}}
+\def\ttfamily#1#2{\origtt\makebox[0pt]{\phantom{X}}}
 
 >\def\commentbegin{\quad\{\ }
 >\def\commentend{\}}

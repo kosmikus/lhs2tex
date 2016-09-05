@@ -1,5 +1,5 @@
 %include tex.fmt
-%subst string a = "\text{\tt " a "}"
+%subst string a = "\text{\ttfamily " a "}"
 
 \begin{code}
 dir(include) "lhs2TeX.fmt"

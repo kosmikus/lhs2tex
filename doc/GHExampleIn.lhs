@@ -1,8 +1,8 @@
 %include verbatim.fmt
 \begingroup
-\let\origtt=\tt
+\let\origtt=\ttfamily
 \let\small\scriptsize
-\def\tt#1#2{\origtt\makebox[0pt]{\phantom{X}}}
+\def\ttfamily#1#2{\origtt\makebox[0pt]{\phantom{X}}}
 
 >%if style == newcode
 >%format ^

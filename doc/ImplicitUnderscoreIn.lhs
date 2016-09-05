@@ -1,7 +1,7 @@
 %include verbatim.fmt
 \begingroup
-\let\origtt=\tt
-\def\tt#1#2{\origtt}
+\let\origtt=\ttfamily
+\def\ttfamily#1#2{\origtt}
 >%format a_i
 >%format a_j
 >%format left  = "\leftarrow "

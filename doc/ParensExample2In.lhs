@@ -1,7 +1,7 @@
 %include verbatim.fmt
 \begingroup
-\let\origtt=\tt
-\def\tt#1#2{\origtt}
+\let\origtt=\ttfamily
+\def\ttfamily#1#2{\origtt}
 >%format eval a = "\llbracket " a "\rrbracket "
 >\begin{code}
 >size (eval (2 + 2)) 

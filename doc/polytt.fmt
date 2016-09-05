@@ -1,6 +1,6 @@
-%subst verb a		= "\text{\tt " a "}"
-%subst verbatim a	= "\begin{tabbing}\tt'n" a "'n\end{tabbing}'n"
-%subst verbnl		= "\\'n\tt "
+%subst verb a		= "\text{\ttfamily " a "}"
+%subst verbatim a	= "\begin{tabbing}\ttfamily'n" a "'n\end{tabbing}'n"
+%subst verbnl		= "\\'n\ttfamily "
 %if style == tt
 %subst inline a  = "\text{\texfamily " a "}"
 %subst thinspace = "\Sp "

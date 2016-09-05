@@ -1,7 +1,7 @@
 %include verbatim.fmt
 \begingroup
-\let\origtt=\tt
-\def\tt#1#2{\origtt \makebox[0pt]{\phantom{X}}}
+\let\origtt=\ttfamily
+\def\ttfamily#1#2{\origtt \makebox[0pt]{\phantom{X}}}
 >%format foo = verylongfoo
 >\begin{code}
 >test  1

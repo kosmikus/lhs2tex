@@ -1,7 +1,7 @@
 %include verbatim.fmt
 \begingroup
-\let\origtt=\tt
-\def\tt#1#2{\origtt}
+\let\origtt=\ttfamily
+\def\ttfamily#1#2{\origtt}
 >%format abs (a) = "\mathopen{|}" a "\mathclose{|}"
 >%format ~>      = "\leadsto"
 >The |abs| function computes the absolute value of 
