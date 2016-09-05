@@ -164,7 +164,7 @@ inherits the position of the original token.
 >       | isOptional            =  (Mandatory, set l s ++ args es)
 >       | otherwise             =  (Optional False, [l] ++ s ++ [r] ++ args es)
 >       where (flag, s)         =  eval e
->             isOptional        =  catCode l == Del '(' && not (mandatory e)
+>             isOptional        =  catCode l == Del "(" && not (mandatory e)
 >                               && case flag of Mandatory -> False; Optional f -> opt || f
 
 \NB It is not a good idea to remove parentheses around atoms, because

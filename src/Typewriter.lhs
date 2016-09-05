@@ -54,6 +54,7 @@
 >     tex _ (Char s)            =  sub'char (catenate (map conv' (init $ tail s))) -- NEW: remove quotes
 >     tex _ (String s)          =  sub'string (catenate (map conv' (init $ tail s))) -- NEW: remove quotes
 >     tex _ (Special c)         =  sub'special (replace Empty [c] (conv False c))
+>     tex _ (SpecialS s)        =  sub'special (replace Empty s (convert False s))
 >     tex _ (Comment s)         =  sub'comment (Embedded s)
 >     tex _ (Nested s)          =  sub'nested (Embedded s)
 >     tex _ (Pragma s)          =  sub'pragma (Embedded s)
