@@ -4,7 +4,7 @@
 % save linebreak; see below
 \let\origlinebreak=\\
 
-\renewcommand{\sectfont}{\bf}
+\renewcommand{\sectfont}{\bfseries}
 
 \usepackage[english]{babel}
 %\usepackage[inference]{semantic}
