@@ -5,8 +5,8 @@
 % license applying to these documents.
 %
 %endif
-%if not lhs2tex_ocaml_fmt_read
-%let lhs2tex_ocaml_fmt_read = True
+%if not lhs2tex_lhs2tex_fmt_read
+%let lhs2tex_lhs2tex_fmt_read = True
 %subst verb a		= "\text{\tt " a "}"
 %subst verbatim a	= "\begin{tabbing}\tt'n" a "'n\end{tabbing}'n"
 %subst verbnl		= "\\'n\tt "
