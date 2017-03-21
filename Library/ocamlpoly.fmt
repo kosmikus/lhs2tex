@@ -15,8 +15,8 @@
 %         by using \allowdisplaybreaks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %endif
-%if not lhs2tex_polycode_fmt_read
-%let lhs2tex_polycode_fmt_read = True
+%if not lhs2tex_ocamlpoly_fmt_read
+%let lhs2tex_ocamlpoly_fmt_read = True
 %include ocaml.fmt
 %
 %if style == poly
