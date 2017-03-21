@@ -227,7 +227,7 @@
 %subst keyword a 	= "{\mathbf " a "}"
 %else
 %subst numeral a 	= "\mathrm{" a "}"
-%subst keyword a 	= "\mathbf{" a "}"
+%subst keyword a 	= "\Keyword{" a "}"
 %endif
 %subst spaces a		= a
 %subst special a	= a
@@ -261,7 +261,6 @@
 %format /          = "\mathbin{/}"
 %format :%         = "\mathbin{:\%}"
 %format %          = "\mathbin{\%}"
-%format :          = "\mathbin{:}"
 %format ++         = "\plus "
 %format ==         = "\equiv "
 %% ODER: format ==         = "\mathrel{==}"
@@ -271,6 +270,8 @@
 %format >=         = "\geq "
 %format &&         = "\mathrel{\wedge}"
 %format ||         = "\mathrel{\vee}"
+%%% %format &&         = "\mathrel{\&\!\!\&}"
+%%% %format ||         = "\mathrel{|\;|}"
 %format >>         = "\sequ "
 %format >>=        = "\bind "
 %format =<<        = "\rbind "
@@ -279,9 +280,13 @@
 %format //         = "\mathbin{//}"
 %format undefined  = "\bot "
 %format not	       = "\neg "
-%format +=         = "\mathbin{+\!\!=}"
+%format +=         = "\mathbin{+\!\!\!=}"
 %format :=         = "\mathbin{:=}"
-%format *          = "\times "
+%format *          = "\mathbin{\times}"
+%%% not technically keywords
+%format raise       = "\Keyword{raise}"
+%format invalid_arg = "\Keyword{invalid\_arg}"
+%format fail_with   = "\Keyword{fail\_with}"
 %if meta
 %format M.a = "a"
 %format M.b = "b"
@@ -389,6 +394,8 @@
 \renewcommand{\commentendchars}{\ensuremath{\;\ast})\quad}
 \renewcommand{\commentbegin}{\commentbeginchars}
 \renewcommand{\commentend}{\commentendchars}
-\newcommand{\Tyvarid}[1]{\Varid{\mbox{}^\shortmid\!\!#1}}
+\newcommand{\Tyvarid}[1]{\Varid{\!\!\mbox{}^\shortmid\!\!#1}}
+\newcommand{\Keyword}[1]{\mathbf{#1}}
+% \newcommand{\Tyvarid}[1]{\Varid{'\!\!#1}}
 \renewcommand{\Conid}[1]{\mathrm{#1}}
 %endif
