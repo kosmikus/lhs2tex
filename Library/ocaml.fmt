@@ -1,0 +1,18 @@
+%if False
+%
+% Permission is granted to include this file (or parts of this file)
+% literally into other documents, regardless of the conditions or
+% license applying to these documents.
+%
+%endif
+%if not lhs2tex_ocaml_fmt_read
+%let lhs2tex_ocaml_fmt_read = True
+%include lhs2TeX.fmt
+%format `mod` = ""
+\renewcommand{\commentbeginchars}{\quad(\ensuremath{\ast\;}}
+\renewcommand{\commentendchars}{\ensuremath{\;\ast})\quad}
+\renewcommand{\commentbegin}{\commentbeginchars}
+\renewcommand{\commentend}{\commentendchars}
+\newcommand{\Tyvarid}[1]{\Varid{\mbox{}^\shortmid\!\!#1}}
+\renewcommand{\Conid}[1]{\mathrm{#1}}
+%endif
