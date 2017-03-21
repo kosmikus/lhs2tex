@@ -19,7 +19,7 @@ These don't really belong into a module named TeXCommands:
 > data Style                    =  Version | Help | SearchPath | Copying | Warranty | CodeOnly | NewCode | Verb | Typewriter | Poly | Math | Pre
 >                                  deriving (Eq, Show, Enum, Bounded)
 
-> data Lang                     =  Haskell | Agda
+> data Lang                     =  Haskell | Agda | OCaml
 >                                  deriving (Eq, Show, Enum, Bounded)
 
 \Todo{Better name for |Class|.}
@@ -74,7 +74,7 @@ Encoding and decoding of commands, environments, and directives.
 >                                    ("pre", Pre), ("version", Version),
 >                                    ("copying", Copying), ("warranty", Warranty), ("help", Help), ("searchpath", SearchPath) ]
 > instance Representation Lang where
->     representation            =  [ ("haskell", Haskell), ("agda", Agda) ]
+>     representation            =  [ ("haskell", Haskell), ("agda", Agda), ("ocaml", OCaml) ]
 > instance Representation Command where
 >     representation            =  [ ("hs", Hs), ("eval", Eval),
 >                                    ("perform", Perform), ("verb*", Vrb True),
