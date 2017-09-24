@@ -3,7 +3,7 @@ import Distribution.Simple.Setup (CopyDest(..),ConfigFlags(..),BuildFlags(..),
                                   CopyFlags(..),RegisterFlags(..),InstallFlags(..),
                                   defaultRegisterFlags,fromFlagOrDefault,Flag(..),
                                   defaultCopyFlags)
-import Distribution.Simple
+import Distribution.Simple  (UserHooks(..), simpleUserHooks, defaultMainWithHooks)
 import Distribution.Simple.LocalBuildInfo
                             (LocalBuildInfo(..),absoluteInstallDirs)
 import Distribution.Simple.Configure (configCompilerAux)
