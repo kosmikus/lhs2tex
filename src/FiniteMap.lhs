@@ -32,12 +32,12 @@ part. \NB |Node [('a', empty)] Nothing| is not legal.
 > lookup x (Leaf y w)
 >     | x == y                  =  Just w
 >     | otherwise               =  Nothing
-> lookup [] (Node ts w)         =  w
-> lookup (a : x) (Node ts w)    =  lookupList ts
+> lookup [] (Node _ts w)        =  w
+> lookup (a : x) (Node ts _w)   =  lookupList ts
 >     where
 >     lookupList []             =  Nothing
->     lookupList ((b, t) : ts)  =  case compare b a of
->         LT                    -> lookupList ts
+>     lookupList ((b, t) : ts') =  case compare b a of
+>         LT                    -> lookupList ts'
 >         EQ                    -> lookup x t
 >         GT                    -> Nothing
 
@@ -65,13 +65,13 @@ Auxiliary functions.
 >     LT                                -> Node [(b, Leaf y w), (a, Leaf x v)] Nothing
 >     EQ                                -> Node [(a, insert (Leaf y w) x v)] Nothing
 >     GT                                -> Node [(a, Leaf x v), (b, Leaf y w)] Nothing
-> insert (Node ts w) [] v               =  Node ts (Just v)
-> insert (Node ts w) (a : x) v          =  Node (insList ts) w
+> insert (Node ts _w) [] v              =  Node ts (Just v)
+> insert (Node ts w)  (a : x) v         =  Node (insList ts) w
 >     where
 >     insList []                        =  [(a,Leaf x v)]
->     insList ((b, t) : ts)             =  case compare b a of
->         LT                            -> (b, t) : insList ts
->         EQ                            -> (b, insert t x v) : ts
->         GT                            -> (a, Leaf x v) : (b, t) : ts
+>     insList ((b, t) : ts')            =  case compare b a of
+>         LT                            -> (b, t) : insList ts'
+>         EQ                            -> (b, insert t x v) : ts'
+>         GT                            -> (a, Leaf x v) : (b, t) : ts'
 
 %}

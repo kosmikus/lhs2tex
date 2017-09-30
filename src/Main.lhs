@@ -20,7 +20,6 @@
 > import Control.Monad
 > import Control.Monad.Except
 > import Control.Monad.State ( MonadState(..), modify )
-> import Control.Monad.Trans
 > import Prelude hiding ( getContents )
 >
 > import Version
@@ -37,7 +36,7 @@
 > import StateT
 > import qualified FiniteMap as FM
 > import Auxiliaries
-> import Value
+> import Value hiding ( str )
 > import License
 >
 > import FileNameUtils
@@ -99,8 +98,8 @@
 >                               ++ [("version", Int numversion)]
 >                               ++ [("pre", Int pre)]
 >                               ++ [("lang", Int (fromEnum (lang s)))]
->                               ++ [ (decode s, Int (fromEnum s)) | s <- [(minBound :: Style) .. maxBound] ]
->                               ++ [ (decode s, Int (fromEnum s)) | s <- [(minBound :: Lang) .. maxBound] ]
+>                               ++ [ (decode s', Int (fromEnum s')) | s' <- [(minBound :: Style) .. maxBound] ]
+>                               ++ [ (decode s', Int (fromEnum s')) | s' <- [(minBound :: Lang) .. maxBound] ]
 >                               -- |++ [ (s, Bool False) || s <- ["underlineKeywords", "spacePreserving", "meta", "array", "latex209", "times", "euler" ] ]|
 
 > preprocess                    :: State -> [Class] -> Bool -> [String] -> IO ()
@@ -121,9 +120,9 @@
 > preprocess _ _ _ _            =  error "preprocess: too few arguments"
 
 > lhs2TeX                       :: Style -> State -> [Class] -> [String] -> IO ()
-> lhs2TeX s flags dirs files    =  do (str, file) <- input files
+> lhs2TeX s flags dirs files'   =  do (str, file') <- input files'
 >                                     expandedpath <- expandPath (searchpath flags)
->                                     toIO (do put (initState s file expandedpath flags)
+>                                     toIO (do put (initState s file' expandedpath flags)
 >                                              formats (map (No 0) dirs) `catchError` abort
 >                                              formatStr (addEndEOF str)
 >                                              stopexternals)
@@ -143,7 +142,7 @@ ks, 20.07.2003: The short option for @--align@ has been changed into @-A@. Other
 @-align@ would not trigger compatibility mode, but be interpreted as a valid option
 usage.
 
-ks, 24.03.2004: The long option @--verbose@ has been removed for now, 
+ks, 24.03.2004: The long option @--verbose@ has been removed for now,
 because with some versions of GHC it triggers ambiguity errors with
 @--verb@.
 
@@ -193,18 +192,18 @@ Compatibility mode option handling.
 > cstyle args                   =  cstyle' Typewriter args
 
 > cstyle'                       :: Style -> [String] -> IO ()
-> cstyle' s args                =  let (dirs,files) = coptions args
->                                  in  lhs2TeX s state0 dirs files
+> cstyle' s args                =  let (dirs,files') = coptions args
+>                                  in  lhs2TeX s state0 dirs files'
 
 > coptions                      :: [String] -> ([Class], [String])
-> coptions                      =  foldr (<|) ([], [])
+> coptions                      =  foldr (<<|) ([], [])
 >   where
->   "-align" <| (ds, s : as)    =  (Directive Align s : ds, as)
->   "-i" <| (ds, s : as)        =  (Directive Include s : ds, as)
->   "-l" <| (ds, s : as)        =  (Directive Let s : ds, as)
->   ('-' : 'i' : s) <| (ds, as) =  (Directive Include s : ds, as)
->   ('-' : 'l' : s) <| (ds, as) =  (Directive Let s : ds, as)
->   s <| (ds, as)               =  (ds, s : as)
+>   "-align" <<| (ds, s : as)   =  (Directive Align s : ds, as)
+>   "-i" <<| (ds, s : as)       =  (Directive Include s : ds, as)
+>   "-l" <<| (ds, s : as)       =  (Directive Let s : ds, as)
+>   ('-' : 'i' : s) <<| (ds, as)=  (Directive Include s : ds, as)
+>   ('-' : 'l' : s) <<| (ds, as)=  (Directive Let s : ds, as)
+>   s <<| (ds, as)              =  (ds, s : as)
 
 
 We abort immediately if an error has occured.
@@ -248,8 +247,8 @@ We abort immediately if an error has occured.
 > format (Command Perform s)    =  do st <- get
 >                                     unless (style st `elem` [CodeOnly,NewCode]) $
 >                                       do result <- external (map unNL s)
->                                          modify (\st@State{file = f', lineno = l'} ->
->                                                    st{file = "<perform>", files = (f', l') : files st})
+>                                          modify (\st'@State{file = f', lineno = l'} ->
+>                                                    st'{file = "<perform>", files = (f', l') : files st'})
 >                                          liftIO (when (verbose st) (hPutStr stderr $ "(" ++ "<perform>"))
 >                                          formatStr (addEndNL result)
 >                                          modify (\st'@State{files = (f, l) : fs} ->
@@ -257,14 +256,6 @@ We abort immediately if an error has occured.
 >                                          liftIO (when (verbose st) (hPutStrLn stderr $ ")"))
 >     where
 >     addEndNL                  =  (++"\n") . unlines . lines
-
-Remove trailing blank line.
-
->     trim                      =  reverse >>> skip >>> reverse
->
->     skip s | all isSpace t    =  u
->            | otherwise        =  s
->            where (t, u)       =  breakAfter (== '\n') s
 
 > format (Environment Haskell_ s)
 >                               =  display s
@@ -277,12 +268,12 @@ Remove trailing blank line.
 >                                     unless (style st `elem` [CodeOnly,NewCode]) $
 >                                       do result <- external s
 >                                          display result
-> format (Environment Hide s)   =  return ()
-> format (Environment Ignore s) =  return ()
+> format (Environment Hide _s)  =  return ()
+> format (Environment Ignore _s)=  return ()
 > format (Environment (Verbatim b) s)
 >                               =  out (Verbatim.display 120 b s)
 > format (Directive Format s)   =  do st <- get
->                                     b@(n,e) <- fromEither (parseFormat (lang st) s)
+>                                     b@(_n,_e) <- fromEither (parseFormat (lang st) s)
 >                                     put (st{fmts = FM.add b (fmts st)})
 > format (Directive Subst s)    =  do st <- get
 >                                     b <- fromEither (parseSubst (lang st) s)
@@ -290,12 +281,12 @@ Remove trailing blank line.
 > format (Directive Include arg)=  do st <- get
 >                                     let d  = path st
 >                                     let sp = searchpath st
->                                     modify (\st@State{file = f', lineno = l'} ->
->                                         st{file = f, files = (f', l') : files st, path = d ++ dir f})
+>                                     modify (\st'@State{file = f', lineno = l'} ->
+>                                         st'{file = f, files = (f', l') : files st', path = d ++ dir f})
 >                                     -- |d <- liftIO getCurrentDirectory|
 >                                     -- |liftIO (setCurrentDirectory (dir f))|
 >                                     (str,f) <- liftIO (chaseFile sp (d ++ f))
->                                     modify (\st -> st { file = f })
+>                                     modify (\st' -> st' { file = f })
 >                                     liftIO (when (verbose st) (hPutStr stderr $ "(" ++ f))
 >                                     formatStr (addEndNL str)
 >                                     -- |liftIO (setCurrentDirectory d)|
@@ -314,9 +305,9 @@ by another line and the included file does not end in a blank line, then
 there will not be a single space between the last character of the included
 file and the first character of the following line. It would be possible
 to split a TeX control sequence over two different files that way. Seems
-strange. So we add a newline, or even two if none has been there before, 
+strange. So we add a newline, or even two if none has been there before,
 to make sure that exactly one linebreak ends up in the output, but not
-more, as a double newline is interpreted as a \par by TeX, and that might 
+more, as a double newline is interpreted as a \par by TeX, and that might
 also not be desired.
 
 > format (Directive Begin _)    =  modify (\st -> st{stack = fmts st : stack st})
@@ -324,8 +315,8 @@ also not be desired.
 >                                     when (null (stack st)) $
 >                                       do liftIO (hPutStrLn stderr $ "unbalanced %} in line "
 >                                                                       ++ show (lineno st))
->                                          modify (\st -> st{stack = [fmts st]})
->                                     modify (\st@State{stack = d:ds} -> st{fmts = d, stack = ds})
+>                                          modify (\st' -> st'{stack = [fmts st']})
+>                                     modify (\st'@State{stack = d:ds} -> st'{fmts = d, stack = ds})
 
 ks, 11.09.03: added exception handling for unbalanced grouping
 
@@ -340,7 +331,7 @@ ks, 11.09.03: added exception handling for unbalanced grouping
 
 \NB @%align@ also resets the left identation stacks.
 
-Also, the @poly@ directives @%separation@ and @%latency@ reset 
+Also, the @poly@ directives @%separation@ and @%latency@ reset
 the corresponding indentation stack |pstack|.
 
 > format (Directive Separation s )
@@ -367,7 +358,7 @@ Printing documents.
 >                                            put (st { ofile = file st, olineno = lineno st })
 >
 >                                      liftIO (hPutStr (output st) s)
->                                      modify (\st -> st { olineno = olineno st + ls, atnewline = enl (atnewline st)})
+>                                      modify (\st' -> st' { olineno = olineno st' + ls, atnewline = enl (atnewline st')})
 >     where
 >     checkNLs n ('\n':[])      =  (n+1,const True)
 >     checkNLs n (_:[])         =  (n,const False)
@@ -424,7 +415,9 @@ Printing documents.
 >                                     return ((if pragmas st then ((p <> sub'nl) <>) else id) d, st)
 >         select CodeOnly st    =  return (Text (trim s), st)
 
+> auto                          :: String
 > auto                          =  "autoSpacing"
+> isTrue                        :: Toggles -> String -> Bool
 > isTrue togs s                 =  bool (value togs s)
 
 Delete leading and trailing blank line (only the first!).
@@ -543,7 +536,7 @@ This function can be used to stop all external processes by sending the
 >                                                                    hFlush pin
 >                                                                    waitForProcess pid) pis
 
-To extract the answer from @ghci@'s or @hugs@' output 
+To extract the answer from @ghci@'s or @hugs@' output
 we use a simple technique which should work in
 most cases: we print the string |magic| before and after
 the expression we are interested in. We assume that everything

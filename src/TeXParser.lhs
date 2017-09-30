@@ -72,12 +72,12 @@ Environments.
 >         (env, '}' : u)        -> case encode env of
 >             Nothing           -> cont
 >             Just cmd
->                 | pred v      -> Environment cmd (arg ++ w) : classify x
+>                 | p v         -> Environment cmd (arg ++ w) : classify x
 >                 | otherwise   -> notFound end str :  cont
 >                 where
 >                 end           =  "\\end{" ++ env ++ "}"
->                 pred          =  isPrefixOf end
->                 (arg, v)      =  breaks maxLine pred u
+>                 p             =  isPrefixOf end
+>                 (arg, v)      =  breaks maxLine p u
 >                 (w, x)        =  blank (drop (length end) v)
 >         _                     -> cont
 
@@ -92,8 +92,8 @@ Commands.
 
 >     (cmd, '{' : t)            -> case encode cmd of
 >         Nothing               -> cont
->         Just cmd              -> case nested maxChar 0 t of
->             (a, '}' : u)      -> Command cmd a : classify u
+>         Just cmd'             -> case nested maxChar 0 t of
+>             (a, '}' : u)      -> Command cmd' a : classify u
 >             _                 -> notFound "matching `}'" str : cont
 >     ([], '%' : t)             -> Many "\\%" : classify t
 >     _                         -> cont
@@ -141,24 +141,24 @@ The function |nested n 0| recognizes arguments enclosed in matching
 curly braces.
 
 > nested                        :: Int -> Int -> String -> (String, String)
-> nested n depth s              =  nest n s
+> nested n' depth s'            =  nest n' s'
 >     where
->     nest 0 s                  =  ([], s)
->     nest n []                 =  ([], [])
+>     nest 0  s                 =  ([], s)
+>     nest _n []                =  ([], [])
 >     nest n  ('}' : s)
 >         | depth == 0          =  ([], '}' : s)
 >         | otherwise           =  '}' <| nested (n - 1) (depth - 1) s
->     nest n ('{' : s)          =  '{' <| nested (n - 1) (depth + 1) s
->     nest n ('\\' : c : s)     =  '\\' <| c <| nest (n - 2) s
->     nest n (c : s)            =  c <| nest (n - 1) s
+>     nest n  ('{' : s)         =  '{' <| nested (n - 1) (depth + 1) s
+>     nest n  ('\\' : c : s)    =  '\\' <| c <| nest (n - 2) s
+>     nest n  (c : s)           =  c <| nest (n - 1) s
 
 The function |verb n c| recognizes arguments enclosed in |c|.
 
 > verb                          :: Int -> Char -> String -> (String, String)
-> verb 0 c s                    =  ([], s)
-> verb n c []                   =  ([], [])
+> verb 0  _c s                  =  ([], s)
+> verb _n _c []                 =  ([], [])
 > verb n c (c' : s)
->     | c == c'                 =  ([], c' : s) 
+>     | c == c'                 =  ([], c' : s)
 >     | otherwise               =  c' <| verb (n - 1) c s
 
 The function |inline n| recognizes arguments enclosed in vertical bars
@@ -166,28 +166,28 @@ The function |inline n| recognizes arguments enclosed in vertical bars
 equivalent to |verb n '||'|).
 
 > inline                        :: Int -> String -> (String, String)
-> inline 0 s                    =  ([], s)
-> inline n []                   =  ([], [])
-> inline n ('|' : '|' : s)      =  '|' <| inline (n - 2) s
-> inline n ('|' : s)            =  ([], '|' : s) 
-> inline n (c : s)              =  c <| inline (n - 1) s
+> inline 0  s                   =  ([], s)
+> inline _n []                  =  ([], [])
+> inline n  ('|' : '|' : s)     =  '|' <| inline (n - 2) s
+> inline _n  ('|' : s)          =  ([], '|' : s)
+> inline n  (c : s)             =  c <| inline (n - 1) s
 >
 > shortverb                     :: Int -> String -> (String, String)
-> shortverb 0 s                 =  ([], s)
-> shortverb n []                =  ([], [])
-> shortverb n ('@' : '@' : s)   =  '@' <| shortverb (n - 2) s
-> shortverb n ('@' : s)         =  ([], '@' : s) 
-> shortverb n (c : s)           =  c <| shortverb (n - 1) s
+> shortverb 0  s                =  ([], s)
+> shortverb _n []               =  ([], [])
+> shortverb n  ('@' : '@' : s)  =  '@' <| shortverb (n - 2) s
+> shortverb _n ('@' : s)        =  ([], '@' : s)
+> shortverb n  (c : s)          =  c <| shortverb (n - 1) s
 
 The function |unbird| recognizes code sections marked by bird tracks;
 |blank| skips the next line if it is blank.
 
 > unbird                        :: Char -> String -> (String, String)
-> unbird c []                   =  ([], [])
-> unbird c ('\n' : c' : s)
+> unbird _c []                  =  ([], [])
+> unbird c  ('\n' : c' : s)
 >     | c == c'                 =  '\n' <| ' ' <| unbird c s
-> unbird c ('\n' : s)           =  '\n' <| blank s
-> unbird c (c' : s)             =  c' <| unbird c s
+> unbird _c ('\n' : s)          =  '\n' <| blank s
+> unbird c  (c' : s)            =  c' <| unbird c s
 >
 > blank                         :: String -> (String, String)
 > blank s | all isSpace t       =  (t, u)
@@ -198,10 +198,10 @@ The function |unbird| recognizes code sections marked by bird tracks;
 holds and |x| is as small as possible (but at most of length |n|).
 
 > breaks                        :: Int -> ([a] -> Bool) -> [a] -> ([a], [a])
-> breaks n pred []              =  ([], [])
-> breaks n pred as@(a : as')
->     | n == 0 || pred as       =  ([], as)
->     | otherwise               =  a <| breaks (n - 1) pred as'
+> breaks _n _p []               =  ([], [])
+> breaks n  p  as@(a : as')
+>     | n == 0 || p as          =  ([], as)
+>     | otherwise               =  a <| breaks (n - 1) p as'
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Post processing}
@@ -209,14 +209,15 @@ holds and |x| is as small as possible (but at most of length |n|).
 
 Collaps adjacent |One|'s into a |Many|.
 
-> compress                      =  foldr (<|) []
+> compress                      :: [Class] -> [Class]
+> compress                      =  foldr (<<|) []
 >     where
->     One '\n' <| ts            =  Many "\n" : ts
->     Many s@('\n' : _) <| ts   =  Many s : ts
->     One c <| (Many s : ts)    =  Many (c : s) : ts
->     One c <| ts               =  Many [c] : ts
->     Many s <| (Many s' : ts)  =  Many (s ++ s') : ts
->     t <| ts                   =  t : ts
+>     One '\n' <<| ts           =  Many "\n" : ts
+>     Many s@('\n' : _) <<| ts  =  Many s : ts
+>     One c <<| (Many s : ts)   =  Many (c : s) : ts
+>     One c <<| ts              =  Many [c] : ts
+>     Many s <<| (Many s' : ts) =  Many (s ++ s') : ts
+>     t <<| ts                  =  t : ts
 
 \NB The first two equations make |compress| incrementel (?); otherwise
 \[
@@ -227,10 +228,10 @@ is silent until the complete input has been digested.
 Adding line numbers.
 
 > number                        :: LineNo -> [Class] -> [Numbered Class]
-> number n []                   =  []
-> number n (t : ts)             =  No n t : number (n + i) ts
+> number _n []                  =  []
+> number n  (t : ts)            =  No n t : number (n + i) ts
 >     where i                   =  case t of
->             One c             -> impossible "number"
+>             One _c            -> impossible "number"
 >             Many s            -> newlines s
 >             Inline s          -> newlines s
 >             Command _ s       -> newlines s
