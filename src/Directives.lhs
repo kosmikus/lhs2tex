@@ -9,11 +9,10 @@
 >
 > import Control.Applicative    (  many, optional )
 > import Control.Monad
-> import Data.Char              (  isSpace, isAlpha, isDigit  )
+> import Data.Char              (  isDigit  )
 > import Data.List
 > import Parser
 > import TeXCommands
-> import TeXParser
 > import HsLexer
 > import FiniteMap              (  FiniteMap, (!)  )
 > import qualified FiniteMap as FM
@@ -73,15 +72,16 @@ Format directives. \NB @%format ( = "(\;"@ is legal.
 >     tex (Conid s)             =  subscript Conid s
 >     tex (Qual [] s)           =  tex s
 >     tex (Qual (m:ms) s)       =  Conid m : tex (Qual ms s)
->      -- ks, 03.09.2003: was "tex (Qual m s) = Conid m : tex s"; 
+>      -- ks, 03.09.2003: was "tex (Qual m s) = Conid m : tex s";
 >      -- seems strange though ...
->     subscript f s  
+>     tex _                     =  impossible "equation.tex"
+>     subscript f s
 >       | null t && not (null w) && (null v || head w == '_')
 >                               =  underscore f s
 >       | otherwise             =  [f (reverse w)
 >                                  , TeX False
 >                                        (Text ((if   not (null v)
->                                                then "_{" ++ reverse v ++ "}" 
+>                                                then "_{" ++ reverse v ++ "}"
 >                                                else ""
 >                                               ) ++ reverse t))
 >                                  ]
@@ -97,7 +97,7 @@ Format directives. \NB @%format ( = "(\;"@ is legal.
 >                                      (if end   then [Varid "_"] else [])
 
 ks, 02.02.2004: I have added implicit formatting via |underscore|.
-The above condition should guarantee that it is (almost) only used in 
+The above condition should guarantee that it is (almost) only used in
 cases where previously implicit formatting did not do anything useful.
 The function |underscore| typesets an identifier such as
 |a_b_c| as $a_{b_{c}}$. TODO: Instead of hard-coded subscripting a
@@ -114,8 +114,8 @@ substitution directive should be invoked here.
 >         where (t, u)          =  break (== '_') s
 >               tok_u           =  tokenize lang (tail u)
 >               proc_u          =  case tok_u of
->                                    Left  _ -> [f (tail u)] -- should not happen
->                                    Right t -> t
+>                                    Left  _  -> [f (tail u)] -- should not happen
+>                                    Right t' -> t'
 
 > lhs                           :: Parser Token (String, [Bool], [String])
 > lhs                           =  do f <- varid `mplus` conid
@@ -127,13 +127,16 @@ substitution directive should be invoked here.
 > optParen p                    =  do _ <- open'; a <- p; _ <- close'; return (True, a)
 >                               `mplus` do a <- p ; return (False, a)
 >
+> item                          :: Parser Token Token
 > item                          =  satisfy (const True)
 
+> convert                       :: String -> String
 > convert []                    =  []
 > convert ('"' : '"' : s)       =  '"' : convert s
 > convert ('"' : s)             =  '{' : '-' : '"' : convert' s
 > convert (c : s)               =  c : convert s
 >
+> convert'                      :: String -> String
 > convert' []                   =  []
 > convert' ('"' : '"' : s)      =  '"' : convert' s
 > convert' ('"' : s)            =  '"' : '-' : '}' : convert s
@@ -160,6 +163,7 @@ substitution directive should be invoked here.
 >   subst args rhs ds           =  catenate (map sub rhs)
 >       where sub (TeX _ d)     =  d
 >             sub (Varid x)     =  FM.fromList (zip args ds) ! x
+>             sub _             =  impossible "substitution.subst.sub"
 > -- TODO: The above lookup can fail badly if unknown variables are used on the rhs of a subst.
 
 \Todo{unbound variables behandeln.}
@@ -168,11 +172,17 @@ of varids accepted on the lhs of a directive, because according to the Agda
 lexer, "=" is both a varid and a varsym. This shouldn't matter for Haskell,
 because "=" will never occur in a Varid constructor.
 
+> varid                         :: Parser Token String
 > varid                         =  do x <- satisfy (\ x -> isVarid x && x /= Varid "="); return (string x)
+
+> conid                         :: Parser Token String
 > conid                         =  do x <- satisfy isConid; return (string x)
+
+> varsym                        :: Lang -> String -> Parser Token Token
 > varsym Agda s                 =  satisfy (\ x -> x == Varsym s || x == Varid s) -- Agda has no symbol/id distinction
 > varsym Haskell s              =  satisfy (== (Varsym s))
 >
+> isTeX                         :: Token -> Bool
 > isTeX (TeX _ _)               =  True
 > isTeX _                       =  False
 
@@ -192,7 +202,7 @@ Auswertung Boole'scher Ausdr"ucke.
 >   where
 >   expr                        =  do e1 <- appl
 >                                     e2 <- optional (do op <- varsym' lang; e <- expr; return (op, e))
->                                     return (maybe e1 (\(op, e2) -> sys2 op e1 e2) e2)
+>                                     return (maybe e1 (\(op, e2') -> sys2 op e1 e2') e2)
 >   appl                        =  do f <- optional not'
 >                                     e <- atom
 >                                     return (maybe e (\_ -> onBool1 not e) f)
@@ -203,6 +213,7 @@ Auswertung Boole'scher Ausdr"ucke.
 >                               `mplus` do s <- satisfy isNumeral; return (Int (read (string s)))
 >                               `mplus` do _ <- open'; e <- expr; _ <- close'; return e
 >
+> sys2                          :: String -> Binary Value
 > sys2 "&&"                     =  onBool2 (&&)
 > sys2 "||"                     =  onBool2 (||)
 > sys2 "=="                     =  onMatching (==) (==) (==)
@@ -241,23 +252,30 @@ Primitive Parser.
 > open'                         =  satisfy (== (Special '('))
 > close'                        =  satisfy (== (Special ')'))
 
+> varsym'                       :: Lang -> Parser Token String
 > varsym' lang                  =  do x <- satisfy (isVarsym lang); return (string x)
+
+> isVarsym                      :: Lang -> Token -> Bool
 > isVarsym _ (Varsym _)         =  True
 > isVarsym Agda (Varid _)       =  True  -- for Agda
 > isVarsym _ _                  =  False
+
+> isString                      :: Token -> Bool
 > isString (String _)           =  True
 > isString _                    =  False
+
+> isNumeral                     :: Token -> Bool
 > isNumeral (Numeral _)         =  True
 > isNumeral _                   =  False
 
 Hilfsfunktionen.
 
 > parse                         :: Lang -> Parser Token a -> String -> Either Exc a
-> parse lang p str              =  do ts <- tokenize lang str
+> parse lang p str'             =  do ts <- tokenize lang str'
 >                                     let ts' = map (\t -> case t of TeX _ x -> TeX False x; _ -> t) .
 >                                               filter (\t -> catCode t /= White || isTeX t) $ ts
 >                                     maybe (Left msg) Right (run p ts')
->     where msg                 =  ("syntax error in directive", str)
+>     where msg                 =  ("syntax error in directive", str')
 
 Hack: |isTeX t| f"ur |parseSubst|.
 

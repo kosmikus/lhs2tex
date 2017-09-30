@@ -41,6 +41,7 @@ path replaces the current one.
 
 > -- absPath ps  =  directorySeparator : relPath ps
 
+> isWindows                     :: Bool
 > isWindows = "win" `isPrefixOf` os || "Win" `isPrefixOf` os || "mingw" `isPrefixOf` os
 
 > absPath                       :: FilePath -> FilePath
@@ -80,7 +81,7 @@ more than one directory separator, all subpaths are added ...
 >                                      (sep,rs') = span isPathSeparator rs
 >                                      s'   = reverse rs'
 >                                      sep' = reverse sep
->                                  in  if   null s' 
+>                                  in  if   null s'
 >                                      then return [[head sep']] {- we don't descend from root -}
 >                                      else if   length sep < 2
 >                                           then return [s]
@@ -99,10 +100,12 @@ more than one directory separator, all subpaths are added ...
 
 > expandEnvironment             :: String -> IO [String]
 > expandEnvironment s           =  case break (=='{') s of
->                                    (s',"")    -> return [s]
+>                                    (_s',"")   -> return [s]
 >                                    (s','{':r) -> case break (=='}') r of
->                                                    (e,"") -> return [s]
+>                                                    (_e,"") -> return [s]
 >                                                    (e,'}':r') -> findEnvironment e s' r'
+>                                                    _ -> impossible "expandEnvironment"
+>                                    _          -> impossible "expandEnvironment"
 >   where findEnvironment       :: String -> String -> String -> IO [String]
 >         findEnvironment e a o =  do er <- try (getEnv e)
 >                                     return $ either (\ (_ :: IOException) -> [])

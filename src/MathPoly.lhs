@@ -14,20 +14,17 @@ are subtle differences, and they will grow over time \dots
 > where
 >
 > import Prelude hiding         (  lines )
-> import Data.List              (  partition, nub, insert, sort, transpose )
-> import Numeric                (  showFFloat )
+> import Data.List              (  partition, nub, sort, transpose )
 > import Control.Applicative    (  many )
 > import Control.Arrow          (  (>>>) )
 > import Control.Monad          (  MonadPlus(..), (>=>) )
 >
 > import Verbatim               (  expand, trim )
-> import Typewriter             (  latex )
 > import MathCommon
 > import Document
 > import Directives
 > import HsLexer
 > import Parser
-> import qualified FiniteMap as FM
 > import Auxiliaries
 > import TeXCommands            (  Lang(..)  )
 > -- import Debug.Trace ( trace )
@@ -69,7 +66,7 @@ are subtle differences, and they will grow over time \dots
 >                               >=> lift (\ts -> (autoalign sep ts,ts))
 >       --                     |>=> lift (\(x,y) -> trace ((unlines $ map show $ y) ++ "\n" ++ show x) (x,y))|
 >                               >=> lift (\(cs,ts) -> let ats = align cs sep lat ts
->                                                         cs' = [("B",0)] ++ cs 
+>                                                         cs' = [("B",0)] ++ cs
 >                                                            ++ [("E",error "E column")]
 >                                                     in  (autocols cs' ats,ats)
 >                                        )
@@ -82,7 +79,7 @@ are subtle differences, and they will grow over time \dots
 >                               >=> lift (\(cs,(d,stack)) -> (sub'code (columns cs <> d),stack))
 >
 > columns                       :: [(String,Doc)] -> Doc
-> columns                       =  foldr (<>) Empty 
+> columns                       =  foldr (<>) Empty
 >                               .  map (uncurry sub'column)
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
@@ -132,7 +129,7 @@ Primitive parser.
 > left                          =  satisfy (\t -> case catCode t of Del c -> c `elem` "([{"; _ -> False)
 > anyright                      =  satisfy (\t -> case catCode t of Del c -> c `elem` ")]}"; _ -> False)
 > right l                       =  satisfy (\c -> case (catCode l, catCode c) of
->                                      (Del o, Del c) -> (o,c) `elem` zip "([{" ")]}" 
+>                                      (Del o, Del c) -> (o,c) `elem` zip "([{" ")]}"
 >                                      _     -> False)
 >                                   `mplus` do eof
 >                                              return (fromToken $ TeX False Empty)
@@ -154,12 +151,12 @@ to |math| style. Also added |anyright|.
 > autoalign sep toks            =  map (\x -> (show x,x))
 >                               .  nub
 >                               .  sort
->                               .  concat 
->                               .  fmap findCols 
+>                               .  concat
+>                               .  fmap findCols
 >                               $  toks
 >   where
 >   findCols                    :: (CToken tok,Show tok) => [Pos tok] -> [Col]
->   findCols ts                 =  case {- |trace (show ts)| -} 
+>   findCols ts                 =  case {- |trace (show ts)| -}
 >                                       (break (\t -> not . isNotSpace . token $ t) ts) of
 >       (_, [])                 -> []   -- done
 >       (_, [v])                -> []   -- last token is whitespace, doesn't matter
@@ -184,18 +181,18 @@ was that in |findCols| above, the recursive calls used |vs| instead of |(v':vs)|
 >                                              let res = splitn ("B",0) False cs t
 >                                              in  if null [x | x <- t
 >                                                          , (row x /= 0 || col x /= 0) && isNotSpace (token x)]
->                                                      || null res 
+>                                                      || null res
 >                                              then Blank
 >                                              else Poly res
 >                                       ) toks
 >   where
 >   splitn cc ind [] []         =  []
 >   splitn cc ind [] ts         =  [(cc,ts,ind)]
->   splitn cc ind ((n,i):oas) ts=  
+>   splitn cc ind ((n,i):oas) ts=
 >     case span (\t -> col t < i) ts of
 >       ([], vs)                -> splitn cc ind oas vs
 >       (us, [])                -> [(cc,us,ind)]
->       (us, (v:vs))            -> 
+>       (us, (v:vs))            ->
 >         let lu = head [ u | u <- reverse us, col u /= 0 || row u /= 0 ]
 >                                  -- again, we skip automatically added spaces
 >             llu = length (string (token lu))
@@ -235,8 +232,8 @@ same amount of space.
 > autocols                      :: (CToken tok, Show tok) => [(String,Int)]   -- column info
 >                                               -> [Line [Pos tok]] -- aligned tokens
 >                                               -> ([(String,Doc)],[Col]) -- cols+alignment, plus centered columns
-> autocols cs ats               = (\(x,y) -> (concat x,concat y)) $ unzip 
->                               $ zipWith3 (\(cn,n) ml ai -> 
+> autocols cs ats               = (\(x,y) -> (concat x,concat y)) $ unzip
+>                               $ zipWith3 (\(cn,n) ml ai ->
 >                                              if ml <= 2 && ai then ([(cn,sub'centered)
 >                                                                     ,(cn ++ "E",sub'dummycol)
 >                                                                     ],[n])
@@ -277,7 +274,7 @@ after a keyword (hence |before b| really means not immediately after).
 >           | c `elem` ",;([{"  -> t : before False ts
 >         Keyword _             -> [ fromToken (TeX False sub'space) | b ] ++ t : after ts
 >         _                     -> t : before True ts
-> 
+>
 >     after []                  =  []
 >     after (t : ts)            =  case token t of
 >         u | not (isNotSpace u)-> t : after ts
@@ -330,7 +327,7 @@ this is not a good idea, but let's see.
 
 As a final step, the current line is placed on the stack.
 
-> leftIndent                    :: Formats -> Bool 
+> leftIndent                    :: Formats -> Bool
 >                               -> [Col]        -- centered columns
 >                               -> Stack        -- current stack
 >                               -> [Line [Pos Token]]
@@ -358,14 +355,14 @@ As a final step, the current line is placed on the stack.
 >                                      -- step 3: place line on stack
 >                                      fstack  = (c,l) : rstack
 >                                  in mkFromTo fstack rn n rc [fromToken $ TeX False (indent (rn,rc) (n,c))] p ls
->                                              
+>
 >
 >         | c `elem` z          -> mkFromTo stack n (n ++ "E") c ts rs ls
 >                                                     -- treat centered lines special
 >       Poly [((n,c),ts,ind)]   -> mkFromTo stack n "E" c ts [] ls
 >                                                     -- last columns
 >       Poly (((n,c),ts,ind):rs@(((nn,_),_,_):_))
->                               -> mkFromTo stack n nn  c ts rs ls 
+>                               -> mkFromTo stack n nn  c ts rs ls
 >
 >   mkFromTo                    :: Stack -> String -> String -> Col -> [Pos Token] -> [((String, Int), [Pos Token], Bool)] -> [Line [Pos Token]] -> (Doc, Stack)
 >   mkFromTo stack bn en c ts rs ls

@@ -11,7 +11,7 @@ therefore there has been much overlap between the two modules.
 
 > import Typewriter ( latex )
 > import Document
-> import Directives
+> import Directives ( Formats )
 > import HsLexer
 > import qualified FiniteMap as FM
 > import Auxiliaries
@@ -20,7 +20,7 @@ therefore there has been much overlap between the two modules.
 
 > when :: Monad m => Bool -> (a -> m a) -> (a -> m a)
 > when True f                   =  f
-> when False f                  =  return
+> when False _f                 =  return
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Adding positional information}
@@ -57,8 +57,8 @@ therefore there has been much overlap between the two modules.
 Numbering the list of tokens.
 
 > number                        :: Row -> Col -> [Token] -> [Pos Token]
-> number r c []                 =  []
-> number r c (t : ts)           =  Pos r c t : number r' c' ts
+> number _r _c []               =  []
+> number r  c  (t : ts)         =  Pos r c t : number r' c' ts
 >     where (r', c')            =  count r c (string t)
 >
 > count                         :: Row -> Col -> String -> (Row, Col)
@@ -85,9 +85,9 @@ things. Since I don't know Smugweb and I haven't written the code below, it is
 possible that the explanation is not adequate:
 
 A |Chunk| is a sequence of \emph{delimiters} or \emph{applications}. Delimiters
-are keywords or operators. Applications are everything else. 
+are keywords or operators. Applications are everything else.
 
-An |application| is a sequence of atoms that are forming a Haskell 
+An |application| is a sequence of atoms that are forming a Haskell
 function application. The list must never be empty, but can contain
 a single element (for instance, in normal infix expressions such as |2 + 3|
 this will occur frequently).
@@ -135,7 +135,7 @@ stage (by the call to latexs, for instance in leftIndent).
 >   where
 >   eval                        :: (CToken tok) => [Item (Pos tok)] -> (Mode,[Pos tok])
 >   eval [e]                    =  eval' e
->   eval chunk                  =  (Optional False, concat [ snd (eval' i) | i <- chunk ])
+>   eval chunk'                 =  (Optional False, concat [ snd (eval' i) | i <- chunk' ])
 >
 >   eval'                       :: (CToken tok) => Item (Pos tok) -> (Mode,[Pos tok])
 >   eval' (Delim s)             =  (Optional False, [s])
@@ -180,11 +180,11 @@ as well.
 To support macros of the form @%format Parser (a) = a@.
 
 > set                           :: (CToken tok) => tok -> [tok] -> [tok]
-> set s []                      =  []
-> set s (t : ts)                =  inherit s (token t) : ts
+> set _s []                     =  []
+> set s  (t : ts)               =  inherit s (token t) : ts
 >
 > mandatory                     :: (CToken tok) => Chunk tok -> Bool
-> mandatory e                   =  False
+> mandatory _e                  =  False
 
 Code before:
 

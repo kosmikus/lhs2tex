@@ -8,7 +8,6 @@
 > where
 >
 > import Data.Maybe
-> import FiniteMap              (  FiniteMap  )
 > import qualified FiniteMap as FM
 > import Auxiliaries
 

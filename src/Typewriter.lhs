@@ -62,15 +62,13 @@
 >     tex _ (TeX True d)        =  sub'tex d
 >     tex _ t@(Qual ms t')      =  replace Empty (string t) (tex (catenate (map (\m -> tex Empty (Conid m) <> Text ".") ms)) t')
 >     tex _ t@(Op t')           =  replace Empty (string t) (sub'backquoted (tex Empty t'))
->         where cmd | isConid t'=  sub'consym
->                   | otherwise =  sub'varsym
 >
 >     replace q s def           =  case FM.lookup s dict of
 >         Just (_, _, [], ts)   -> q <> catenate (map (tex Empty) ts)
 >         _                     -> def
 
 \NB the directives @%format a = b@ and @%format b = a@ cause a loop.
- 
+
 \NB Only nullary macros are applied.
 
 Conversion of strings and characters. The Boolean indicates whether we

@@ -90,38 +90,39 @@ The main function.
 ks, 28.08.2008: New: Agda and Haskell modes.
 
 > lexify                        :: Lang -> [Char] -> Either Exc [Token]
-> lexify lang []                =  return []
-> lexify lang s@(_ : _)         =  case lex' lang s of
+> lexify _lang []               =  return []
+> lexify lang  s@(_ : _)        =  case lex' lang s of
 >     Nothing                   -> Left ("lexical error", s)
 >     Just (t, s')              -> do ts <- lexify lang s'; return (t : ts)
 >
 > lex'                          :: Lang -> String -> Maybe (Token, String)
-> lex' lang ""                  =  Nothing
-> lex' lang ('\'' : s)          =  do let (t, u) = lexLitChar s
+> lex' _lang ""                 =  Nothing
+> lex' _lang ('\'' : s)         =  do let (t, u) = lexLitChar s
 >                                     v <- match "\'" u
 >                                     return (Char ("'" ++ t ++ "'"), v)
-> lex' lang ('"' : s)           =  do let (t, u) = lexLitStr s
+> lex' _lang ('"' : s)          =  do let (t, u) = lexLitStr s
 >                                     v <- match "\"" u
 >                                     return (String ("\"" ++ t ++ "\""), v)
-> lex' lang ('-' : '-' : s)
+> lex' lang  ('-' : '-' : s)
 >   | not (null s') && isSymbol lang (head s')
 >                               =  case s' of
 >                                    (c : s'') -> return (varsymid lang ("--" ++ d ++ [c]), s'')
+>                                    [] -> impossible "lex'"
 >   | otherwise                 =  return (Comment t, u)
 >   where (d, s') = span (== '-') s
 >         (t, u)  = break (== '\n') s'
-> lex' lang ('{' : '-' : '"' : s)
+> lex' _lang ('{' : '-' : '"' : s)
 >                               =  do let (t, u) = inlineTeX s
 >                                     v <- match "\"-}" u
 >                                     return (TeX True (Text t), v)
-> lex' lang ('{' : '-' : '#' : s)
+> lex' _lang ('{' : '-' : '#' : s)
 >                               =  do let (t, u) = nested 0 s
 >                                     v <- match "#-}" u
 >                                     return (Pragma t, v)
-> lex' lang ('{' : '-' : s)     =  do let (t, u) = nested 0 s
+> lex' _lang ('{' : '-' : s)    =  do let (t, u) = nested 0 s
 >                                     v <- match "-}" u
 >                                     return (Nested t, v)
-> lex' lang (c : s)
+> lex' lang  (c : s)
 >     | isSpace c               =  let (t, u) = span isSpace s in return (Space (c : t), u)
 >     | isSpecial lang c        =  Just (Special c, s)
 >     | isUpper c               =  let (t, u) = span (isIdChar lang) s in return (Conid (c : t), u)
@@ -135,10 +136,10 @@ ks, 28.08.2008: New: Agda and Haskell modes.
 >     where
 >     numeral Agda              =  Varid
 >     numeral Haskell           =  Numeral
->     classify s
->         | s `elem` keywords lang
->                               =  Keyword s
->         | otherwise           =  Varid   s
+>     classify s'
+>         | s' `elem` keywords lang
+>                               =  Keyword s'
+>         | otherwise           =  Varid   s'
 >
 >
 > lexFracExp                    :: String -> Maybe (String, String)
@@ -161,8 +162,11 @@ ks, 28.08.2008: New: Agda and Haskell modes.
 > lexDigits'                    :: String -> Maybe (String, String)
 > lexDigits' s                  =  do (cs@(_ : _), t) <- Just (span isDigit s); return (cs, t)
 
+> varsymid :: Lang -> String -> Token
 > varsymid Agda    = Varid
 > varsymid Haskell = Varsym
+>
+> consymid :: Lang -> String -> Token
 > consymid Agda    = Conid
 > consymid Haskell = Consym
 

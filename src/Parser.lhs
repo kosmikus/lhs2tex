@@ -7,10 +7,8 @@
 > module Parser                 (  Parser, run, satisfy, lit, lits, wrap, nonnull, eof  )
 > where
 >
-> import Data.Char              (  isSpace  )
-> import Auxiliaries
 > import Control.Applicative
-> import Control.Monad          (  MonadPlus(..), filterM, ap  )
+> import Control.Monad          (  MonadPlus(..), ap  )
 
 %endif
 Deterministische Mini-Parser.
@@ -19,6 +17,7 @@ Deterministische Mini-Parser.
 %format (unParser (p)) = p
 %else
 
+> unParser                      :: Parser tok a -> [tok] -> Maybe (a, [tok])
 > unParser (MkParser p)         =  p
 
 %endif
@@ -36,7 +35,7 @@ Deterministische Mini-Parser.
 >                                      Nothing        -> Nothing
 >                                      Just (a, rest) -> unParser (k a) rest)
 > instance MonadPlus  (Parser tok) where
->     mzero                     =  MkParser (\inp -> Nothing)
+>     mzero                     =  MkParser (\_inp -> Nothing)
 >     m `mplus` n               =  MkParser (\inp -> unParser m inp `mplus` unParser n inp)
 > instance Applicative (Parser tok) where
 >     pure                      =  return
@@ -46,9 +45,9 @@ Deterministische Mini-Parser.
 >     (<|>)                     =  mplus
 >
 > satisfy                       :: (tok -> Bool) -> Parser tok tok
-> satisfy pred                  =  MkParser (\inp -> case inp of
->                                      a : rest | pred a -> Just (a, rest)
->                                      _                 -> Nothing)
+> satisfy p                     =  MkParser (\inp -> case inp of
+>                                      a : rest | p a -> Just (a, rest)
+>                                      _              -> Nothing)
 >
 > lit                           :: (Eq tok) => tok -> Parser tok tok
 > lit c                         =  satisfy (== c)
@@ -75,6 +74,7 @@ ks, 06.09.2003: Adding eof that accepts succeeds only at the end of input.
 > nonnull                       :: ([tok] -> ([a], [tok])) -> Parser tok [a]
 > nonnull f                     =  mfilter (not . null) (wrap f)
 
+> mfilter                       :: MonadPlus m => (b -> Bool) -> m b -> m b
 > mfilter p m                   =  m >>= \a -> if p a then return a else mzero
 
 %if False

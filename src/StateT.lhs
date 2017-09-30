@@ -8,11 +8,8 @@
 > module StateT                 (  module StateT  )
 > where
 >
-> import Control.Applicative
 > import Control.Monad.Except
 > import Control.Monad.State
->
-> import Auxiliaries
 
 %endif
 
@@ -31,6 +28,7 @@
 
 %if style /= math
 
+> unXIO                         :: XIO exc st a -> ExceptT exc (StateT st IO) a
 > unXIO (MkXIO f)               =  f
 
 %endif

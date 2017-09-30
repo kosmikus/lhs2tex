@@ -12,8 +12,6 @@
 > import Data.Char              (  isSpace  )
 > import Control.Arrow          (  (>>>), Kleisli(..) )
 > import qualified Control.Arrow as A
-> import Control.Monad          (  MonadPlus(..)  )
-> import Control.Monad.Except
 
 %endif
 
@@ -45,7 +43,7 @@
 
 > merge                         :: (Ord a) => [a] -> [a] -> [a]
 > merge [] bs                   =  bs
-> merge as@(a : _) []           =  as
+> merge as@(_a : _)   []        =  as
 > merge as@(a : as')  bs@(b : bs')
 >     | a <= b                  =  a : merge as' bs
 >     | otherwise               =  b : merge as  bs'
@@ -58,14 +56,14 @@ i], [sub a (i+1),..,sub a n])| such that |p (sub a i) = True| and |p
 %}
 
 > breakAfter                    :: (a -> Bool) -> [a] -> ([a], [a])
-> breakAfter p []               =  ([], [])
-> breakAfter p (a : as)
+> breakAfter _p []              =  ([], [])
+> breakAfter p  (a : as)
 >     | p a                     =  ([a], as)
 >     | otherwise               =  a <| breakAfter p as
 
 > breaks                        :: ([a] -> Bool) -> [a] -> ([a], [a])
-> breaks p []                   =  ([], [])
-> breaks p as@(a : as')
+> breaks _p []                  =  ([], [])
+> breaks p  as@(a : as')
 >     | p as                    =  ([], as)
 >     | otherwise               =  a <| breaks p as'
 
@@ -79,7 +77,7 @@ i], [sub a (i+1),..,sub a n])| such that |p (sub a i) = True| and |p
 > group n                       =  repSplit (repeat n) >>> takeWhile (not . null)
 
 > repSplit                      :: [Int] -> [a] -> [[a]]
-> repSplit [] xs                =  []
+> repSplit [] _xs               =  []
 > repSplit (n : ns) xs          =  ys : repSplit ns zs
 >   where (ys, zs)              =  splitAt n xs
 
