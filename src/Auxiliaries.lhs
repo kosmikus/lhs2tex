@@ -13,7 +13,7 @@
 > import Control.Arrow          (  (>>>), Kleisli(..) )
 > import qualified Control.Arrow as A
 > import Control.Monad          (  MonadPlus(..)  )
-> import Control.Monad.Error
+> import Control.Monad.Except
 
 %endif
 
@@ -106,10 +106,6 @@ Some useful type abbreviations.
 > type LineNo                   =  Int
 > type Message                  =  String
 > type Exc                      =  (Message, String)
-
-> instance Error Exc where
->   noMsg    = ("unknown error", "")
->   strMsg s = (s, "")
 
 Reverse Composition.
 

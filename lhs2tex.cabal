@@ -79,7 +79,7 @@ executable lhs2TeX
                         TypeSynonymInstances
   build-depends:        base >= 4.2 && < 5,
                         regex-compat,
-                        mtl,
+                        mtl >= 2.2.1,
                         filepath,
                         directory,
                         process

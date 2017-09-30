@@ -18,7 +18,7 @@
 > import System.Process
 > import Control.Arrow
 > import Control.Monad
-> import Control.Monad.Error
+> import Control.Monad.Except
 > import Control.Monad.State ( MonadState(..), modify )
 > import Control.Monad.Trans
 > import Prelude hiding ( getContents )
