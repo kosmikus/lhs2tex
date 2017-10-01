@@ -74,14 +74,14 @@ This variant cannot handle unbalanced parentheses.
 >
 > chunk                         :: (CToken tok) => Parser (Pos tok) (Chunk (Pos tok))
 > chunk                         =  do a <- many atom
->                                     as <- many (do s <- sep; a <- many atom; return (Delim s : offside a))
+>                                     as <- many (do s <- sep; a' <- many atom; return (Delim s : offside a'))
 >                                     return (offside a ++ concat as)
 >     where offside []          =  []
 >           -- old: |opt a =  [Apply a]|
 >           offside (a : as)    =  Apply (a : bs) : offside cs
 >               where (bs, cs)  =  span (\a' -> col' a < col' a') as
->           col' (Atom a)       =  col a
->           col' (Paren a _ _)  =  col a
+>           col' (Atom a)       =  poscol a
+>           col' (Paren a _ _)  =  poscol a
 >
 > atom                          :: (CToken tok) => Parser (Pos tok) (Atom (Pos tok))
 > atom                          =  fmap Atom noSep
@@ -98,7 +98,7 @@ Primitive parser.
 > left                          =  satisfy (\t -> case catCode t of Del c -> c `elem` "(["; _-> False)
 >
 > right                         :: (CToken tok) => tok -> Parser tok tok
-> right l                       =  satisfy (\c -> case (catCode l, catCode c) of
+> right l                       =  satisfy (\c' -> case (catCode l, catCode c') of
 >                                      (Del o, Del c) -> (o,c) `elem` zip "([" ")]"
 >                                      _     -> False)
 
@@ -117,11 +117,11 @@ Position von |=| oder |::| heranzuziehen ist gef"ahrlich; wenn z.B.
 > align                         :: (CToken tok) => Maybe Int -> [[Pos tok]] -> [Line [Pos tok]]
 > align c                       =  fmap (maybe Multi split3 c)
 >   where
->   split3 i ts                 =  case span (\t -> col t < i) ts of
+>   split3 i ts                 =  case span (\t -> poscol t < i) ts of
 >       ([], [])                -> Blank
 >       ((_ : _), [])           -> Multi ts
 >       (us, v : vs)
->           | col v == i && isInternal v
+>           | poscol v == i && isInternal v
 >                               -> Three us [v] vs
 >           | null us           -> Three [] [] (v : vs)
 >           | otherwise         -> Multi ts
@@ -149,10 +149,10 @@ indicates whether to insert a space or not; |after| means immediately
 after a keyword (hence |before b| really means not immediately after).
 
 > addSpaces                     :: (CToken tok) => [tok] -> [tok]
-> addSpaces ts                  =  before False ts
+> addSpaces ts0                 =  before False ts0
 >     where
->     before b []               =  []
->     before b (t : ts)         =  case token t of
+>     before _b []              =  []
+>     before  b (t : ts)        =  case token t of
 >         u | selfSpacing u     -> t : before False ts
 >         Special c
 >           | c `elem` ",;([{"  -> t : before False ts
@@ -193,8 +193,8 @@ Auch wenn |auto = False| wird der Stack auf dem laufenden gehalten.
 >   -> (Stack, Stack)
 >   -> [Line [Pos Token]]
 >   -> (Doc, (Stack, Stack))
-> leftIndent dict auto (lst, rst)
->                               =  loop lst rst
+> leftIndent dict auto (lst0, rst0)
+>                               =  loop lst0 rst0
 >   where
 >   copy d | auto               =  d
 >          | otherwise          =  Empty
@@ -203,37 +203,37 @@ Die Funktion |isInternal| pr"uft, ob |v| ein spezielles Symbol wie
 @::@, @=@ etc~oder ein Operator wie @++@ ist.
 
 >   loop lst rst []             =  (Empty, (lst, rst))
->   loop lst rst (l : ls)       =  case l of
+>   loop lst rst (l' : ls)      =  case l' of
 >       Blank                   -> loop lst rst ls
 >       Three l c r             -> (sub'column3 (copy lskip <> latexs dict l)
 >                                               (latexs dict c)
->                                               (copy rskip <> latexs dict r) <> sep ls <> rest, st')
+>                                               (copy rskip <> latexs dict r) <> sep' ls <> rest, st')
 >           where (lskip, lst') =  indent l lst
 >                 (rskip, rst') =  indent r rst
 >                 (rest, st')   =  loop lst' rst' ls -- does not work: |if null l && null c then rst' else []|
->       Multi m                 -> (sub'column1 (copy lskip <> latexs dict m) <> sep ls <> rest, st')
+>       Multi m                 -> (sub'column1 (copy lskip <> latexs dict m) <> sep' ls <> rest, st')
 >           where (lskip, lst') =  indent m lst
 >                 (rest, st')   =  loop lst' [] ls
 >
->   sep []                      =  Empty
->   sep (Blank : _ )            =  sub'blankline
->   sep (_ : _)                 =  sub'nl
+>   sep' []                     =  Empty
+>   sep' (Blank : _ )           =  sub'blankline
+>   sep' (_ : _)                =  sub'nl
 >
 >   indent                      :: [Pos Token] -> Stack -> (Doc, Stack)
 >   indent [] stack             =  (Empty, stack)
->   indent ts@(t : _) []        =  (Empty, [(col t, Empty, ts)])
+>   indent ts@(t : _) []        =  (Empty, [(poscol t, Empty, ts)])
 >   indent ts@(t : _) (top@(c, skip, line) : stack)
->                               =  case compare (col t) c of
+>                               =  case compare (poscol t) c of
 >       LT                      -> indent ts stack
 >       EQ                      -> (skip, (c, skip, ts) : stack)
->       GT                      -> (skip', (col t, skip', ts) : top : stack)
+>       GT                      -> (skip', (poscol t, skip', ts) : top : stack)
 >           where
->           skip'               =  case span (\u -> col u < col t) line of
->               (us, v : _vs) | col v == col t
+>           skip'               =  case span (\u -> poscol u < poscol t) line of
+>               (us, v : _vs) | poscol v == poscol t
 >                               -> skip <> sub'phantom (latexs dict us)
 >               -- does not work: |(us, _) -> skip ++ [Phantom (fmap token us), Skip (col t - last (c : fmap col us))]|
 >               _               -> skip <> sub'hskip (Text em)
->                   where em    =  showFFloat (Just 2) (0.5 * fromIntegral (col t - c) :: Double) ""
+>                   where em    =  showFFloat (Just 2) (0.5 * fromIntegral (poscol t - c) :: Double) ""
 
 M"ussen |v| und |t| zueinander passen?
 %

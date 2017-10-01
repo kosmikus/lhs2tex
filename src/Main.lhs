@@ -20,9 +20,9 @@
 > import Control.Monad
 > import Control.Monad.Except
 > import Control.Monad.State ( MonadState(..), modify )
-> import Prelude hiding ( getContents )
+> import Prelude hiding ( getContents, pi )
 >
-> import Version
+> import qualified Version as V
 > import TeXCommands
 > import TeXParser
 > import qualified Verbatim
@@ -64,7 +64,7 @@
 >                                       []  -> lhs2TeX Poly flags (reverse initdirs) n
 >                                           -- ks, 22.11.2005, changed default style to |Poly|
 >                                       [Help]        -> quitSuccess (usageInfo uheader options)
->                                       [SearchPath]  -> quitSuccess (init . unlines $ searchPath)
+>                                       [SearchPath]  -> quitSuccess (init . unlines $ V.searchPath)
 >                                       [Version]     -> quitSuccess programInfo
 >                                       [Copying]     -> quitSuccess (programInfo ++ "\n\n" ++ copying)
 >                                       [Warranty]    -> quitSuccess (programInfo ++ "\n\n" ++ warranty)
@@ -95,8 +95,8 @@
 >                                    }
 >     where toggles0            =  --[(decode CodeOnly, Bool (sty == CodeOnly))]
 >                                  [("style", Int (fromEnum sty))]
->                               ++ [("version", Int numversion)]
->                               ++ [("pre", Int pre)]
+>                               ++ [("version", Int V.numversion)]
+>                               ++ [("pre", Int V.pre)]
 >                               ++ [("lang", Int (fromEnum (lang s)))]
 >                               ++ [ (decode s', Int (fromEnum s')) | s' <- [(minBound :: Style) .. maxBound] ]
 >                               ++ [ (decode s', Int (fromEnum s')) | s' <- [(minBound :: Lang) .. maxBound] ]
@@ -282,18 +282,18 @@ We abort immediately if an error has occured.
 >                                     let d  = path st
 >                                     let sp = searchpath st
 >                                     modify (\st'@State{file = f', lineno = l'} ->
->                                         st'{file = f, files = (f', l') : files st', path = d ++ dir f})
+>                                         st'{file = arg', files = (f', l') : files st', path = d ++ dir arg'})
 >                                     -- |d <- liftIO getCurrentDirectory|
 >                                     -- |liftIO (setCurrentDirectory (dir f))|
->                                     (str,f) <- liftIO (chaseFile sp (d ++ f))
+>                                     (str,f) <- liftIO (chaseFile sp (d ++ arg'))
 >                                     modify (\st' -> st' { file = f })
 >                                     liftIO (when (verbose st) (hPutStr stderr $ "(" ++ f))
 >                                     formatStr (addEndNL str)
 >                                     -- |liftIO (setCurrentDirectory d)|
->                                     modify (\st'@State{files = (f, l) : fs} ->
->                                         st'{file = f, lineno = l, files = fs, path = d})
+>                                     modify (\st'@State{files = (f', l) : fs} ->
+>                                         st'{file = f', lineno = l, files = fs, path = d})
 >                                     liftIO (when (verbose st) (hPutStrLn stderr $ ")"))
->     where f                   =  withoutSpaces arg
+>     where arg'                =  withoutSpaces arg
 >           addEndNL            =  (++"\n") . unlines . lines
 
 ks, 25.01.2003: I added the above function at the suggestion of NAD, but
@@ -339,10 +339,11 @@ the corresponding indentation stack |pstack|.
 > format (Directive Latency s)  =  modify (\st -> st{latency = read s, pstack = []})
 
 > format (Directive File s)     =  modify (\st -> st{file = withoutSpaces s})
-> format (Directive Options s)  =  modify (\st -> st{opts = trim s})
->     where trim                =  dropWhile isSpace >>> reverse >>> dropWhile isSpace >>> reverse
+> format (Directive Options s)  =  modify (\st -> st{opts = trim' s})
+>     where trim'               =  dropWhile isSpace >>> reverse >>> dropWhile isSpace >>> reverse
 
 > format (Error exc)            =  throwError exc
+> format _                      =  impossible "format"
 
 Printing documents.
 %{
@@ -393,12 +394,13 @@ Printing documents.
 > inline s                      =  do st <- get
 >                                     d <- fromEither (select (style st) st)
 >                                     eject d
->   where select Verb st        =  Right (Verbatim.inline False s)
+>   where select Verb _st       =  Right (Verbatim.inline False s)
 >         select Typewriter st  =  Typewriter.inline (lang st) (fmts st) s
 >         select Math st        =  Math.inline (lang st) (fmts st) (isTrue (toggles st) auto) s
 >         select Poly st        =  Poly.inline (lang st) (fmts st) (isTrue (toggles st) auto) s
->         select CodeOnly st    =  return Empty
->         select NewCode st     =  return Empty   -- generate PRAGMA or something?
+>         select CodeOnly _st   =  return Empty
+>         select NewCode _st    =  return Empty   -- generate PRAGMA or something?
+>         select _ _            =  impossible "inline.select"
 
 > display s                     =  do st <- get
 >                                     (d, st') <- fromEither (select (style st) st)
@@ -414,6 +416,7 @@ Printing documents.
 >                                     let p = sub'pragma $ Text ("LINE " ++ show (lineno st + 1) ++ " " ++ show (takeFileName $ file st))
 >                                     return ((if pragmas st then ((p <> sub'nl) <>) else id) d, st)
 >         select CodeOnly st    =  return (Text (trim s), st)
+>         select _ _            =  impossible "display.select"
 
 > auto                          :: String
 > auto                          =  "autoSpacing"
@@ -423,11 +426,11 @@ Printing documents.
 Delete leading and trailing blank line (only the first!).
 
 > trim                          :: String -> String
-> trim                          =  skip >>> reverse >>> skip >>> reverse
+> trim                          =  skip' >>> reverse >>> skip' >>> reverse
 >     where
->     skip                      :: String -> String
->     skip ""                   =  ""
->     skip s | all isSpace t    =  u
+>     skip'                     :: String -> String
+>     skip' ""                  =  ""
+>     skip' s | all isSpace t   =  u
 >            | otherwise        =  s
 >            where (t, u)       =  breakAfter (== '\n') s
 
@@ -447,23 +450,23 @@ groups.
 > directive                     :: Lang -> Directive -> String
 >                               -> (FilePath,LineNo) -> [CondInfo] -> Toggles
 >                               -> [Numbered Class] -> Formatter
-> directive lang d s (f,l) stack togs ts
->                               =  dir d s stack
+> directive lang' d0 s0 (f0,l0) stack' togs ts
+>                               =  dir' d0 s0 stack'
 >   where
->   dir If s bs                 =  do b <- fromEither (eval lang togs s)
->                                     skipOrFormat ((f, l, bool b, True) : bs) ts
->   dir Elif s ((f,l,b2,b1):bs) =  do b <- fromEither (eval lang togs s)
+>   dir' If s bs                =  do b <- fromEither (eval lang' togs s)
+>                                     skipOrFormat ((f0, l0, bool b, True) : bs) ts
+>   dir' Elif s ((f,l,b2,b1):bs)=  do b <- fromEither (eval lang' togs s)
 >                                     skipOrFormat ((f, l, bool b, not b2 && b1) : bs) ts
->   dir Else _ ((f,l,b2,b1):bs) =  skipOrFormat ((f, l, not b2 && b1, True) : bs) ts
->   dir Endif _ ((f,l,b2,b1):bs)=  skipOrFormat bs ts
->   dir EOF _ []                =  return ()  -- nothing left to do
->   dir EOF s bs                =  throwError (init $ unlines (map unBalancedIf bs), s)
->   dir d s _                   =  throwError ("spurious %" ++ decode d, s)
+>   dir' Else _ ((f,l,b2,b1):bs)=  skipOrFormat ((f, l, not b2 && b1, True) : bs) ts
+>   dir' Endif _ ((_f,_l,_b2,_b1):bs)=  skipOrFormat bs ts
+>   dir' EOF _ []               =  return ()  -- nothing left to do
+>   dir' EOF s bs               =  throwError (init $ unlines (map unBalancedIf bs), s)
+>   dir' d s _                  =  throwError ("spurious %" ++ decode d, s)
 
 > skipOrFormat                  :: [CondInfo] -> [Numbered Class] -> Formatter
-> skipOrFormat stack ts         =  do  modify (\st -> st{conds = stack})
->                                      if andS stack  then formats ts
->                                                     else skip ts
+> skipOrFormat stack' ts        =  do  modify (\st -> st{conds = stack'})
+>                                      if andS stack'  then formats ts
+>                                                      else skip ts
 
 > andS                          :: [CondInfo] -> Bool
 > andS                          =  all (\(_,_,x,y) -> x && y)
@@ -473,9 +476,9 @@ groups.
 
 > skip                          :: [Numbered Class] -> Formatter
 > skip []                       =  return ()
-> skip ts@(No n  (Directive d s) : _)
+> skip ts@(No _n (Directive d _s) : _)
 >     | conditional d           =  formats ts
-> skip (t : ts)                 =  skip ts
+> skip (_t : ts)                =  skip ts
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Active commands}

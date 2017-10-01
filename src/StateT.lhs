@@ -5,10 +5,11 @@
 %if codeOnly || showModuleHeader
 
 > {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+> {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 > module StateT                 (  module StateT  )
 > where
 >
-> import Control.Applicative
+> import Control.Applicative -- only needed for older GHCs
 > import Control.Monad.Except
 > import Control.Monad.State
 

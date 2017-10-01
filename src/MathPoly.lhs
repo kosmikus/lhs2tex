@@ -96,17 +96,17 @@ This variant can handle unbalanced parentheses in some cases (see below).
 >
 > chunk                         :: (CToken tok) => Int -> Parser (Pos tok) (Chunk (Pos tok))
 > chunk d                       =  do a <- many (atom d)
->                                     as <- many (do s <- sep; a <- many (atom d); return (Delim s : offside a))
+>                                     as <- many (do s <- csep; a' <- many (atom d); return (Delim s : offside a'))
 >                                     return (offside a ++ concat as)
 >     where offside []          =  []
 >           -- old: |opt a =  [Apply a]|
 >           offside (a : as)    =  Apply (a : bs) : offside cs
 >               where (bs, cs)  =  span (\a' -> col' a < col' a') as
->           col' (Atom a)       =  col a
->           col' (Paren a _ _)  =  col a
+>           col' (Atom a)       =  poscol a
+>           col' (Paren a _ _)  =  poscol a
 >
 > atom                          :: (CToken tok) => Int -> Parser (Pos tok) (Atom (Pos tok))
-> atom d                        =  fmap Atom noSep
+> atom d                        =  fmap Atom cnoSep
 >                               `mplus` do l <- left
 >                                          e <- chunk (d+1)
 >                                          r <- right l
@@ -123,14 +123,14 @@ parsed as an arbitrary amount of right parentheses.
 
 Primitive parser.
 
-> sep, noSep, left, anyright    :: (CToken tok) => Parser tok tok
-> sep                           =  satisfy (\t -> catCode t == Sep)
-> noSep                         =  satisfy (\t -> catCode t == NoSep)
+> csep, cnoSep, left, anyright  :: (CToken tok) => Parser tok tok
+> csep                          =  satisfy (\t -> catCode t == Sep)
+> cnoSep                        =  satisfy (\t -> catCode t == NoSep)
 > left                          =  satisfy (\t -> case catCode t of Del c -> c `elem` "([{"; _ -> False)
 > anyright                      =  satisfy (\t -> case catCode t of Del c -> c `elem` ")]}"; _ -> False)
 >
 > right                         :: (CToken tok) => tok -> Parser tok tok
-> right l                       =  satisfy (\c -> case (catCode l, catCode c) of
+> right l                       =  satisfy (\c' -> case (catCode l, catCode c') of
 >                                      (Del o, Del c) -> (o,c) `elem` zip "([{" ")]}"
 >                                      _     -> False)
 >                                   `mplus` do eof
@@ -163,10 +163,10 @@ to |math| style. Also added |anyright|.
 >       (_, [])                 -> []   -- done
 >       (_, [_v])               -> []   -- last token is whitespace, doesn't matter
 >       (_, v:v':vs)
->         | row v' == 0 && col v' == 0
+>         | posrow v' == 0 && poscol v' == 0
 >                               -> findCols (v:vs)  -- skip internal tokens (automatically added spaces)
 >         | length (string (token v)) >= sep
->                               -> {- |trace ("found: " ++ show (col v')) $| -} col v' : findCols (v':vs)
+>                               -> {- |trace ("found: " ++ show (col v')) $| -} poscol v' : findCols (v':vs)
 >         | otherwise           -> {- |trace ("found too short")|            -} findCols (v':vs)
 
 ks, 21.11.2005: I've fixed a bug that was known to me since long ago, but I never got
@@ -182,7 +182,7 @@ was that in |findCols| above, the recursive calls used |vs| instead of |(v':vs)|
 > align cs sep lat toks         =  fmap (\t -> {- |trace (show (map token t) ++ "\n") $| -}
 >                                              let res = splitn ("B",0) False cs t
 >                                              in  if null [x | x <- t
->                                                          , (row x /= 0 || col x /= 0) && isNotSpace (token x)]
+>                                                          , (posrow x /= 0 || poscol x /= 0) && isNotSpace (token x)]
 >                                                      || null res
 >                                              then Blank
 >                                              else Poly res
@@ -191,15 +191,15 @@ was that in |findCols| above, the recursive calls used |vs| instead of |(v':vs)|
 >   splitn _cc _ind [] []       =  []
 >   splitn  cc  ind [] ts       =  [(cc,ts,ind)]
 >   splitn  cc  ind ((n,i):oas) ts=
->     case span (\t -> col t < i) ts of
+>     case span (\t -> poscol t < i) ts of
 >       ([], vs)                -> splitn cc ind oas vs
 >       (us, [])                -> [(cc,us,ind)]
 >       (us, (v:vs))            ->
->         let lu = head [ u | u <- reverse us, col u /= 0 || row u /= 0 ]
+>         let lu = head [ u | u <- reverse us, poscol u /= 0 || posrow u /= 0 ]
 >                                  -- again, we skip automatically added spaces
 >             llu = length (string (token lu))
 >         in case () of
->             _ | (lat /= 0 && isNotSpace (token lu)) || llu < lat || col v /= i
+>             _ | (lat /= 0 && isNotSpace (token lu)) || llu < lat || poscol v /= i
 >                                  -- no alignment for this column
 >                               -> splitn cc ind oas (us ++ (v:vs))
 >               | not (isNotSpace (token lu)) && llu >= sep
@@ -248,14 +248,14 @@ same amount of space.
 >     anyinternals              = map (any (any isInternal)) cts
 >
 >     deline                    :: [(String,Int)] -> Line [a] -> [[[a]]]
->     deline _cs Blank          = []
->     deline  cs (Poly ls)      = [decol cs ls]
+>     deline _cs' Blank         = []
+>     deline  cs' (Poly ls)     = [decol cs' ls]
 >
 >     decol                     :: [(String, Int)] -> [((String, Int), [a], Bool)] -> [[a]]
->     decol cs []               = replicate (length cs) []
->     decol ((cn,_):cs) r@(((cn',_),ts,_):rs)
->       | cn' == cn             = ts : decol cs rs
->       | otherwise             = [] : decol cs r
+>     decol cs' []              = replicate (length cs') []
+>     decol ((cn,_):cs') r@(((cn',_),ts,_):rs)
+>       | cn' == cn             = ts : decol cs' rs
+>       | otherwise             = [] : decol cs' r
 >     decol _ _                 = impossible "autocols.decol"
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
@@ -268,7 +268,7 @@ indicates whether to insert a space or not; |after| means immediately
 after a keyword (hence |before b| really means not immediately after).
 
 > addSpaces                     :: (CToken tok) => [tok] -> [tok]
-> addSpaces ts                  =  before False ts
+> addSpaces ts0                 =  before False ts0
 >     where
 >     before _b []              =  []
 >     before  b (t : ts)        =  case token t of
@@ -350,7 +350,7 @@ As a final step, the current line is placed on the stack.
 >       Poly p@(((n,c),ts,_ind):rs)
 >         | first               -> -- check indentation
 >                                  let -- step 1: shrink stack
->                                      rstack  = dropWhile (\(rc,_) -> rc >= c) stack
+>                                      rstack  = dropWhile (\(rc',_) -> rc' >= c) stack
 >                                      -- step 2: find relevant column
 >                                      (rn,rc) = findrel (n,c) rstack
 >                                      -- step 3: place line on stack

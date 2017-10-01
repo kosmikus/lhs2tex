@@ -29,7 +29,7 @@ therefore there has been much overlap between the two modules.
 > type Row                      =  Int
 > type Col                      =  Int
 >
-> data Pos a                    =  Pos {row :: !Row, col :: !Col, ann :: a}
+> data Pos a                    =  Pos {posrow :: !Row, poscol :: !Col, posann :: a}
 >                                  deriving (Show)
 
 %{
@@ -74,7 +74,7 @@ Splitting the token list in lines.
 >     where
 >     split _   []              =  []
 >     split r ts                =  us : split (r + 1) vs
->         where (us, vs)        =  span (\t -> row t <= r) ts
+>         where (us, vs)        =  span (\t -> posrow t <= r) ts
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{A very simple Haskell Parser}
