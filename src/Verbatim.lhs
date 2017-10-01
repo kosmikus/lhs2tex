@@ -75,9 +75,9 @@ Delete leading and trailing blank line(s).
 Expanding tabs (assuming a tabulator width of $8$ characters).
 
 > expand                        :: Int -> String -> String
-> expand n []                   =  []
-> expand n ('\n' : s)           =  '\n' : expand 0 s
-> expand n ('\t' : s)           =  replicate (n' - n) ' ' ++ expand n' s
+> expand _n []                  =  []
+> expand _n ('\n' : s)          =  '\n' : expand 0 s
+> expand  n ('\t' : s)          =  replicate (n' - n) ' ' ++ expand n' s
 >     where n'                  =  (n + 8) `div` 8 * 8
-> expand n (c : s)              =  c : expand (n + 1) s
+> expand  n (c : s)             =  c : expand (n + 1) s
 

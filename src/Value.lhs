@@ -16,19 +16,19 @@
 
 Dynamic conversion routines.
 
-> str                           :: Value -> String  
+> str                           :: Value -> String
 > str Undef                     =  ""
 > str (Str s)                   =  s
 > str (Bool b)                  =  if b then "True" else ""
 > str (Int i)                   =  show i
 >
-> bool                          :: Value -> Bool  
+> bool                          :: Value -> Bool
 > bool Undef                    =  False
 > bool (Str s)                  =  not (null s)
 > bool (Bool b)                 =  b
 > bool (Int i)                  =  i /= 0
 >
-> int                           :: Value -> Int  
+> int                           :: Value -> Int
 > int Undef                     =  0
 > int (Str s)                   =  case reads s of
 >     [(i, [])]                 -> i
@@ -60,27 +60,32 @@ Lifting unsary and binary operations to |Value|.
 > type Binary a                 =  a -> a -> a
 >
 > onStr2                        :: Binary String -> Binary Value
-> onStr2 (++) v1 v2             =  Str (str v1 ++ str v2)
+> onStr2 op v1 v2               =  Str (str v1 `op` str v2)
 >
 > onBool2                       :: Binary Bool -> Binary Value
-> onBool2 (||) v1 v2            =  Bool (bool v1 || bool v2)
+> onBool2 op v1 v2              =  Bool (bool v1 `op` bool v2)
 >
 > onInt2                        :: Binary Int -> Binary Value
-> onInt2 (+) v1 v2              =  Int (int v1 + int v2)
+> onInt2 op v1 v2               =  Int (int v1 `op` int v2)
 
 %align 41
 {\setlength{\lwidth}{5.5cm}
 
-> onMatching f g h Undef     (Str s2)   =  Bool (f (str Undef) s2)
-> onMatching f g h (Str s1)  Undef      =  Bool (f s1 (str Undef))
-> onMatching f g h (Str s1)  (Str s2)   =  Bool (f s1 s2)
-> onMatching f g h Undef     (Bool b2)  =  Bool (g (bool Undef) b2)
-> onMatching f g h (Bool b1) Undef      =  Bool (g b1 (bool Undef))
-> onMatching f g h (Bool b1) (Bool b2)  =  Bool (g b1 b2)
-> onMatching f g h Undef     (Int i2)   =  Bool (h (int Undef) i2)
-> onMatching f g h (Int i1)  Undef      =  Bool (h i1 (int Undef))
-> onMatching f g h (Int i1)  (Int i2)   =  Bool (h i1 i2)
-> onMatching _ _ _ _ _                  =  Bool False
+> onMatching ::
+>   (String -> String -> Bool)
+>   -> (Bool -> Bool -> Bool)
+>   -> (Int -> Int -> Bool)
+>   -> Value -> Value -> Value
+> onMatching  f _g _h Undef     (Str s2)   =  Bool (f (str Undef) s2)
+> onMatching  f _g _h (Str s1)  Undef      =  Bool (f s1 (str Undef))
+> onMatching  f _g _h (Str s1)  (Str s2)   =  Bool (f s1 s2)
+> onMatching _f  g _h Undef     (Bool b2)  =  Bool (g (bool Undef) b2)
+> onMatching _f  g _h (Bool b1) Undef      =  Bool (g b1 (bool Undef))
+> onMatching _f  g _h (Bool b1) (Bool b2)  =  Bool (g b1 b2)
+> onMatching _f _g  h Undef     (Int i2)   =  Bool (h (int Undef) i2)
+> onMatching _f _g  h (Int i1)  Undef      =  Bool (h i1 (int Undef))
+> onMatching _f _g  h (Int i1)  (Int i2)   =  Bool (h i1 i2)
+> onMatching  _  _  _ _         _          =  Bool False
 
 }
 %}

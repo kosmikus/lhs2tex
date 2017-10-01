@@ -15,13 +15,11 @@
 > import Control.Monad          (  MonadPlus(..), (>=>) )
 >
 > import Verbatim               (  expand, trim )
-> import Typewriter             (  latex )
 > import MathCommon
 > import Document
 > import Directives
 > import HsLexer
 > import Parser
-> import qualified FiniteMap as FM
 > import Auxiliaries
 > import TeXCommands ( Lang(..) )
 
@@ -98,8 +96,10 @@ Primitive parser.
 > sep                           =  satisfy (\t -> catCode t == Sep)
 > noSep                         =  satisfy (\t -> catCode t == NoSep)
 > left                          =  satisfy (\t -> case catCode t of Del c -> c `elem` "(["; _-> False)
+>
+> right                         :: (CToken tok) => tok -> Parser tok tok
 > right l                       =  satisfy (\c -> case (catCode l, catCode c) of
->                                      (Del o, Del c) -> (o,c) `elem` zip "([" ")]" 
+>                                      (Del o, Del c) -> (o,c) `elem` zip "([" ")]"
 >                                      _     -> False)
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
@@ -135,9 +135,9 @@ Position von |=| oder |::| heranzuziehen ist gef"ahrlich; wenn z.B.
 >     _                         -> False
 >
 > instance Functor Line where
->     fmap f Blank              =  Blank
->     fmap f (Three l c r)      =  Three (f l) (f c) (f r)
->     fmap f (Multi a)          =  Multi (f a)
+>     fmap _f Blank             =  Blank
+>     fmap  f (Three l c r)     =  Three (f l) (f c) (f r)
+>     fmap  f (Multi a)         =  Multi (f a)
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Adding spaces}
@@ -158,7 +158,7 @@ after a keyword (hence |before b| really means not immediately after).
 >           | c `elem` ",;([{"  -> t : before False ts
 >         Keyword _             -> [ fromToken (TeX False sub'space) | b ] ++ t : after ts
 >         _                     -> t : before True ts
-> 
+>
 >     after []                  =  []
 >     after (t : ts)            =  case token t of
 >         u | selfSpacing u     -> t : before False ts
@@ -187,6 +187,12 @@ Auch wenn |auto = False| wird der Stack auf dem laufenden gehalten.
 
 > type Stack                    =  [(Col, Doc, [Pos Token])]
 >
+> leftIndent ::
+>   Formats
+>   -> Bool
+>   -> (Stack, Stack)
+>   -> [Line [Pos Token]]
+>   -> (Doc, (Stack, Stack))
 > leftIndent dict auto (lst, rst)
 >                               =  loop lst rst
 >   where
@@ -223,7 +229,7 @@ Die Funktion |isInternal| pr"uft, ob |v| ein spezielles Symbol wie
 >       GT                      -> (skip', (col t, skip', ts) : top : stack)
 >           where
 >           skip'               =  case span (\u -> col u < col t) line of
->               (us, v : vs) | col v == col t
+>               (us, v : _vs) | col v == col t
 >                               -> skip <> sub'phantom (latexs dict us)
 >               -- does not work: |(us, _) -> skip ++ [Phantom (fmap token us), Skip (col t - last (c : fmap col us))]|
 >               _               -> skip <> sub'hskip (Text em)

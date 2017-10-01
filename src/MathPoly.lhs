@@ -51,7 +51,7 @@ are subtle differences, and they will grow over time \dots
 
 > display                       :: Lang -> Int -> Formats -> Bool -> Int -> Int -> Stack
 >                               -> String -> Either Exc (Doc, Stack)
-> display lang line fmts auto sep lat stack
+> display lang line fmts auto sep lat _stack
 >                               =   lift trim
 >                               >=> lift (expand 0)
 >                               >=> tokenize lang
@@ -128,6 +128,8 @@ Primitive parser.
 > noSep                         =  satisfy (\t -> catCode t == NoSep)
 > left                          =  satisfy (\t -> case catCode t of Del c -> c `elem` "([{"; _ -> False)
 > anyright                      =  satisfy (\t -> case catCode t of Del c -> c `elem` ")]}"; _ -> False)
+>
+> right                         :: (CToken tok) => tok -> Parser tok tok
 > right l                       =  satisfy (\c -> case (catCode l, catCode c) of
 >                                      (Del o, Del c) -> (o,c) `elem` zip "([{" ")]}"
 >                                      _     -> False)
@@ -159,7 +161,7 @@ to |math| style. Also added |anyright|.
 >   findCols ts                 =  case {- |trace (show ts)| -}
 >                                       (break (\t -> not . isNotSpace . token $ t) ts) of
 >       (_, [])                 -> []   -- done
->       (_, [v])                -> []   -- last token is whitespace, doesn't matter
+>       (_, [_v])               -> []   -- last token is whitespace, doesn't matter
 >       (_, v:v':vs)
 >         | row v' == 0 && col v' == 0
 >                               -> findCols (v:vs)  -- skip internal tokens (automatically added spaces)
@@ -186,9 +188,9 @@ was that in |findCols| above, the recursive calls used |vs| instead of |(v':vs)|
 >                                              else Poly res
 >                                       ) toks
 >   where
->   splitn cc ind [] []         =  []
->   splitn cc ind [] ts         =  [(cc,ts,ind)]
->   splitn cc ind ((n,i):oas) ts=
+>   splitn _cc _ind [] []       =  []
+>   splitn  cc  ind [] ts       =  [(cc,ts,ind)]
+>   splitn  cc  ind ((n,i):oas) ts=
 >     case span (\t -> col t < i) ts of
 >       ([], vs)                -> splitn cc ind oas vs
 >       (us, [])                -> [(cc,us,ind)]
@@ -217,8 +219,8 @@ symbols.
 >     _                         -> False
 >
 > instance Functor Line where
->     fmap f Blank              =  Blank
->     fmap f (Poly ls)          =  Poly (map (\(x,y,z) -> (x,f y,z)) ls)
+>     fmap _f Blank             =  Blank
+>     fmap  f (Poly ls)         =  Poly (map (\(x,y,z) -> (x,f y,z)) ls)
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Automatically determining centered columns}
@@ -245,14 +247,16 @@ same amount of space.
 >     maxlengths                = {- |trace (show cts) $ |-} map (maximum . map length) cts
 >     anyinternals              = map (any (any isInternal)) cts
 >
->     -- deline                    :: [(String,Int)] -> Line [a] -> [[[a]]]
->     deline cs Blank           = []
->     deline cs (Poly ls)       = [decol cs ls]
+>     deline                    :: [(String,Int)] -> Line [a] -> [[[a]]]
+>     deline _cs Blank          = []
+>     deline  cs (Poly ls)      = [decol cs ls]
 >
+>     decol                     :: [(String, Int)] -> [((String, Int), [a], Bool)] -> [[a]]
 >     decol cs []               = replicate (length cs) []
 >     decol ((cn,_):cs) r@(((cn',_),ts,_):rs)
 >       | cn' == cn             = ts : decol cs rs
 >       | otherwise             = [] : decol cs r
+>     decol _ _                 = impossible "autocols.decol"
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Adding spaces}
@@ -266,8 +270,8 @@ after a keyword (hence |before b| really means not immediately after).
 > addSpaces                     :: (CToken tok) => [tok] -> [tok]
 > addSpaces ts                  =  before False ts
 >     where
->     before b []               =  []
->     before b (t : ts)         =  case token t of
+>     before _b []              =  []
+>     before  b (t : ts)        =  case token t of
 >         u | not (isNotSpace u)-> t : before b ts
 >           | selfSpacing u     -> t : before False ts
 >         Special c
@@ -332,21 +336,18 @@ As a final step, the current line is placed on the stack.
 >                               -> Stack        -- current stack
 >                               -> [Line [Pos Token]]
 >                               -> (Doc, Stack)
-> leftIndent dict auto z stack
->                               =  loop True stack
+> leftIndent dict _auto z stack0
+>                               =  loop True stack0
 >   where
->   copy d | auto               =  d
->          | otherwise          =  Empty
-
 >   loop                        :: Bool -> Stack -> [Line [Pos Token]] -> (Doc, Stack)
->   loop first stack []         =  (Empty, stack)  -- done
->   loop first stack (l:ls)     =  case l of
+>   loop _first stack []        =  (Empty, stack)  -- done
+>   loop  first stack (l:ls)    =  case l of
 >       Blank                   -> loop True stack ls -- ignore blank lines
 >    {-| Poly x || trace (show x) False -> undefined |-}
 >       Poly []                 -> loop True stack ls -- next line
->       Poly (((n,c),[],ind):rs)
+>       Poly (((_n,_c),[],_ind):rs)
 >         | first               -> loop True stack (Poly rs:ls) -- ignore leading blank columns
->       Poly p@(((n,c),ts,ind):rs)
+>       Poly p@(((n,c),ts,_ind):rs)
 >         | first               -> -- check indentation
 >                                  let -- step 1: shrink stack
 >                                      rstack  = dropWhile (\(rc,_) -> rc >= c) stack
@@ -359,13 +360,13 @@ As a final step, the current line is placed on the stack.
 >
 >         | c `elem` z          -> mkFromTo stack n (n ++ "E") c ts rs ls
 >                                                     -- treat centered lines special
->       Poly [((n,c),ts,ind)]   -> mkFromTo stack n "E" c ts [] ls
+>       Poly [((n,c),ts,_ind)]  -> mkFromTo stack n "E" c ts [] ls
 >                                                     -- last columns
->       Poly (((n,c),ts,ind):rs@(((nn,_),_,_):_))
+>       Poly (((n,c),ts,_ind):rs@(((nn,_),_,_):_))
 >                               -> mkFromTo stack n nn  c ts rs ls
 >
 >   mkFromTo                    :: Stack -> String -> String -> Col -> [Pos Token] -> [((String, Int), [Pos Token], Bool)] -> [Line [Pos Token]] -> (Doc, Stack)
->   mkFromTo stack bn en c ts rs ls
+>   mkFromTo stack bn en _c ts rs ls
 >     | bn == en                =  -- this can happen at the beginning of a line due to indentation
 >                                  (rest,stack')
 >     | otherwise               =  (sub'fromto bn en (latexs dict ts)
@@ -381,8 +382,8 @@ As a final step, the current line is placed on the stack.
 >   findrel                     :: (String,Col) -> Stack -> (String,Col)
 >   findrel (n,c) []            =  (n,c)
 >   findrel (n,c) ((_,Blank):r) =  findrel (n,c) r  -- should never happen
->   findrel (n,c) ((_,Poly t):_)
->                               =  case break (\((n',c'),_,_) -> c' > c) t of
+>   findrel (_n,c) ((_,Poly t):_)
+>                               =  case break (\((_n',c'),_,_) -> c' > c) t of
 >                                    ([],_)     -> error "findrel: the impossible happened"
 >                                    (pre,_)    -> let ((rn,rc),_,_) = last pre
 >                                                  in  (rn,rc)
@@ -392,7 +393,7 @@ As a final step, the current line is placed on the stack.
 >   sep (_ : _)                 =  sub'nl
 >
 >   indent                      :: (String,Int) -> (String,Int) -> Doc
->   indent (n,c) (n',c')
+>   indent (_n,c) (_n',c')
 >     | c /= c'                 =  sub'indent (Text (show (c' - c)))
 >     | otherwise               =  Empty
 

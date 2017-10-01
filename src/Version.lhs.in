@@ -21,12 +21,14 @@ Used internally to distinguish prereleases.
 > pre                           :: Int
 > pre                           =  @PRE@
 
+> isWindows :: Bool
 > isWindows = "win" `isPrefixOf` os || "Win" `isPrefixOf` os
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Search path}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
+> searchPath                    :: [FilePath]
 > searchPath                    =  "." :
 >                                  [  deep (joinPath (env "HOME" : [p ++ x]))
 >                                  |  p <- ["","."]
@@ -50,6 +52,7 @@ Used internally to distinguish prereleases.
 >                                  ,"lhs2TeX"
 >                                  ]
 >
+> stydir                        :: FilePath
 > stydir                        =  replace (replace "@stydir@" "datarootdir" "@datarootdir@") "prefix" "@prefix@"
 >   where replace x w y  |  ("$" ++ w) `isPrefixOf` x = y ++ drop (length w + 1) x
 >                        |  ("${" ++ w ++ "}") `isPrefixOf` x = y ++ drop (length w + 3) x
