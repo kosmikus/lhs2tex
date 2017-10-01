@@ -8,6 +8,7 @@
 > module StateT                 (  module StateT  )
 > where
 >
+> import Control.Applicative
 > import Control.Monad.Except
 > import Control.Monad.State
 
