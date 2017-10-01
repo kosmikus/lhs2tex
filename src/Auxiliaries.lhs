@@ -114,13 +114,3 @@ Reverse Composition.
 > impossible name               =  error ("The `impossible' happened in \""
 >                                         ++ name ++ "\"")
 
-% - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
-\subsubsection{Obsolete code}
-% - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
-
-> command                       :: String -> String -> String
-> command name arg              =  "\\" ++ name ++ "{" ++ arg ++ "}"
->
-> environment                   :: String -> String -> String
-> environment name m            =  "\\begin{" ++ name ++ "}" ++ m
->                               ++ "\\end{" ++ name ++ "}"
