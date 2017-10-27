@@ -384,7 +384,7 @@ Printing documents.
 >
 > undef                         :: String -> String
 > undef s                       =  "`" ++ s ++ "' is not defined;\n\
->                                  \perhaps you forgot to include \"lhs2TeX.fmt\"?"
+>                                  \perhaps you forgot to include \"polycode.fmt\" (or \"lhs2TeX.fmt\")?"
 
 %}
 
