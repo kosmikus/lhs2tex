@@ -8,7 +8,7 @@
 > where
 >
 > import Control.Applicative
-> import Control.Monad          (  MonadPlus(..), ap  )
+> import Control.Monad          (  MonadPlus(..), ap, mfilter  )
 
 %endif
 Deterministische Mini-Parser.
@@ -73,9 +73,6 @@ ks, 06.09.2003: Adding eof that accepts succeeds only at the end of input.
 >
 > nonnull                       :: ([tok] -> ([a], [tok])) -> Parser tok [a]
 > nonnull f                     =  mfilter (not . null) (wrap f)
-
-> mfilter                       :: MonadPlus m => (b -> Bool) -> m b -> m b
-> mfilter p m                   =  m >>= \a -> if p a then return a else mzero
 
 %if False
 
