@@ -54,13 +54,16 @@ Format directives. \NB @%format ( = "(\;"@ is legal.
 > equation lang                 =  do (opt, (f, opts, args)) <- optParen lhs
 >                                     _ <- varsym lang "="
 >                                     r <- many item
+>                                     eof
 >                                     return (f, (opt, opts, args, r))
 >                               `mplus` do f <- item
 >                                          _ <- varsym lang "="
 >                                          r <- many item
+>                                          eof
 >                                          return (string f, (False, [], [], r))
 >                               -- no RHS, try implicit formatting rules
 >                               `mplus` do f <- satisfy isVarid `mplus` satisfy isConid
+>                                          eof
 >                                          return (string f, (False, [], [], tex f))
 
 \Todo{@%format `div1`@ funktioniert nicht.}
