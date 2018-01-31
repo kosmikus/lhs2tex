@@ -10,7 +10,6 @@
 > import Data.Char      (  isSpace, isUpper, isLower, isDigit, isAlphaNum, isPunctuation  )
 > import qualified Data.Char ( isSymbol )
 > import Control.Monad
-> import Control.Monad.Error ()
 > import Document
 > import Auxiliaries
 > import TeXCommands    (  Lang(..)  )
