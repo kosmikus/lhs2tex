@@ -48,6 +48,7 @@
 >     tex q (Conid s)           =  replace q s (sub'conid (q <> convert False s))
 >     tex _ (Varid "")          =  sub'dummy    -- HACK
 >     tex q (Varid s)           =  replace q s (sub'varid (q <> convert False s))
+>     tex q (Tyvarid s)         =  replace q s (sub'tyvarid (q <> convert False s))
 >     tex q (Consym s)          =  replace q s (sub'consym (q <> convert False s))
 >     tex q (Varsym s)          =  replace q s (sub'varsym (q <> convert False s))
 >     tex _ (Numeral s)         =  replace Empty s (sub'numeral (convert True s)) -- NEU

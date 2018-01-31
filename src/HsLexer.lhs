@@ -7,7 +7,7 @@
 > {-# LANGUAGE NPlusKPatterns #-}
 > module HsLexer                (  module HsLexer ) --Token(..), isVarid, isConid, isNotSpace, string, tokenize  )
 > where
-> import Data.Char      (  isSpace, isUpper, isLower, isDigit, isAlphaNum, isPunctuation  )
+> import Data.Char      (  isSpace, isUpper, isLower, isDigit, isHexDigit, isOctDigit, isAlpha, isAlphaNum, isPunctuation  )
 > import qualified Data.Char ( isSymbol )
 > import Control.Monad
 > import Document
@@ -20,6 +20,7 @@ A Haskell lexer, based on the Prelude function \hs{lex}.
 > data Token                    =  Space String
 >                               |  Conid String
 >                               |  Varid String
+>                               |  Tyvarid String -- type variable (OCaml)
 >                               |  Consym String
 >                               |  Varsym String
 >                               |  Numeral String
@@ -41,6 +42,7 @@ hierarchical modules. Also added Pragma.
 
 > isVarid, isConid, isNotSpace  :: Token -> Bool
 > isVarid (Varid _)             =  True
+> isVarid (Tyvarid _)           =  True
 > isVarid (Qual _ t)            =  isVarid t
 > isVarid _                     =  False
 >
@@ -55,6 +57,7 @@ hierarchical modules. Also added Pragma.
 > string (Space s)              =  s
 > string (Conid s)              =  s
 > string (Varid s)              =  s
+> string (Tyvarid s)            =  "'" ++ s
 > string (Consym s)             =  s
 > string (Varsym s)             =  s
 > string (Numeral s)            =  s
@@ -97,6 +100,10 @@ ks, 28.08.2008: New: Agda and Haskell modes.
 >
 > lex'                          :: Lang -> String -> Maybe (Token, String)
 > lex' lang ""                  =  Nothing
+> lex' OCaml ('\'' : s)         =  Just $ let (t, u) = ocamlQuote s
+>                                         in case u of
+>                                             ('\'' : v) -> (Char ("'" ++ t ++ "'"), v)
+>                                             _ -> (Tyvarid t, u)
 > lex' lang ('\'' : s)          =  do let (t, u) = lexLitChar s
 >                                     v <- match "\'" u
 >                                     return (Char ("'" ++ t ++ "'"), v)
@@ -104,22 +111,30 @@ ks, 28.08.2008: New: Agda and Haskell modes.
 >                                     v <- match "\"" u
 >                                     return (String ("\"" ++ t ++ "\""), v)
 > lex' lang ('-' : '-' : s)
->   | not (null s') && isSymbol lang (head s')
+>   | hsOrAgda lang && not (null s') && isSymbol lang (head s')
 >                               =  case s' of
 >                                    (c : s'') -> return (varsymid lang ("--" ++ d ++ [c]), s'')
->   | otherwise                 =  return (Comment t, u)
+>   | hsOrAgda lang             =  return (Comment t, u)
 >   where (d, s') = span (== '-') s
 >         (t, u)  = break (== '\n') s'
-> lex' lang ('{' : '-' : '"' : s)
+> lex' lang ('{' : '-' : '"' : s) -- Important: this syntax is used internally for generating code (even in OCaml mode)
 >                               =  do let (t, u) = inlineTeX s
 >                                     v <- match "\"-}" u
 >                                     return (TeX True (Text t), v)
 > lex' lang ('{' : '-' : '#' : s)
->                               =  do let (t, u) = nested 0 s
+>   | hsOrAgda lang             =  do let (t, u) = nested 0 s
 >                                     v <- match "#-}" u
 >                                     return (Pragma t, v)
-> lex' lang ('{' : '-' : s)     =  do let (t, u) = nested 0 s
+> lex' lang ('{' : '-' : s)
+>   | hsOrAgda lang             =  do let (t, u) = nested 0 s
 >                                     v <- match "-}" u
+>                                     return (Nested t, v)
+> lex' OCaml ('(' : '*' : '"' : s)
+>                               =  do let (t, u) = inlineTeX s
+>                                     v <- match "\"*)" u
+>                                     return (TeX True (Text t), v)
+> lex' OCaml ('(' : '*' : s)    =  do let (t, u) = nestedOCaml 0 s
+>                                     v <- match "*)" u
 >                                     return (Nested t, v)
 > lex' lang (c : s)
 >     | isSpace c               =  let (t, u) = span isSpace s in return (Space (c : t), u)
@@ -134,13 +149,16 @@ ks, 28.08.2008: New: Agda and Haskell modes.
 >     | otherwise               =  Nothing
 >     where
 >     numeral Agda              =  Varid
->     numeral Haskell           =  Numeral
+>     numeral _                 =  Numeral
 >     classify s
 >         | s `elem` keywords lang
 >                               =  Keyword s
 >         | otherwise           =  Varid   s
->
->
+
+> hsOrAgda Haskell              = True
+> hsOrAgda Agda                 = True
+> hsOrAgda OCaml                = False
+
 > lexFracExp                    :: String -> Maybe (String, String)
 > lexFracExp s                  =  do t <- match "." s
 >                                     (ds, u) <- lexDigits' t
@@ -162,9 +180,9 @@ ks, 28.08.2008: New: Agda and Haskell modes.
 > lexDigits' s                  =  do (cs@(_ : _), t) <- Just (span isDigit s); return (cs, t)
 
 > varsymid Agda    = Varid
-> varsymid Haskell = Varsym
+> varsymid _       = Varsym
 > consymid Agda    = Conid
-> consymid Haskell = Consym
+> consymid _       = Consym
 
 %}
 
@@ -192,6 +210,49 @@ incorrectly reject programs that contain comments like the
 following one: {- start normal, but close as pragma #-} ...
 I don't expect this to be a problem, though.
 
+> nestedOCaml                   :: Int -> String -> (String, String)
+> nestedOCaml = go
+>  where
+>    go _     []                =  ([], [])
+>    go 0     ('*' : ')' : s)   =  ([], '*':')':s)
+>    go (n+1) ('*' : ')' : s)   =  '*' <| ')' <| go n s
+>    go n     ('(' : '*' : s)   =  '(' <| '*' <| go (n + 1) s
+>    go n     (c : s)           =  c <| go n s
+
+fb, 2017-03-20: the quote character is used to prefix type
+variables as well as for character literals. ocamlQuote
+parses either the type variable up to the next non-identifer
+character, or a character literal, up to the next quote
+character.
+
+> ocamlQuote                    :: String -> (String, String)
+> ocamlQuote []                 =  ([],[])
+> ocamlQuote ('\'' : s)         =  ([], '\'' : s)
+> ocamlQuote ('\\' : c : '\'' : s)
+>   | ocamlEsc c                =  (['\\', c], '\'' : s)
+> ocamlQuote ('\\' : a : b : c : '\'' : s)
+>   | all isDigit [a, b, c]     =  (['\\', a, b, c], '\'' : s)
+> ocamlQuote ('\\' : 'x' : a : b : '\'' : s)
+>   | all isHexDigit [a, b]     =  (['\\', a, b], '\'' : s)
+> ocamlQuote ('\\' : 'o' : a : b : c : '\'' : s)
+>   | isOctal a b c             =  (['\\', a, b, c], '\'' : s)
+> ocamlQuote (c : '\'' : s)     =  ([c], '\'' : s)
+> ocamlQuote (c : s)
+>   | isAlpha c || c == '_'     =  c <| ocamlIdent s
+> ocamlQuote s                  = ([],s)
+> ocamlIdent []                 = ([],[])
+> ocamlIdent (c : s)
+>   | isIdChar OCaml c          =  c <| ocamlIdent s
+>   | otherwise                 =  ([], c : s)
+
+Escape sequences for OCaml character literals.
+[ocamlEsc c == True]    iff   ['\c'] is a valid character.
+ 
+> ocamlEsc                      :: Char -> Bool
+> ocamlEsc c                    = c `elem` "\\\"'ntbr "
+
+> isOctal a b c = all isOctDigit [a,b,c] && read [a] <= 3
+
 > lexLitChar, lexLitStr         :: String -> (String, String)
 > lexLitChar []                 =  ([], [])
 > lexLitChar ('\'' : s)         =  ([], '\'' : s)
@@ -205,14 +266,14 @@ I don't expect this to be a problem, though.
 
 > isSpecial                     :: Lang -> Char -> Bool
 > isIdChar, isSymbol            :: Lang -> Char -> Bool
-> isSpecial Haskell c           =  c `elem` ",;()[]{}`"
 > isSpecial Agda c              =  c `elem` ";(){}"
-> isSymbol Haskell c            =  not (isSpecial Haskell c) && notElem c "'\"" &&
+> isSpecial _ c                 =  c `elem` ",;()[]{}`"
+> isSymbol Agda c               =  isIdChar Agda c
+> isSymbol _ c                  =  not (isSpecial Haskell c) && notElem c "'\"" &&
 >                                  (c `elem` "!@#$%&*+./<=>?\\^|:-~" ||
 >                                   Data.Char.isSymbol c || Data.Char.isPunctuation c)
-> isSymbol Agda c               =  isIdChar Agda c
-> isIdChar Haskell c            =  isAlphaNum c || c `elem` "_'"
 > isIdChar Agda c               =  not (isSpecial Agda c || isSpace c)
+> isIdChar _ c                  =  isAlphaNum c || c `elem` "_'"
 
 > match                         :: String -> String -> Maybe String
 > match p s
@@ -235,6 +296,17 @@ Keywords
 >                                    "infixl", "infixr", "mutual", "abstract",
 >                                    "private", "forall", "using", "hiding",
 >                                    "renaming", "public" ]
+> keywords OCaml                =  [ "and", "as", "assert", "asr", "begin", "class",
+>                                    "constraint", "do", "done", "downto", "else",
+>                                    "end", "exception", "external", "false", "for",
+>                                    "fun", "function", "functor", "if", "in",
+>                                    "include", "inherit", "initializer", "land",
+>                                    "lazy", "let", "lor", "lsl", "lsr", "lxor",
+>                                    "match", "method", "mod", "module", "mutable",
+>                                    "new", "nonrec", "object", "of", "open", "or",
+>                                    "private", "rec", "sig", "struct", "then", "to",
+>                                    "true", "try", "type", "val", "virtual", "when",
+>                                    "while", "with" ]
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Phase 2}
@@ -348,12 +420,13 @@ an improvement.
 >     catCode (Space _)         =  White
 >     catCode (Conid _)         =  NoSep
 >     catCode (Varid _)         =  NoSep
+>     catCode (Tyvarid _)       =  NoSep
 >     catCode (Consym _)        =  Sep -- Sep is necessary for correct Haskell formatting
 >     catCode (Varsym _)        =  Sep -- in Agda mode, Consym/Varsym don't occur
 >     catCode (Numeral _)       =  NoSep
 >     catCode (Char _)          =  NoSep
 >     catCode (String _)        =  NoSep
->     catCode (Special c)
+>     catCode (Special c) -- How can we deal with OCaml array brackets [| |] ?
 >         | c `elem` "([{}])"   =  Del c
 >         | otherwise           =  Sep
 
@@ -375,4 +448,3 @@ This is related to the change above in function |string|.
 >     token                     =  id
 >     inherit _ t               =  t
 >     fromToken                 =  id
-

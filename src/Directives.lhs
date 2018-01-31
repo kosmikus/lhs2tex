@@ -73,15 +73,15 @@ Format directives. \NB @%format ( = "(\;"@ is legal.
 >     tex (Conid s)             =  subscript Conid s
 >     tex (Qual [] s)           =  tex s
 >     tex (Qual (m:ms) s)       =  Conid m : tex (Qual ms s)
->      -- ks, 03.09.2003: was "tex (Qual m s) = Conid m : tex s"; 
+>      -- ks, 03.09.2003: was "tex (Qual m s) = Conid m : tex s";
 >      -- seems strange though ...
->     subscript f s  
+>     subscript f s
 >       | null t && not (null w) && (null v || head w == '_')
 >                               =  underscore f s
 >       | otherwise             =  [f (reverse w)
 >                                  , TeX False
 >                                        (Text ((if   not (null v)
->                                                then "_{" ++ reverse v ++ "}" 
+>                                                then "_{" ++ reverse v ++ "}"
 >                                                else ""
 >                                               ) ++ reverse t))
 >                                  ]
@@ -97,7 +97,7 @@ Format directives. \NB @%format ( = "(\;"@ is legal.
 >                                      (if end   then [Varid "_"] else [])
 
 ks, 02.02.2004: I have added implicit formatting via |underscore|.
-The above condition should guarantee that it is (almost) only used in 
+The above condition should guarantee that it is (almost) only used in
 cases where previously implicit formatting did not do anything useful.
 The function |underscore| typesets an identifier such as
 |a_b_c| as $a_{b_{c}}$. TODO: Instead of hard-coded subscripting a
@@ -172,6 +172,7 @@ because "=" will never occur in a Varid constructor.
 > conid                         =  do x <- satisfy isConid; return (string x)
 > varsym Agda s                 =  satisfy (\ x -> x == Varsym s || x == Varid s) -- Agda has no symbol/id distinction
 > varsym Haskell s              =  satisfy (== (Varsym s))
+> varsym OCaml s                =  varsym Haskell s
 >
 > isTeX (TeX _ _)               =  True
 > isTeX _                       =  False

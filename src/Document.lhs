@@ -48,6 +48,7 @@ Substitution strings.
 > sub'code a                    =  Sub "code" [a]
 > sub'conid a                   =  Sub "conid" [a]
 > sub'varid a                   =  Sub "varid" [a]
+> sub'tyvarid a                 =  Sub "tyvarid" [a]
 > sub'consym a                  =  Sub "consym" [a]
 > sub'varsym a                  =  Sub "varsym" [a]
 > sub'backquoted a              =  Sub "backquoted" [a]
