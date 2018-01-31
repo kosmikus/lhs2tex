@@ -954,7 +954,7 @@ The above input produces the following output:
 \end{colorsurround}
 %
 In the first line there are no parentheses to drop. In the second
-line, the parentheses around the arguments @a@ and @b@ are dropped, as
+line, the parentheses around the arguments @a@ and @c@ are dropped, as
 are the parentheses around the function @ptest@. In the third line,
 the source has double parentheses around each argument as well as the
 function. One set of parentheses are dropped in each case, except for
