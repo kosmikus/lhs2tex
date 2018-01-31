@@ -10,9 +10,9 @@
 > import Prelude hiding         (  lines )
 > import Data.List              (  partition )
 > import Numeric                (  showFFloat )
-> import Control.Applicative    (  many )
+> import Control.Applicative
 > import Control.Arrow          (  (>>>) )
-> import Control.Monad          (  MonadPlus(..), (>=>) )
+> import Control.Monad          (  (>=>) )
 >
 > import Verbatim               (  expand, trim )
 > import MathCommon
@@ -84,11 +84,11 @@ This variant cannot handle unbalanced parentheses.
 >           col' (Paren a _ _)  =  poscol a
 >
 > atom                          :: (CToken tok) => Parser (Pos tok) (Atom (Pos tok))
-> atom                          =  fmap Atom noSep
->                               `mplus` do l <- left
->                                          e <- chunk
->                                          r <- right l
->                                          return (Paren l e r)
+> atom                          =   fmap Atom noSep
+>                               <|> do l <- left
+>                                      e <- chunk
+>                                      r <- right l
+>                                      return (Paren l e r)
 
 Primitive parser.
 

@@ -7,8 +7,7 @@
 > module Directives             (  Formats, parseFormat, Equation, Substs, Subst, parseSubst, Toggles, eval, define, value, nrargs  )
 > where
 >
-> import Control.Applicative    (  many, optional )
-> import Control.Monad
+> import Control.Applicative
 > import Data.Char              (  isDigit  )
 > import Data.List
 > import Parser
@@ -50,20 +49,20 @@ repr"asentiert, da math |Pos Token| verlangt.
 Format directives. \NB @%format ( = "(\;"@ is legal.
 
 > equation                      :: Lang -> Parser Token (String, Equation)
-> equation lang                 =  do (opt, (f, opts, args)) <- optParen lhs
->                                     _ <- varsym lang "="
->                                     r <- many item
->                                     eof
->                                     return (f, (opt, opts, args, r))
->                               `mplus` do f <- item
->                                          _ <- varsym lang "="
->                                          r <- many item
->                                          eof
->                                          return (string f, (False, [], [], r))
+> equation lang                 =   do (opt, (f, opts, args)) <- optParen lhs
+>                                      _ <- varsym lang "="
+>                                      r <- many item
+>                                      eof
+>                                      return (f, (opt, opts, args, r))
+>                               <|> do f <- item
+>                                      _ <- varsym lang "="
+>                                      r <- many item
+>                                      eof
+>                                      return (string f, (False, [], [], r))
 >                               -- no RHS, try implicit formatting rules
->                               `mplus` do f <- satisfy isVarid `mplus` satisfy isConid
->                                          eof
->                                          return (string f, (False, [], [], tex f))
+>                               <|> do f <- satisfy isVarid <|> satisfy isConid
+>                                      eof
+>                                      return (string f, (False, [], [], tex f))
 
 \Todo{@%format `div1`@ funktioniert nicht.}
 
@@ -121,14 +120,14 @@ substitution directive should be invoked here.
 >                                    Right t' -> t'
 
 > lhs                           :: Parser Token (String, [Bool], [String])
-> lhs                           =  do f <- varid `mplus` conid
+> lhs                           =  do f <- varid <|> conid
 >                                     as <- many (optParen varid)
 >                                     let (opts, args) = unzip as
 >                                     return (f, opts, args)
 
 > optParen                      :: Parser Token a -> Parser Token (Bool, a)
-> optParen p                    =  do _ <- open'; a <- p; _ <- close'; return (True, a)
->                               `mplus` do a <- p ; return (False, a)
+> optParen p                    =   do _ <- open'; a <- p; _ <- close'; return (True, a)
+>                               <|> do a <- p ; return (False, a)
 >
 > item                          :: Parser Token Token
 > item                          =  satisfy (const True)
@@ -159,7 +158,7 @@ substitution directive should be invoked here.
 > substitution lang             =  do s <- varid
 >                                     args <- many varid
 >                                     _ <- varsym lang "="
->                                     rhs <- many (satisfy isVarid `mplus` satisfy isTeX)
+>                                     rhs <- many (satisfy isVarid <|> satisfy isTeX)
 >                                     return (s, subst args rhs)
 >   where
 >   subst :: [String] -> [Token] -> Subst
@@ -209,12 +208,12 @@ Auswertung Boole'scher Ausdr"ucke.
 >   appl                        =  do f <- optional not'
 >                                     e <- atom
 >                                     return (maybe e (\_ -> onBool1 not e) f)
->   atom                        =  do Varid x <- satisfy isVarid; return (value togs x)
->                               `mplus` do _ <- true'; return (Bool True)
->                               `mplus` do _ <- false'; return (Bool False)
->                               `mplus` do s <- satisfy isString; return (Str (read (string s)))
->                               `mplus` do s <- satisfy isNumeral; return (Int (read (string s)))
->                               `mplus` do _ <- open'; e <- expr; _ <- close'; return e
+>   atom                        =   do Varid x <- satisfy isVarid; return (value togs x)
+>                               <|> do _ <- true'; return (Bool True)
+>                               <|> do _ <- false'; return (Bool False)
+>                               <|> do s <- satisfy isString; return (Str (read (string s)))
+>                               <|> do s <- satisfy isNumeral; return (Int (read (string s)))
+>                               <|> do _ <- open'; e <- expr; _ <- close'; return e
 >
 > sys2                          :: String -> Binary Value
 > sys2 "&&"                     =  onBool2 (&&)

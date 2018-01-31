@@ -9,6 +9,7 @@
 > where
 > import Data.Char      (  isSpace, isUpper, isLower, isDigit, isAlphaNum, isPunctuation  )
 > import qualified Data.Char ( isSymbol )
+> import Control.Applicative
 > import Control.Monad
 > import Document
 > import Auxiliaries
@@ -143,20 +144,20 @@ ks, 28.08.2008: New: Agda and Haskell modes.
 >
 >
 > lexFracExp                    :: String -> Maybe (String, String)
-> lexFracExp s                  =  do t <- match "." s
->                                     (ds, u) <- lexDigits' t
->                                     (e, v)  <- lexExp u
->                                     return ('.' : ds ++ e, v)
->                               `mplus` lexExp s
+> lexFracExp s                  =   do t <- match "." s
+>                                      (ds, u) <- lexDigits' t
+>                                      (e, v)  <- lexExp u
+>                                      return ('.' : ds ++ e, v)
+>                               <|> lexExp s
 >
 > lexExp                        :: String -> Maybe (String, String)
 > lexExp (e:s)
->      | e `elem` "eE"          =  do (c : t) <- Just s
->                                     unless (c `elem` "+-") Nothing
->                                     (ds, u) <- lexDigits' t
->                                     return (e : c : ds, u)
->                               `mplus` do (ds, t) <- lexDigits' s
->                                          return (e : ds, t)
+>      | e `elem` "eE"          =   do (c : t) <- Just s
+>                                      unless (c `elem` "+-") Nothing
+>                                      (ds, u) <- lexDigits' t
+>                                      return (e : c : ds, u)
+>                               <|> do (ds, t) <- lexDigits' s
+>                                      return (e : ds, t)
 > lexExp s                      =  Just ("", s)
 >
 > lexDigits'                    :: String -> Maybe (String, String)

@@ -15,9 +15,9 @@ are subtle differences, and they will grow over time \dots
 >
 > import Prelude hiding         (  lines )
 > import Data.List              (  partition, nub, sort, transpose )
-> import Control.Applicative    (  many )
+> import Control.Applicative
 > import Control.Arrow          (  (>>>) )
-> import Control.Monad          (  MonadPlus(..), (>=>) )
+> import Control.Monad          (  (>=>) )
 >
 > import Verbatim               (  expand, trim )
 > import MathCommon
@@ -106,14 +106,14 @@ This variant can handle unbalanced parentheses in some cases (see below).
 >           col' (Paren a _ _)  =  poscol a
 >
 > atom                          :: (CToken tok) => Int -> Parser (Pos tok) (Atom (Pos tok))
-> atom d                        =  fmap Atom cnoSep
->                               `mplus` do l <- left
->                                          e <- chunk (d+1)
->                                          r <- right l
->                                          return (Paren l e r)
->                               `mplus` if d == 0 then do r <- anyright
->                                                         return (Paren (fromToken $ TeX False Empty) [] r)
->                                                 else mzero
+> atom d                        =   fmap Atom cnoSep
+>                               <|> do l <- left
+>                                      e <- chunk (d+1)
+>                                      r <- right l
+>                                      return (Paren l e r)
+>                               <|> if d == 0 then do r <- anyright
+>                                                     return (Paren (fromToken $ TeX False Empty) [] r)
+>                                             else empty
 
 ks, 09.09.2003: Added handling of unbalanced parentheses, surely not in the
 most elegant way. Both |chunk| and |atom| now take an integer argument
@@ -130,11 +130,11 @@ Primitive parser.
 > anyright                      =  satisfy (\t -> case catCode t of Del c -> c `elem` ")]}"; _ -> False)
 >
 > right                         :: (CToken tok) => tok -> Parser tok tok
-> right l                       =  satisfy (\c' -> case (catCode l, catCode c') of
->                                      (Del o, Del c) -> (o,c) `elem` zip "([{" ")]}"
->                                      _     -> False)
->                                   `mplus` do eof
->                                              return (fromToken $ TeX False Empty)
+> right l                       =   satisfy (\c' -> case (catCode l, catCode c') of
+>                                     (Del o, Del c) -> (o,c) `elem` zip "([{" ")]}"
+>                                     _     -> False)
+>                               <|> do eof
+>                                      return (fromToken $ TeX False Empty)
 
 ks, 06.09.2003: Modified the |right| parser to accept the end of file,
 to allow for unbalanced parentheses. This behaviour is not (yet) backported

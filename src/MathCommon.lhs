@@ -16,7 +16,7 @@ therefore there has been much overlap between the two modules.
 > import qualified FiniteMap as FM
 > import Auxiliaries
 >
-> import Control.Monad
+> import Control.Applicative
 
 > when :: Monad m => Bool -> (a -> m a) -> (a -> m a)
 > when True f                   =  f
@@ -143,7 +143,7 @@ stage (by the call to latexs, for instance in leftIndent).
 >   eval' (Apply (e : es))      =  eval'' False e es
 >
 >   eval''                      :: (CToken tok) => Bool -> Atom (Pos tok) -> [Atom (Pos tok)] -> (Mode,[Pos tok])
->   eval'' _ (Atom s) es        =  case FM.lookup (string (token s) ++ pos2string s) d `mplus` FM.lookup (string (token s)) d of
+>   eval'' _ (Atom s) es        =  case FM.lookup (string (token s) ++ pos2string s) d <|> FM.lookup (string (token s)) d of
 >     Nothing                   -> (Optional False, s : args es)
 >     Just (opt, opts, lhs, rhs)-> (Optional opt, set s (concat (fmap sub rhs)) ++ args bs)
 >         where
@@ -161,10 +161,10 @@ Whenever a token is replaced or removed, the first token of the replacement
 inherits the position of the original token.
 
 >   eval'' opt (Paren l e r) es
->       | optional              =  (Mandatory, set l s ++ args es)
+>       | isOptional            =  (Mandatory, set l s ++ args es)
 >       | otherwise             =  (Optional False, [l] ++ s ++ [r] ++ args es)
 >       where (flag, s)         =  eval e
->             optional          =  catCode l == Del '(' && not (mandatory e)
+>             isOptional        =  catCode l == Del '(' && not (mandatory e)
 >                               && case flag of Mandatory -> False; Optional f -> opt || f
 
 \NB It is not a good idea to remove parentheses around atoms, because
