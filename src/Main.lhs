@@ -143,7 +143,7 @@ ks, 20.07.2003: The short option for @--align@ has been changed into @-A@. Other
 @-align@ would not trigger compatibility mode, but be interpreted as a valid option
 usage.
 
-ks, 24.03.2004: The long option @--verbose@ has been removed for now, 
+ks, 24.03.2004: The long option @--verbose@ has been removed for now,
 because with some versions of GHC it triggers ambiguity errors with
 @--verb@.
 
@@ -314,9 +314,9 @@ by another line and the included file does not end in a blank line, then
 there will not be a single space between the last character of the included
 file and the first character of the following line. It would be possible
 to split a TeX control sequence over two different files that way. Seems
-strange. So we add a newline, or even two if none has been there before, 
+strange. So we add a newline, or even two if none has been there before,
 to make sure that exactly one linebreak ends up in the output, but not
-more, as a double newline is interpreted as a \par by TeX, and that might 
+more, as a double newline is interpreted as a \par by TeX, and that might
 also not be desired.
 
 > format (Directive Begin _)    =  modify (\st -> st{stack = fmts st : stack st})
@@ -340,7 +340,7 @@ ks, 11.09.03: added exception handling for unbalanced grouping
 
 \NB @%align@ also resets the left identation stacks.
 
-Also, the @poly@ directives @%separation@ and @%latency@ reset 
+Also, the @poly@ directives @%separation@ and @%latency@ reset
 the corresponding indentation stack |pstack|.
 
 > format (Directive Separation s )
@@ -543,7 +543,7 @@ This function can be used to stop all external processes by sending the
 >                                                                    hFlush pin
 >                                                                    waitForProcess pid) pis
 
-To extract the answer from @ghci@'s or @hugs@' output 
+To extract the answer from @ghci@'s or @hugs@' output
 we use a simple technique which should work in
 most cases: we print the string |magic| before and after
 the expression we are interested in. We assume that everything
