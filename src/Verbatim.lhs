@@ -13,6 +13,7 @@
 >
 > import Document
 > import Auxiliaries
+> import Prelude hiding         (  (<>) )
 
 %endif
 

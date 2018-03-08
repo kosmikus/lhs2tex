@@ -16,6 +16,7 @@
 > import qualified FiniteMap as FM
 > import Auxiliaries
 > import TeXCommands ( Lang (..) )
+> import Prelude hiding ( (<>) )
 
 %endif
 

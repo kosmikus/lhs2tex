@@ -6,6 +6,8 @@
 
 > module Document ( module Document )
 > where
+>
+> import Prelude hiding         (  (<>) )
 
 %endif
 

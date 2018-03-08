@@ -24,6 +24,7 @@ way that is compatible with the @poly@ or @math@ formatters.
 > import Auxiliaries
 > import MathPoly               (  exprParse, substitute, number )
 > import TeXCommands            (  Lang(..) )
+> import Prelude hiding         (  (<>) )
 
 %endif
 
