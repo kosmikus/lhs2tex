@@ -21,7 +21,7 @@
 > import Control.Monad.Error
 > import Control.Monad.State ( MonadState(..), modify )
 > import Control.Monad.Trans
-> import Prelude hiding ( getContents, (<>) )
+> import Prelude hiding ( getContents )
 >
 > import Version
 > import TeXCommands
@@ -421,7 +421,7 @@ Printing documents.
 >                                     return (d, st{pstack = pstack'})
 >         select NewCode st     =  do d <- NewCode.display (lang st) (fmts st) s
 >                                     let p = sub'pragma $ Text ("LINE " ++ show (lineno st + 1) ++ " " ++ show (takeFileName $ file st))
->                                     return ((if pragmas st then ((p <> sub'nl) <>) else id) d, st)
+>                                     return ((if pragmas st then ((p <<>> sub'nl) <<>>) else id) d, st)
 >         select CodeOnly st    =  return (Text (trim s), st)
 
 > auto                          =  "autoSpacing"

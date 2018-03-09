@@ -7,11 +7,10 @@
 > module Document ( module Document )
 > where
 >
-> import Prelude hiding         (  (<>) )
 
 %endif
 
-> infixr 5 {-"\enskip"-} <>  -- same fixity as `|++|'
+> infixr 5 {-"\enskip"-} <<>>  -- same fixity as `|++|'
 
 The pretty printer generate documents of type |Doc|.
 
@@ -25,13 +24,13 @@ The pretty printer generate documents of type |Doc|.
 |Embedded| is used for embedded pseudo \TeX\ text (eg in comments);
 |Sub s ds| is used for replacements (eg |Sub "inline" [..]|).
 
-> (<>)                          :: Doc -> Doc -> Doc
-> Empty <> d                    =  d
-> d <> Empty                    =  d
-> d1 <> d2                      =  d1 :^: d2
+> (<<>>)                        :: Doc -> Doc -> Doc
+> Empty <<>> d                  =  d
+> d <<>> Empty                  =  d
+> d1 <<>> d2                    =  d1 :^: d2
 >
 > catenate                      :: [Doc] -> Doc
-> catenate                      =  foldr (<>) Empty
+> catenate                      =  foldr (<<>>) Empty
 
 Substitution strings.
 

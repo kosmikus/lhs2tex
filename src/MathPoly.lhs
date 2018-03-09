@@ -13,7 +13,7 @@ are subtle differences, and they will grow over time \dots
 > module MathPoly               (  module MathPoly, substitute, number  )
 > where
 >
-> import Prelude hiding         (  lines, (<>) )
+> import Prelude hiding         (  lines )
 > import Data.List              (  partition, nub, insert, sort, transpose )
 > import Numeric                (  showFFloat )
 > import Control.Applicative    (  many )
@@ -79,10 +79,10 @@ are subtle differences, and they will grow over time \dots
 >                               >=> return *** lift (\(z,ats) -> leftIndent fmts auto z [] ats)
 >       -- ks, 17.07.2003: i've changed "stack" into "[]" and thereby disabled
 >       -- the global stack for now as it leads to unexepected behaviour
->                               >=> lift (\(cs,(d,stack)) -> (sub'code (columns cs <> d),stack))
+>                               >=> lift (\(cs,(d,stack)) -> (sub'code (columns cs <<>> d),stack))
 >
 > columns                       :: [(String,Doc)] -> Doc
-> columns                       =  foldr (<>) Empty 
+> columns                       =  foldr (<<>>) Empty 
 >                               .  map (uncurry sub'column)
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
@@ -372,7 +372,7 @@ As a final step, the current line is placed on the stack.
 >     | bn == en                =  -- this can happen at the beginning of a line due to indentation
 >                                  (rest,stack')
 >     | otherwise               =  (sub'fromto bn en (latexs dict ts)
->                                     <> (if null rs then sep ls else Empty) <> rest
+>                                     <<>> (if null rs then sep ls else Empty) <<>> rest
 >                                  ,stack'
 >                                  )
 >     where
