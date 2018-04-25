@@ -205,13 +205,13 @@ Die Funktion |isInternal| pr"uft, ob |v| ein spezielles Symbol wie
 >   loop lst rst []             =  (Empty, (lst, rst))
 >   loop lst rst (l' : ls)      =  case l' of
 >       Blank                   -> loop lst rst ls
->       Three l c r             -> (sub'column3 (copy lskip <> latexs dict l)
+>       Three l c r             -> (sub'column3 (copy lskip <<>> latexs dict l)
 >                                               (latexs dict c)
->                                               (copy rskip <> latexs dict r) <> sep' ls <> rest, st')
+>                                               (copy rskip <<>> latexs dict r) <<>> sep' ls <<>> rest, st')
 >           where (lskip, lst') =  indent l lst
 >                 (rskip, rst') =  indent r rst
 >                 (rest, st')   =  loop lst' rst' ls -- does not work: |if null l && null c then rst' else []|
->       Multi m                 -> (sub'column1 (copy lskip <> latexs dict m) <> sep' ls <> rest, st')
+>       Multi m                 -> (sub'column1 (copy lskip <<>> latexs dict m) <<>> sep' ls <<>> rest, st')
 >           where (lskip, lst') =  indent m lst
 >                 (rest, st')   =  loop lst' [] ls
 >
@@ -230,9 +230,9 @@ Die Funktion |isInternal| pr"uft, ob |v| ein spezielles Symbol wie
 >           where
 >           skip'               =  case span (\u -> poscol u < poscol t) line of
 >               (us, v : _vs) | poscol v == poscol t
->                               -> skip <> sub'phantom (latexs dict us)
+>                               -> skip <<>> sub'phantom (latexs dict us)
 >               -- does not work: |(us, _) -> skip ++ [Phantom (fmap token us), Skip (col t - last (c : fmap col us))]|
->               _               -> skip <> sub'hskip (Text em)
+>               _               -> skip <<>> sub'hskip (Text em)
 >                   where em    =  showFFloat (Just 2) (0.5 * fromIntegral (poscol t - c) :: Double) ""
 
 M"ussen |v| und |t| zueinander passen?

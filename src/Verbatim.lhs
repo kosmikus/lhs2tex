@@ -37,8 +37,8 @@ The Boolean flag indicates whether a space should be typeset as \verb*| | (|True
 >                               >>> sub'verbatim
 >
 > splice                        :: [Doc] -> Doc
-> splice ds                     =  Text "~" <> catenate (intersperse nl ds)
->     where nl                  =  Text "!" <> sub'verbnl <> Text "!"
+> splice ds                     =  Text "~" <<>> catenate (intersperse nl ds)
+>     where nl                  =  Text "!" <<>> sub'verbnl <<>> Text "!"
 >
 > latexs                        :: Bool -> String -> Doc
 > latexs b                      =  catenate . map latex

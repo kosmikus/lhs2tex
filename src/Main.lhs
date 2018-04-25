@@ -155,6 +155,7 @@ because with some versions of GHC it triggers ambiguity errors with
 >   , Option []    ["tt"]      (NoArg (return, id, [Typewriter]))                           "typewriter style (deprecated)"
 >   , Option []    ["math"]    (NoArg (return, id, [Math]))                                 "math style (deprecated)"
 >   , Option []    ["poly"]    (NoArg (return, id, [Poly]))                                 "poly style (default)"
+>   , Option []    ["markdown"](NoArg (return, id, [Markdown]))                             "markdown style"
 >   , Option []    ["code"]    (NoArg (return, id, [CodeOnly]))                             "code style (deprecated)"
 >   , Option []    ["newcode"] (NoArg (return, id, [NewCode]))                              "new code style"
 >   , Option []    ["verb"]    (NoArg (return, id, [Verb]))                                 "verbatim (deprecated)"
@@ -398,6 +399,7 @@ Printing documents.
 >         select Typewriter st  =  Typewriter.inline (lang st) (fmts st) s
 >         select Math st        =  Math.inline (lang st) (fmts st) (isTrue (toggles st) auto) s
 >         select Poly st        =  Poly.inline (lang st) (fmts st) (isTrue (toggles st) auto) s
+>         select Markdown st    =  NewCode.inline (lang st) (fmts st) s
 >         select CodeOnly _st   =  return Empty
 >         select NewCode _st    =  return Empty   -- generate PRAGMA or something?
 >         select _ _            =  impossible "inline.select"
@@ -414,7 +416,9 @@ Printing documents.
 >                                     return (d, st{pstack = pstack'})
 >         select NewCode st     =  do d <- NewCode.display (lang st) (fmts st) s
 >                                     let p = sub'pragma $ Text ("LINE " ++ show (lineno st + 1) ++ " " ++ show (takeFileName $ file st))
->                                     return ((if pragmas st then ((p <> sub'nl) <>) else id) d, st)
+>                                     return ((if pragmas st then ((p <<>> sub'nl) <<>>) else id) d, st)
+>         select Markdown st    =  do d <- NewCode.display (lang st) (fmts st) s
+>                                     return (d, st)
 >         select CodeOnly st    =  return (Text (trim s), st)
 >         select _ _            =  impossible "display.select"
 
