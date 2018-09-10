@@ -30,6 +30,7 @@ extra-source-files:     AUTHORS
                         INSTALL
                         TODO
                         doc/*.lhs
+                        doc/*.lhs.in
                         doc/*.fmt
                         doc/Guide2.lhs
                         doc/Guide2.pdf
