@@ -1,4 +1,4 @@
-* lhs2tex-1.21
+# lhs2tex-1.21 (2018-09-10)
 
 - Some code refactoring.
 - Experimental markdown mode.
