@@ -7,7 +7,6 @@
 >                               , openOutputFile
 >                               , modifySearchPath
 >                               , deep, env
->                               , absPath
 >                               , module System.FilePath
 >                               ) where
 >
@@ -43,12 +42,6 @@ path replaces the current one.
 
 > isWindows                     :: Bool
 > isWindows = "win" `isPrefixOf` os || "Win" `isPrefixOf` os || "mingw" `isPrefixOf` os
-
-> absPath                       :: FilePath -> FilePath
-> absPath                       =  if isWindows then
->                                    (("C:" ++ [pathSeparator]) ++)
->                                  else
->                                    (pathSeparator :)
 
 > deep                          :: FilePath -> FilePath
 > deep                          =  (++(replicate 2 pathSeparator))

@@ -39,10 +39,10 @@ Used internally to distinguish prereleases.
 >                                  [  deep (path [dir])
 >                                  |  dir  <-  lhs2TeXNames
 >                                  ,  path <-  if isWindows then [] else
->                                              [\x -> absPath (joinPath $ ["usr","local","share"] ++ x)
->                                              ,\x -> absPath (joinPath $ ["usr","local","lib"] ++ x)
->                                              ,\x -> absPath (joinPath $ ["usr","share"] ++ x)
->                                              ,\x -> absPath (joinPath $ ["usr","lib"] ++ x)
+>                                              [\x -> joinPath $ ["/usr","local","share"] ++ x
+>                                              ,\x -> joinPath $ ["/usr","local","lib"] ++ x
+>                                              ,\x -> joinPath $ ["/usr","share"] ++ x
+>                                              ,\x -> joinPath $ ["/usr","lib"] ++ x
 >                                              ]
 >                                  ]
 >
