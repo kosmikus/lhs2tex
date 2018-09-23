@@ -208,7 +208,7 @@ Auswertung Boole'scher Ausdr"ucke.
 >   appl                        =  do f <- optional not'
 >                                     e <- atom
 >                                     return (maybe e (\_ -> onBool1 not e) f)
->   atom                        =   do Varid x <- satisfy isVarid; return (value togs x)
+>   atom                        =   do x <- satisfy isVarid; return (value togs (string x))
 >                               <|> do _ <- true'; return (Bool True)
 >                               <|> do _ <- false'; return (Bool False)
 >                               <|> do s <- satisfy isString; return (Str (read (string s)))
@@ -237,10 +237,10 @@ Definierende Gleichungen.
 > define lang togs              =  parse lang (definition lang togs)
 >
 > definition                    :: Lang -> Toggles -> Parser Token (String, Value)
-> definition lang togs          =  do Varid x <- satisfy isVarid
+> definition lang togs          =  do x <- satisfy isVarid
 >                                     _ <- equal' lang
 >                                     b <- expression lang togs
->                                     return (x, b)
+>                                     return (string x, b)
 
 Primitive Parser.
 
