@@ -26,6 +26,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S()
 
 # other programs
+AC_PATH_PROG(BASH,bash)
 AC_PATH_PROG(MV,mv)
 AC_PATH_PROG(CP,cp)
 AC_PATH_PROG(RM,rm)
