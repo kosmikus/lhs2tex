@@ -28,9 +28,7 @@ polytable.sty :
 	$(LN_S) ../polytable/lazylist.sty .
 
 RawSearchPath.lhs : ../src/Version.lhs
-	echo '\begin{code}' > $@
-	$(LHS2TEX) --searchpath >> $@
-	echo '\end{code}' >> $@
+	$(LHS2TEX) --texsearchpath > $@
 
 SearchPath.lhs : RawSearchPath.lhs
 	touch $@
@@ -81,5 +79,5 @@ TLL.tex : TLL.lhs $(SNIPPETSTLL)
 
 .PHONY : all srcdist clean
 clean :
-	rm -f $(SNIPPETSGD) $(SNIPPETSSTC)
+	rm -f $(SNIPPETSGD) $(SNIPPETSSTC) RawSearchPath.lhs
 

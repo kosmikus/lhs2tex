@@ -52,7 +52,7 @@
 > main                          =  getArgs >>= main'
 
 > main'                         :: [String] -> IO ()
-> main' args                    =  case getOpt Permute options args of
+> main' args                    =  case getOpt Permute (options ++ hiddenOptions) args of
 >   (o,n,[])                    -> do hSetEncoding stdin  utf8
 >                                     hSetEncoding stdout utf8
 >                                     hSetEncoding stderr utf8
@@ -65,6 +65,9 @@
 >                                           -- ks, 22.11.2005, changed default style to |Poly|
 >                                       [Help]        -> quitSuccess (usageInfo uheader options)
 >                                       [SearchPath]  -> quitSuccess (init . unlines $ V.searchPath)
+>                                       [TeXSearchPath] ->
+>                                         quitSuccess (init . unlines $
+>                                           ["\\begin{code}"] ++ V.searchPath ++ ["\\end{code}"])
 >                                       [Version]     -> quitSuccess programInfo
 >                                       [Copying]     -> quitSuccess (programInfo ++ "\n\n" ++ copying)
 >                                       [Warranty]    -> quitSuccess (programInfo ++ "\n\n" ++ warranty)
@@ -180,6 +183,11 @@ because with some versions of GHC it triggers ambiguity errors with
 >   , Option []    ["copying"] (NoArg (return, id, [Copying]))                              "display license"
 >   , Option []    ["warranty"](NoArg (return, id, [Warranty]))                             "info about warranty"
 >   ]
+>
+> hiddenOptions                 :: [OptDescr (State -> IO State,[Class] -> [Class],[Style])]
+> hiddenOptions =
+>   [ Option []    ["texsearchpath"]
+>                              (NoArg (return, id, [TeXSearchPath]))                        "show searchpath in code environment" ]
 >
 > formatStr                     :: String -> Formatter
 > formatStr str                 =  formats (texparse 1 str) `catchError` abort

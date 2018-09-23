@@ -1,6 +1,6 @@
 cabal-version:  >=1.10
 name:           lhs2tex
-version:        1.21
+version:        1.22
 license:        GPL
 license-file:   LICENSE
 author:         Ralf Hinze <ralf.hinze@comlab.ox.ac.uk>, Andres Loeh <lhs2tex@andres-loeh.de>
