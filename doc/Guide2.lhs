@@ -14,6 +14,7 @@
 \usepackage{hyperref}
 
 %\usepackage[T1]{fontenc}
+\usepackage{lmodern}
 \usepackage{mathpazo}
 %\usepackage[scaled=0.9]{luximono}
 \usepackage{colortbl}
