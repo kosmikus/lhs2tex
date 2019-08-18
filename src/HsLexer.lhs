@@ -7,7 +7,7 @@
 > {-# LANGUAGE NPlusKPatterns #-}
 > module HsLexer                (  module HsLexer ) --Token(..), isVarid, isConid, isNotSpace, string, tokenize  )
 > where
-> import Data.Char      (  isSpace, isUpper, isLower, isDigit, isAlphaNum, isPunctuation  )
+> import Data.Char      (  isSpace, isUpper, isLower, isDigit, isAlphaNum, isPunctuation, toLower )
 > import qualified Data.Char ( isSymbol )
 > import Control.Applicative
 > import Control.Monad
@@ -123,6 +123,12 @@ ks, 28.08.2008: New: Agda and Haskell modes.
 > lex' _lang ('{' : '-' : s)    =  do let (t, u) = nested 0 s
 >                                     v <- match "-}" u
 >                                     return (Nested t, v)
+> lex' _lang ('0' : d : s)
+>     -- octal and hexademical literals, see #74
+>     -- Agda seems to support hex but not octal, but it seems harmless and easiest to me to
+>     -- support this for both languages
+>     | d `elem` "oO"           =  let (t, u) = span isOctDigit s in return (Numeral ('0' : d : t), u)
+>     | d `elem` "xX"           =  let (t, u) = span isHexDigit s in return (Numeral ('0' : d : t), u)
 > lex' lang  (c : s)
 >     | isSpace c               =  let (t, u) = span isSpace s in return (Space (c : t), u)
 >     | isSpecial lang c        =  Just (Special c, s)
@@ -218,6 +224,10 @@ I don't expect this to be a problem, though.
 > isSymbol Agda c               =  isIdChar Agda c
 > isIdChar Haskell c            =  isAlphaNum c || c `elem` "_'"
 > isIdChar Agda c               =  not (isSpecial Agda c || isSpace c)
+
+> isOctDigit, isHexDigit        :: Char -> Bool
+> isOctDigit c                  =  c `elem` "01234567"
+> isHexDigit c                  =  isDigit c || toLower c `elem` "abcdef"
 
 > match                         :: String -> String -> Maybe String
 > match p s
