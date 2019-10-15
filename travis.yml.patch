@@ -1,0 +1,13 @@
+diff --git a/.travis.yml b/.travis.yml
+index d51e060..f10c8c5 100644
+--- a/.travis.yml
++++ b/.travis.yml
+@@ -126,6 +126,8 @@ install:
+   - rm  cabal.project.freeze
+   - ${CABAL} v2-build $WITHCOMPILER ${TEST} ${BENCH} --dep -j2 all | color_cabal_output
+   - ${CABAL} v2-build $WITHCOMPILER --disable-tests --disable-benchmarks --dep -j2 all | color_cabal_output
++before_script:
++  - touch doc/Guide2.pdf
+ script:
+   - DISTDIR=$(mktemp -d /tmp/dist-test.XXXX)
+   # Packaging...
