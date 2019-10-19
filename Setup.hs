@@ -1,4 +1,10 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE PackageImports #-}
+
+#if !defined(MIN_VERSION_Cabal)
+# define MIN_VERSION_Cabal(x,y,z) 0
+#endif
+
 import Distribution.Simple.Setup (CopyDest(..),ConfigFlags(..),BuildFlags(..),
                                   CopyFlags(..),RegisterFlags(..),InstallFlags(..),
                                   defaultRegisterFlags,fromFlagOrDefault,Flag(..),
@@ -6,14 +12,14 @@ import Distribution.Simple.Setup (CopyDest(..),ConfigFlags(..),BuildFlags(..),
 import Distribution.Simple  (UserHooks(..), simpleUserHooks, defaultMainWithHooks)
 import Distribution.Simple.LocalBuildInfo
                             (LocalBuildInfo(..),absoluteInstallDirs)
-import Distribution.Simple.Configure (configCompilerAux)
 import Distribution.PackageDescription (PackageDescription(..))
 import Distribution.Simple.InstallDirs
                             (InstallDirs(..))
 import Distribution.Simple.Program
-                            (Program(..),ConfiguredProgram(..),ProgramConfiguration(..),
+                            (Program(..),ConfiguredProgram(..),
                              ProgramLocation(..),simpleProgram,lookupProgram,
-                             rawSystemProgramConf)
+                             runDbProgram)
+import Distribution.Simple.Program.Db (ProgramDb)
 import Distribution.Simple.Utils
 import Distribution.Verbosity
 import Data.Char (isSpace, showLitChar)
@@ -181,7 +187,7 @@ lhs2texBuildDocumentation a (BuildFlags { buildVerbosity = vf }) pd lbi =
         d <- getCurrentDirectory
         setCurrentDirectory lhs2texDocDir
         -- call pdflatex as long as necessary
-        let loop = do rawSystemProgramConf v (simpleProgram "pdflatex") (withPrograms lbi) ["Guide2.tex"]
+        let loop = do runDbProgram v (simpleProgram "pdflatex") (withPrograms lbi) ["Guide2.tex"]
                       x <- readFile "Guide2.log"
                       case matchRegex (mkRegexWithOpts "Warning.*Rerun" True True) x of
                         Just _  -> loop
@@ -237,7 +243,7 @@ lhs2texRegHook pd lbi _ (RegisterFlags { regVerbosity = vf }) =
     do  let v = fromFlagOrDefault normal vf
         ebi <- getPersistLhs2texBuildConfig
         when (isJust . installPolyTable $ ebi) $
-          do  rawSystemProgramConf v (simpleProgram "mktexlsr") (withPrograms lbi) []
+          do  runDbProgram v (simpleProgram "mktexlsr") (withPrograms lbi) []
               return ()
 
 lhs2texCleanHook pd lbi v pshs =
@@ -285,14 +291,14 @@ callLhs2tex v lbi params outf =
 
 runCommandProgramConf  ::  Verbosity              -- ^ verbosity
                        ->  String                 -- ^ program name
-                       ->  ProgramConfiguration   -- ^ lookup up the program here
+                       ->  ProgramDb              -- ^ lookup up the program here
                        ->  [String]               -- ^ args
                        ->  IO (ExitCode,String,String)
 runCommandProgramConf v progName programConf extraArgs =
     do  (prog,args) <- getProgram progName programConf
         runCommand v prog (args ++ extraArgs)
 
-getProgram :: String -> ProgramConfiguration -> IO (String, [String])
+getProgram :: String -> ProgramDb -> IO (String, [String])
 getProgram progName programConf =
              do  let mProg = lookupProgram (simpleProgram progName) programConf
                  case mProg of
@@ -300,7 +306,7 @@ getProgram progName programConf =
                                              programDefaultArgs = args })  -> return (p,args)
                    Just (ConfiguredProgram { programLocation = FoundOnSystem p,
                                              programDefaultArgs = args })  -> return (p,args)
-                   _ -> (die (progName ++ " command not found"))
+                   _ -> (die' silent (progName ++ " command not found"))
 
 -- | Run a command in a specific environment and return the output and errors.
 runCommandInEnv  ::  Verbosity             -- ^ verbosity
@@ -336,11 +342,11 @@ getPersistLhs2texBuildConfig :: IO Lhs2texBuildInfo
 getPersistLhs2texBuildConfig = do
   e <- doesFileExist lhs2texBuildInfoFile
   let dieMsg = "error reading " ++ lhs2texBuildInfoFile ++ "; run \"setup configure\" command?\n"
-  when (not e) (die dieMsg)
+  when (not e) (die' silent dieMsg)
   str <- readFile lhs2texBuildInfoFile
   case reads str of
     [(bi,_)] -> return bi
-    _        -> die dieMsg
+    _        -> die' silent dieMsg
 
 writePersistLhs2texBuildConfig :: Lhs2texBuildInfo -> IO ()
 writePersistLhs2texBuildConfig lbi = do
@@ -370,3 +376,8 @@ joinFileName dir fname
 
 -- It would be nice if there'd be a predefined way to detect this
 isWindows = "mingw" `isPrefixOf` os || "win" `isPrefixOf` os
+
+#if !(MIN_VERSION_Cabal(2,0,0))
+die' :: Verbosity -> String -> IO a
+die' _ = die
+#endif
