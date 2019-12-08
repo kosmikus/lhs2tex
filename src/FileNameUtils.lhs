@@ -21,7 +21,6 @@
 > import Control.Exception as E
 >                               (  try, catch, IOException )
 > import System.FilePath
-> import System.Info
 >
 > import Auxiliaries
 
@@ -39,9 +38,6 @@ path replaces the current one.
 > -- relPath =  joinpath
 
 > -- absPath ps  =  directorySeparator : relPath ps
-
-> isWindows                     :: Bool
-> isWindows = "win" `isPrefixOf` os || "Win" `isPrefixOf` os || "mingw" `isPrefixOf` os
 
 > deep                          :: FilePath -> FilePath
 > deep                          =  (++(replicate 2 pathSeparator))
