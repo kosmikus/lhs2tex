@@ -52,7 +52,7 @@
 > main                          =  getArgs >>= main'
 
 > main'                         :: [String] -> IO ()
-> main' args                    =  case getOpt Permute options args of
+> main' args                    =  case getOpt Permute (options ++ hiddenOptions) args of
 >   (o,n,[])                    -> do hSetEncoding stdin  utf8
 >                                     hSetEncoding stdout utf8
 >                                     hSetEncoding stderr utf8
@@ -65,6 +65,9 @@
 >                                           -- ks, 22.11.2005, changed default style to |Poly|
 >                                       [Help]        -> quitSuccess (usageInfo uheader options)
 >                                       [SearchPath]  -> quitSuccess (init . unlines $ V.searchPath)
+>                                       [TeXSearchPath] ->
+>                                         quitSuccess (init . unlines $
+>                                           ["\\begin{code}"] ++ V.searchPath ++ ["\\end{code}"])
 >                                       [Version]     -> quitSuccess programInfo
 >                                       [Copying]     -> quitSuccess (programInfo ++ "\n\n" ++ copying)
 >                                       [Warranty]    -> quitSuccess (programInfo ++ "\n\n" ++ warranty)
@@ -155,6 +158,7 @@ because with some versions of GHC it triggers ambiguity errors with
 >   , Option []    ["tt"]      (NoArg (return, id, [Typewriter]))                           "typewriter style (deprecated)"
 >   , Option []    ["math"]    (NoArg (return, id, [Math]))                                 "math style (deprecated)"
 >   , Option []    ["poly"]    (NoArg (return, id, [Poly]))                                 "poly style (default)"
+>   , Option []    ["markdown"](NoArg (return, id, [Markdown]))                             "markdown style"
 >   , Option []    ["code"]    (NoArg (return, id, [CodeOnly]))                             "code style (deprecated)"
 >   , Option []    ["newcode"] (NoArg (return, id, [NewCode]))                              "new code style"
 >   , Option []    ["verb"]    (NoArg (return, id, [Verb]))                                 "verbatim (deprecated)"
@@ -179,6 +183,11 @@ because with some versions of GHC it triggers ambiguity errors with
 >   , Option []    ["copying"] (NoArg (return, id, [Copying]))                              "display license"
 >   , Option []    ["warranty"](NoArg (return, id, [Warranty]))                             "info about warranty"
 >   ]
+>
+> hiddenOptions                 :: [OptDescr (State -> IO State,[Class] -> [Class],[Style])]
+> hiddenOptions =
+>   [ Option []    ["texsearchpath"]
+>                              (NoArg (return, id, [TeXSearchPath]))                        "show searchpath in code environment" ]
 >
 > formatStr                     :: String -> Formatter
 > formatStr str                 =  formats (texparse 1 str) `catchError` abort
@@ -398,6 +407,7 @@ Printing documents.
 >         select Typewriter st  =  Typewriter.inline (lang st) (fmts st) s
 >         select Math st        =  Math.inline (lang st) (fmts st) (isTrue (toggles st) auto) s
 >         select Poly st        =  Poly.inline (lang st) (fmts st) (isTrue (toggles st) auto) s
+>         select Markdown st    =  NewCode.inline (lang st) (fmts st) s
 >         select CodeOnly _st   =  return Empty
 >         select NewCode _st    =  return Empty   -- generate PRAGMA or something?
 >         select _ _            =  impossible "inline.select"
@@ -414,7 +424,9 @@ Printing documents.
 >                                     return (d, st{pstack = pstack'})
 >         select NewCode st     =  do d <- NewCode.display (lang st) (fmts st) s
 >                                     let p = sub'pragma $ Text ("LINE " ++ show (lineno st + 1) ++ " " ++ show (takeFileName $ file st))
->                                     return ((if pragmas st then ((p <> sub'nl) <>) else id) d, st)
+>                                     return ((if pragmas st then ((p <<>> sub'nl) <<>>) else id) d, st)
+>         select Markdown st    =  do d <- NewCode.display (lang st) (fmts st) s
+>                                     return (d, st)
 >         select CodeOnly st    =  return (Text (trim s), st)
 >         select _ _            =  impossible "display.select"
 

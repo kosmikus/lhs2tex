@@ -45,11 +45,11 @@
 > latex sp nl dict              =  tex Empty
 >     where
 >     tex _ (Space s)           =  sub'spaces (convert False s)
->     tex q (Conid s)           =  replace q s (sub'conid (q <> convert False s))
+>     tex q (Conid s)           =  replace q s (sub'conid (q <<>> convert False s))
 >     tex _ (Varid "")          =  sub'dummy    -- HACK
->     tex q (Varid s)           =  replace q s (sub'varid (q <> convert False s))
->     tex q (Consym s)          =  replace q s (sub'consym (q <> convert False s))
->     tex q (Varsym s)          =  replace q s (sub'varsym (q <> convert False s))
+>     tex q (Varid s)           =  replace q s (sub'varid (q <<>> convert False s))
+>     tex q (Consym s)          =  replace q s (sub'consym (q <<>> convert False s))
+>     tex q (Varsym s)          =  replace q s (sub'varsym (q <<>> convert False s))
 >     tex _ (Numeral s)         =  replace Empty s (sub'numeral (convert True s)) -- NEU
 >     tex _ (Char s)            =  sub'char (catenate (map conv' (init $ tail s))) -- NEW: remove quotes
 >     tex _ (String s)          =  sub'string (catenate (map conv' (init $ tail s))) -- NEW: remove quotes
@@ -60,11 +60,11 @@
 >     tex _ (Keyword s)         =  replace Empty s (sub'keyword (convert False s))
 >     tex _ (TeX False d)       =  d
 >     tex _ (TeX True d)        =  sub'tex d
->     tex _ t@(Qual ms t')      =  replace Empty (string t) (tex (catenate (map (\m -> tex Empty (Conid m) <> Text ".") ms)) t')
+>     tex _ t@(Qual ms t')      =  replace Empty (string t) (tex (catenate (map (\m -> tex Empty (Conid m) <<>> Text ".") ms)) t')
 >     tex _ t@(Op t')           =  replace Empty (string t) (sub'backquoted (tex Empty t'))
 >
 >     replace q s def           =  case FM.lookup s dict of
->         Just (_, _, [], ts)   -> q <> catenate (map (tex Empty) ts)
+>         Just (_, _, [], ts)   -> q <<>> catenate (map (tex Empty) ts)
 >         _                     -> def
 
 \NB the directives @%format a = b@ and @%format b = a@ cause a loop.

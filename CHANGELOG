@@ -1,8 +1,0 @@
-Changes (w.r.t. lhs2TeX 1.16)
------------------------------
-
-* Cabal-1.10 support
-
-* Fix for file permissions problem of installed files
-
-* Several improvements to the documentation

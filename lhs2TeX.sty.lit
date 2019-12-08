@@ -10,7 +10,7 @@
 %let lhs2tex_lhs2tex_sty_read = True
 %include lhs2TeX.fmt
 %
-%if style /= newcode
+%if (style /= newcode) && (style /= markdown)
 %
 \makeatletter
 \@@ifundefined{lhs2tex.lhs2tex.sty.read}%

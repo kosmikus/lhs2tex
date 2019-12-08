@@ -20,6 +20,7 @@ GHCFLAGS        = -O
 
 HUGS            = @HUGS@
 
+SHELL           = @BASH@
 INSTALL         = @INSTALL@
 MV              = @MV@
 CP              = @CP@

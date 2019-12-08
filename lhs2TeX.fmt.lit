@@ -207,7 +207,7 @@ etc~(for all lower and upper case greek letters).
 %-------------------------------=  --------------------------------------------
 
 \begin{code}
-%elif style == newcode
+%elif (style == newcode) || (style == markdown)
 %subst comment a        = "-- " a
 %subst nested a         = "{- " a " -}"
 %subst code a           = a "'n"
@@ -227,6 +227,10 @@ etc~(for all lower and upper case greek letters).
 %subst backquoted a     = "`" a "`"
 %subst char a           = "''" a "''"
 %subst string a         = "'d" a "'d"
+%if style == markdown
+%subst inline a         = "`" a "`"
+%subst code a           = "```'n" a "'n```'n"
+%endif
 \end{code}
 
 %-------------------------------=  --------------------------------------------

@@ -14,6 +14,7 @@
 \usepackage{hyperref}
 
 %\usepackage[T1]{fontenc}
+\usepackage{lmodern}
 \usepackage{mathpazo}
 %\usepackage[scaled=0.9]{luximono}
 \usepackage{colortbl}
@@ -489,7 +490,7 @@ by |lhs2TeX|, however, they will behave as they would without
 \paragraph{\bfseries Everything else}
 %
 Everything in the input file that does not fall into one of the above
-cases is is classified as \textbf{plain text} and will simply pass
+cases is classified as \textbf{plain text} and will simply pass
 straight through |lhs2TeX|.
 
 
@@ -498,7 +499,7 @@ straight through |lhs2TeX|.
 \label{sec:styles}
 %---------------------------------------------------------------------------
 
-In this section, we will walk though an example to illustrate how to
+In this section, we will walk through an example to illustrate how to
 utilize the styles of |lhs2TeX|. As we noted in
 Section~\ref{sec:about}, |lhs2TeX| operates in the \textbf{poly} style
 by default. Appendix~\ref{sec:deprecatedstyles} contains summaries of
@@ -635,7 +636,7 @@ that |lhs2TeX| knows about.
 \caption{All |lhs2TeX| directives}\label{directives}
 \end{table}
 %
-Many of these directive will be explained in more detail in the
+Many of these directives will be explained in more detail in the
 following sections:
 \begin{compactitem}
   \item See Section~\ref{sec:include} for the @%include@ directive.
@@ -720,7 +721,7 @@ any of your documents anymore.
 
 It is perfectly possible to design your own libraries that replace or
 extend these basic files and to include these libraries instead. It is
-not recommended, though, to edit @polycode.fmt@ or@lhs2TeX.fmt@ files
+not recommended, though, to edit @polycode.fmt@ or @lhs2TeX.fmt@ files
 directly. If you are not satisfied with some of the default
 definitions, create your own file to redefine selected parts. This
 way, if |lhs2TeX| is updated, you will still be able to benefit from
@@ -728,7 +729,7 @@ improvements and changes in the `prelude' files.
 
 It is possible to use |lhs2TeX| in a setup where a \TeX\ document is
 split into several files. In this case, each of the files will be
-processed separately by |lhs2TeX|, so you should must include
+processed separately by |lhs2TeX|, so you have to include
 @polycode.fmt@ (or @lhs2TeX.fmt@) in every single source file.
 
 \begin{important}[Warning]
@@ -766,13 +767,13 @@ different use cases.
 
 There are three different forms of the formatting statement. The first
 can be used to change the appearance of most functions and operators
-and a few other symbols (cf. Section~\ref{subsec:format-single}). The
+and a few other symbols (cf.~Section~\ref{subsec:format-single}). The
 second form is restricted to named identifiers (both qualified and
 unqualified, but no symbolic operators); in turn, such formatting
-directives can be parametrized (cf.
-Section~\ref{subsec:format-param}). Finally, the third form provides a
+directives can be parametrized (cf.~Section~\ref{subsec:format-param}).
+Finally, the third form provides a
 syntactically lightweight way of formatting certain identifiers using
-some heuristics (cf. Section~\ref{subsec:format-implicit}). Let us
+some heuristics (cf.~Section~\ref{subsec:format-implicit}). Let us
 begin by looking at the first form.
 
 %%%
@@ -908,7 +909,7 @@ produces output similar to
 %
 If the function is used with too few arguments as in the text,
 a default symbol is substituted (usually a @\cdot@, but that is
-customizable, cf. Section~\ref{sec:subst}).
+customizable, cf.~Section~\ref{sec:subst}).
 
 %%%
 %%%
@@ -1149,7 +1150,7 @@ The ``|::|'' and the ``|=|'' have been aligned with the declarations
 of the where-clause. This results in too much space between the two
 |options| tokens and the symbols. Another problems is that in this
 case the \emph{centering} of the two symbols is destroyed by the
-alignment (cf. Section~\ref{centering}). As a result, ``|::|'' and
+alignment (cf.~Section~\ref{centering}). As a result, ``|::|'' and
 ``|=|'' appear left-aligned, but not cleanly, because \TeX\ inserts a
 different amount of whitespace around the two symbols.
 
@@ -1181,7 +1182,7 @@ is exactly what happens:
       ``\emph{latency}''
       spaces, then the token is \textbf{aligned} at column |n|.
 \item All tokens that are aligned at a specific column will appear aligned
-      (i.e. at the same horizontal position) in the output.
+      (i.e.~at the same horizontal position) in the output.
 \end{compactitem}
 %
 Both latency and separation can be modified by means of associated
@@ -1241,7 +1242,7 @@ Sometimes, this behaviour might not match the intention of
 the user, especially in cases as
 above, where there really starts a token at the same position
 in the previous line, but is not preceded by enough spaces.
-Always verify the output if the result looks as desired.
+Always verify the output to see if the result looks as desired.
 
 The amount of space that is inserted can be modified. A call
 to the \TeX\ control sequence @\hsindent@ is inserted at the
@@ -1370,8 +1371,8 @@ of the @polytable@ package that tell you to rerun \LaTeX!
 \label{sec:variables}
 %---------------------------------------------------------------------------
 
-One can define or define flags (or variables) by means of the
-@%let@ directive.
+One can define flags (or variables) by means of the
+@%let@ directive:
 \input{LetSyntax}%
 Expressions are built from booleans (either @True@ or @False@),
 numerals (integers, but also decimal numbers) and previously defined
@@ -1419,8 +1420,8 @@ where the @%elif@ and @%else@ directives are optional. There may
 be arbitrarily many @%elif@ directives. When an @%if@ directive
 is encountered, the expression is evaluated, and depending on the
 result of the evaluation of the expression, only the then or only
-the else part of the conditional is processed by |lhs2TeX|, the
-other part is ignored.
+the else part of the conditional is processed by |lhs2TeX|, and the
+rest is ignored.
 
 %%%
 %%%
@@ -1944,7 +1945,7 @@ particular style and can actually be changed.
 \subsection{Verbatim: ``verb'' style}
 
 In \textbf{verb} style, the code shows up in the formatted
-document exactly as it has been entered, i.e. verbatim.
+document exactly as it has been entered, i.e.~verbatim.
 All spaces are preserved, and a non-proportional font is
 used.
 \input{Zip}%
@@ -2032,7 +2033,7 @@ a \LaTeX\ table. Doing this manually, though, is very cumbersome and
 in some case still quite hard. The task of the formatted styles of
 |lhs2TeX| is thus to spare the user the burden of cluttering up
 the code with formatting annotations. Most of the time, completely
-un-annotated code can be used to achieve good results, using the
+unannotated code can be used to achieve good results, using the
 fonts you like while maintaining alignment information in the code!
 
 %%%

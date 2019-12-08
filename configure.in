@@ -3,11 +3,11 @@ dnl Generic Haskell configure script
 dnl
 
 # Is it there?
-AC_INIT(lhs2tex,1.20)
+AC_INIT(lhs2tex,1.22)
 
-VERSION="1.20"
-SHORTVERSION="1.20"
-NUMVERSION=120
+VERSION="1.22"
+SHORTVERSION="1.22"
+NUMVERSION=122
 PRE=1
 AC_SUBST(VERSION)
 AC_SUBST(SHORTVERSION)
@@ -26,6 +26,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S()
 
 # other programs
+AC_PATH_PROG(BASH,bash)
 AC_PATH_PROG(MV,mv)
 AC_PATH_PROG(CP,cp)
 AC_PATH_PROG(RM,rm)

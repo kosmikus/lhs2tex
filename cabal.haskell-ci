@@ -1,0 +1,2 @@
+travis-patches: travis.yml.patch
+installed:      +all -transformers
