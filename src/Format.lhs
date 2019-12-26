@@ -85,7 +85,7 @@ Plain text (in \TeX\ mode) is just forwarded:
 
 > format (Many s)               =  out (Text s)
 
-Inline code is processes according to the selected style.
+Inline code is processed according to the selected style.
 There are two forms for this, either surrounding code by @|@, or
 using the @\hs@ magic command:
 
@@ -200,7 +200,7 @@ the corresponding indentation stack |pstack|.
 > format (Error exc)            =  throwError exc
 > format _                      =  impossible "format"
 
-Printing documents.
+With |eject|, we can pretty-print a document to the output stream.
 %{
 %format d1
 %format d2
@@ -228,7 +228,12 @@ Printing documents.
 >     substitute d              =  case FM.lookup s d of
 >         Nothing               -> throwError (undef s, "")
 >         Just sub              -> eject (sub ds)
->
+
+Function we call if we encounter an undefined subst directive.
+This is unusual, as all subst are supposed to be defined by an
+initially included format file. We therefore produce a warning
+that suggest including the standard format files.
+
 > undef                         :: String -> String
 > undef s                       =  "`" ++ s ++ "' is not defined;\n\
 >                                  \perhaps you forgot to include \"polycode.fmt\" (or \"lhs2TeX.fmt\")?"
@@ -239,42 +244,62 @@ Printing documents.
 \subsubsection{Style dependent formatting}
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 
-> out                           :: Doc -> Formatter
-> out d                         =  do st <- get; eject (select (style st))
->     where select CodeOnly     =  Empty
->           select NewCode      =  Empty
->           select _            =  d
+The function |out| is a wrapper around |eject| that skips outputting the document
+if we are in a code-centric style.
 
-> inline, display               :: String -> Formatter
-> inline s                      =  do st <- get
->                                     d <- fromEither (select (style st) st)
->                                     eject d
->   where select Verb _st       =  Right (Verbatim.inline False s)
->         select Typewriter st  =  Typewriter.inline (lang st) (fmts st) s
->         select Math st        =  Math.inline (lang st) (fmts st) (isTrue (toggles st) auto) s
->         select Poly st        =  Poly.inline (lang st) (fmts st) (isTrue (toggles st) auto) s
->         select Markdown st    =  NewCode.inline (lang st) (fmts st) s
->         select CodeOnly _st   =  return Empty
->         select NewCode _st    =  return Empty   -- generate PRAGMA or something?
->         select _ _            =  impossible "inline.select"
+> out :: Doc -> Formatter
+> out d = do
+>   st <- get
+>   eject (select (style st))
+>   where
+>     select :: Style -> Doc
+>     select CodeOnly  =  Empty
+>     select NewCode   =  Empty
+>     select _         =  d
 
-> display s                     =  do st <- get
->                                     (d, st') <- fromEither (select (style st) st)
->                                     put st'
->                                     eject d
->   where select Verb st        =  return (Verbatim.display 120 False s, st)
->         select Typewriter st  =  do d <- Typewriter.display (lang st) (fmts st) s; return (d, st)
->         select Math st        =  do (d, sts) <- Math.display (lang st) (fmts st) (isTrue (toggles st) auto) (stacks st) (align st) s
->                                     return (d, st{stacks = sts})
->         select Poly st        =  do (d, pstack') <- Poly.display (lang st) (lineno st + 1) (fmts st) (isTrue (toggles st) auto) (separation st) (latency st) (pstack st) s
->                                     return (d, st{pstack = pstack'})
->         select NewCode st     =  do d <- NewCode.display (lang st) (fmts st) s
->                                     let p = sub'pragma $ Text ("LINE " ++ show (lineno st + 1) ++ " " ++ show (takeFileName $ file st))
->                                     return ((if pragmas st then ((p <<>> sub'nl) <<>>) else id) d, st)
->         select Markdown st    =  do d <- NewCode.display (lang st) (fmts st) s
->                                     return (d, st)
->         select CodeOnly st    =  return (Text (trim s), st)
->         select _ _            =  impossible "display.select"
+The function |inline| formats a string as inline code, according to the current style.
+(In particular, no output is generated in code-centric styles.)
+
+> inline :: String -> Formatter
+> inline s = do
+>   st <- get
+>   d <- fromEither (select (style st) st)
+>   eject d
+>   where
+>     select :: Style -> State -> Either Exc Doc
+>     select Verb        _st  =  Right (Verbatim.inline False s)
+>     select Typewriter  st   =  Typewriter.inline (lang st) (fmts st) s
+>     select Math        st   =  Math.inline (lang st) (fmts st) (isTrue (toggles st) auto) s
+>     select Poly        st   =  Poly.inline (lang st) (fmts st) (isTrue (toggles st) auto) s
+>     select Markdown    st   =  NewCode.inline (lang st) (fmts st) s
+>     select CodeOnly    _st  =  return Empty
+>     select NewCode     _st  =  return Empty   -- generate PRAGMA or something?
+>     select _           _    =  impossible "inline.select"
+
+The function |display| formats a string as display code, according to the current style.
+(In particular, no output is generated in code-centric styles.)
+
+> display :: String -> Formatter
+> display s = do
+>   st <- get
+>   (d, st') <- fromEither (select (style st) st)
+>   put st'
+>   eject d
+>   where
+>     select :: Style -> State -> Either Exc (Doc, State)
+>     select Verb st        =  return (Verbatim.display 120 False s, st)
+>     select Typewriter st  =  do d <- Typewriter.display (lang st) (fmts st) s; return (d, st)
+>     select Math st        =  do (d, sts) <- Math.display (lang st) (fmts st) (isTrue (toggles st) auto) (stacks st) (align st) s
+>                                 return (d, st{stacks = sts})
+>     select Poly st        =  do (d, pstack') <- Poly.display (lang st) (lineno st + 1) (fmts st) (isTrue (toggles st) auto) (separation st) (latency st) (pstack st) s
+>                                 return (d, st{pstack = pstack'})
+>     select NewCode st     =  do d <- NewCode.display (lang st) (fmts st) s
+>                                 let p = sub'pragma $ Text ("LINE " ++ show (lineno st + 1) ++ " " ++ show (takeFileName $ file st))
+>                                 return ((if pragmas st then ((p <<>> sub'nl) <<>>) else id) d, st)
+>     select Markdown st    =  do d <- NewCode.display (lang st) (fmts st) s
+>                                 return (d, st)
+>     select CodeOnly st    =  return (Text (trim s), st)
+>     select _ _            =  impossible "display.select"
 
 > auto                          :: String
 > auto                          =  "autoSpacing"

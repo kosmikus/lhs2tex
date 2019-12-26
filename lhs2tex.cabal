@@ -91,12 +91,14 @@ executable lhs2TeX
                         Document
                         FileNameUtils
                         FiniteMap
+                        Format
                         HsLexer
                         License
                         MathCommon
                         Math
                         MathPoly
                         NewCode
+                        Options
                         Parser
                         State
                         StateT

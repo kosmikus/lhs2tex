@@ -22,18 +22,12 @@
 %format unXIO (m) = m
 %endif
 
-> newtype XIO exc st a          =  MkXIO (ExceptT exc (StateT st IO) a)
+> newtype XIO exc st a          =  MkXIO { unXIO :: ExceptT exc (StateT st IO) a }
 >   deriving (Functor, Applicative, Monad, MonadIO, MonadState st, MonadError exc)
 
--- XIO exc st a ~= StateT st IO (Either exc a)
---              ~= ErrorT exc (StateT st IO) a
-
-%if style /= math
-
-> unXIO                         :: XIO exc st a -> ExceptT exc (StateT st IO) a
-> unXIO (MkXIO f)               =  f
-
-%endif
+-- XIO exc st a ~= ExceptT exc (StateT st IO) a
+--              ~= StateT st IO (Either exc a)
+--              ~= st -> IO (Either exc a, st)
 
 \NB The state is preserved upon failure.
 
