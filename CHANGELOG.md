@@ -1,3 +1,8 @@
+# lhs2tex-1.23 (2020-02-25)
+
+- Compatibility with ghc-8.8 and Cabal-3.0 (#76).
+- Lexing of hexadecimal and octal literals (#74).
+
 # lhs2tex-1.22 (2018-09-23)
 
 - Compatibility with ghc-8.6.
