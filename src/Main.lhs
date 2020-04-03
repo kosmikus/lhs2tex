@@ -20,6 +20,7 @@
 > import Control.Monad
 > import Control.Monad.Except
 > import Control.Monad.State ( MonadState(..), modify )
+> import Data.Maybe (fromMaybe)
 > import Prelude hiding ( getContents, pi )
 >
 > import qualified Version as V
@@ -106,19 +107,24 @@
 >                               -- |++ [ (s, Bool False) || s <- ["underlineKeywords", "spacePreserving", "meta", "array", "latex209", "times", "euler" ] ]|
 
 > preprocess                    :: State -> [Class] -> Bool -> [String] -> IO ()
+
+f1 is the argument to -h
+f2 is the input file
+f3 is the output file
+
 > preprocess flags dirs lit (f1:f2:f3:_)
 >                               =  if (f1 == f2) && not lit
 >                                  then copyFile f2 f3
->                                  else do c <- readFile f1
+>                                  else do c <- readFile f2
 >                                          case matchRegex (mkRegexWithOpts "^%include" True False) c of
 >                                            Nothing -> if lit then
 >                                                          do h <- openOutputFile f3
->                                                             lhs2TeX NewCode (flags { output = h }) (Directive Include "lhs2TeX.fmt" : dirs) [f1]
+>                                                             lhs2TeX NewCode (flags { output = h, linefile = Just f1 }) (Directive Include "lhs2TeX.fmt" : dirs) [f2]
 >                                                             hClose h
 >                                                       else copyFile f2 f3
 >                                            Just _  -> -- supposed to be an lhs2TeX file
 >                                                       do h <- openOutputFile f3
->                                                          lhs2TeX NewCode (flags { output = h }) dirs [f1]
+>                                                          lhs2TeX NewCode (flags { output = h, linefile = Just f1 }) dirs [f2]
 >                                                          hClose h
 > preprocess _ _ _ _            =  error "preprocess: too few arguments"
 
@@ -423,7 +429,7 @@ Printing documents.
 >         select Poly st        =  do (d, pstack') <- Poly.display (lang st) (lineno st + 1) (fmts st) (isTrue (toggles st) auto) (separation st) (latency st) (pstack st) s
 >                                     return (d, st{pstack = pstack'})
 >         select NewCode st     =  do d <- NewCode.display (lang st) (fmts st) s
->                                     let p = sub'pragma $ Text ("LINE " ++ show (lineno st + 1) ++ " " ++ show (takeFileName $ file st))
+>                                     let p = sub'pragma $ Text ("LINE " ++ show (lineno st + 1) ++ " " ++ show (fromMaybe (takeFileName $ file st) (linefile st)))
 >                                     return ((if pragmas st then ((p <<>> sub'nl) <<>>) else id) d, st)
 >         select Markdown st    =  do d <- NewCode.display (lang st) (fmts st) s
 >                                     return (d, st)
