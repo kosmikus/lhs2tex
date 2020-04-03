@@ -1,11 +1,9 @@
-diff --git a/.travis.yml b/.travis.yml
-index d51e060..f10c8c5 100644
---- a/.travis.yml
-+++ b/.travis.yml
-@@ -126,6 +126,8 @@ install:
+--- a/.travis.yml	2020-04-03 21:03:55.565660853 +0200
++++ b/.travis.yml	2020-04-03 21:03:46.078620967 +0200
+@@ -120,6 +120,8 @@
    - rm  cabal.project.freeze
-   - ${CABAL} v2-build $WITHCOMPILER ${TEST} ${BENCH} --dep -j2 all | color_cabal_output
-   - ${CABAL} v2-build $WITHCOMPILER --disable-tests --disable-benchmarks --dep -j2 all | color_cabal_output
+   - travis_wait 40 ${CABAL} v2-build $WITHCOMPILER ${TEST} ${BENCH} --dep -j2 all
+   - travis_wait 40 ${CABAL} v2-build $WITHCOMPILER --disable-tests --disable-benchmarks --dep -j2 all
 +before_script:
 +  - touch doc/Guide2.pdf
  script:
