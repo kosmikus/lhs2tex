@@ -19,6 +19,7 @@
 >                                          lang       :: Lang,          -- Haskell or Agda, currently
 >                                          verbose    :: Bool,
 >                                          searchpath :: [FilePath],
+>                                          linefile   :: Maybe FilePath,  -- The filepath to use for LINE pragmas, passed by the -h option by GHC in preprocessor mode
 >                                          file       :: FilePath,      -- also used for `hugs'
 >                                          lineno     :: LineNo,
 >                                          ofile      :: FilePath,
@@ -70,6 +71,7 @@ Initial state.
 >                                          separation = 2,
 >                                          latency    = 2,
 >                                          pstack     = [],
+>                                          linefile   = Nothing,
 >                                          -- ks, 03.01.04: added to prevent warnings during compilation
 >                                          style      = error "uninitialized style",
 >                                          file       = error "uninitialized filename",
