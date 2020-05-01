@@ -429,7 +429,9 @@ Printing documents.
 >         select Poly st        =  do (d, pstack') <- Poly.display (lang st) (lineno st + 1) (fmts st) (isTrue (toggles st) auto) (separation st) (latency st) (pstack st) s
 >                                     return (d, st{pstack = pstack'})
 >         select NewCode st     =  do d <- NewCode.display (lang st) (fmts st) s
->                                     let p = sub'pragma $ Text ("LINE " ++ show (lineno st + 1) ++ " " ++ show (fromMaybe (takeFileName $ file st) (linefile st)))
+>                                     -- display trims the contents, so for the line number in the pragma to be correct, we have to check initial newlines
+>                                     let nlOffset = newlines (takeWhile isSpace s)
+>                                     let p = sub'pragma $ Text ("LINE " ++ show (lineno st + nlOffset) ++ " " ++ show (fromMaybe (takeFileName $ file st) (linefile st)))
 >                                     return ((if pragmas st then ((p <<>> sub'nl) <<>>) else id) d, st)
 >         select Markdown st    =  do d <- NewCode.display (lang st) (fmts st) s
 >                                     return (d, st)

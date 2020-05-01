@@ -4,7 +4,7 @@
 
 %if codeOnly || showModuleHeader
 
-> module TeXParser              (  texparse  )
+> module TeXParser              (  texparse, newlines  )
 > where
 > import Data.Char              (  isSpace, isAlpha  )
 > import TeXCommands
