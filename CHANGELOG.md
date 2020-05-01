@@ -1,3 +1,8 @@
+# lhs2tex-1.24 (2020-05-01)
+
+- Fix line number calculation for LINE pragmas (#81).
+- Fix filepaths in preprocessor mode (#80).
+
 # lhs2tex-1.23 (2020-02-25)
 
 - Compatibility with ghc-8.8 and Cabal-3.0 (#76).
