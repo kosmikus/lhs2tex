@@ -219,7 +219,7 @@ Collaps adjacent |One|'s into a |Many|.
 >     Many s <<| (Many s' : ts) =  Many (s ++ s') : ts
 >     t <<| ts                  =  t : ts
 
-\NB The first two equations make |compress| incrementel (?); otherwise
+\NB The first two equations make |compress| incremental; otherwise
 \[
     |do s <- readFile "Examples/InfI.lhs"; mapM_ print (compress (map One s))|
 \]
