@@ -260,8 +260,8 @@ in a conditional checking |anyMath|.
 %subst blankline 	= "\\[0.66084ex]%'n"
 %let anyMath            = True
 %elif style == poly
-%subst comment a	= "\mbox{\onelinecomment " a "}"
-%subst nested a	        = "\mbox{\commentbegin " a " \commentend}"
+%subst comment a	= "\mbox{\onelinecomment{} " a "}"
+%subst nested a	        = "\mbox{\commentbegin{} " a " \commentend}"
 %if array
 %subst code a    	= "\['n\begin{parray}\SaveRestoreHook'n" a "\ColumnHook'n\end{parray}'n\]\resethooks'n"
 %else
