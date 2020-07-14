@@ -9,7 +9,7 @@
 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{polytable}%
-   [2013/07/18 v0.8.5 `polytable' package (Andres Loeh)]
+   [2020/07/14 v0.8.6 `polytable' package (Andres Loeh)]
 \let\PT@original@And\And
 \let\PT@original@Not\Not
 \RequirePackage{lazylist}
@@ -214,6 +214,7 @@
                                     \PT@Print\PT@allcols}%
       \PT@postlazylist
    \fi
+   \let\column             \PT@otherrun@column
    \let\PT@firstrun@column \PT@otherrun@column
    \let\savecolumns        \PT@gobbleoptional
    \let\restorecolumns     \PT@gobbleoptional
