@@ -10,16 +10,18 @@
 > import Prelude hiding         (  lines )
 > import Data.List              (  partition )
 > import Numeric                (  showFFloat )
-> import Control.Applicative
+> import Control.Applicative    (  many )
 > import Control.Arrow          (  (>>>) )
-> import Control.Monad          (  (>=>) )
+> import Control.Monad          (  MonadPlus(..), (>=>) )
 >
 > import Verbatim               (  expand, trim )
+> import Typewriter             (  latex )
 > import MathCommon
 > import Document
 > import Directives
 > import HsLexer
 > import Parser
+> import qualified FiniteMap as FM
 > import Auxiliaries
 > import TeXCommands ( Lang(..) )
 
@@ -74,7 +76,7 @@ This variant cannot handle unbalanced parentheses.
 >
 > chunk                         :: (CToken tok) => Parser (Pos tok) (Chunk (Pos tok))
 > chunk                         =  do a <- many atom
->                                     as <- many (do s <- sep; a' <- many atom; return (Delim s : offside a'))
+>                                     as <- many (do s <- sep; a <- many atom; return (Delim s : offside a))
 >                                     return (offside a ++ concat as)
 >     where offside []          =  []
 >           -- old: |opt a =  [Apply a]|
@@ -84,22 +86,20 @@ This variant cannot handle unbalanced parentheses.
 >           col' (Paren a _ _)  =  poscol a
 >
 > atom                          :: (CToken tok) => Parser (Pos tok) (Atom (Pos tok))
-> atom                          =   fmap Atom noSep
->                               <|> do l <- left
->                                      e <- chunk
->                                      r <- right l
->                                      return (Paren l e r)
+> atom                          =  fmap Atom noSep
+>                               `mplus` do l <- left
+>                                          e <- chunk
+>                                          r <- right l
+>                                          return (Paren l e r)
 
 Primitive parser.
 
 > sep, noSep, left              :: (CToken tok) => Parser tok tok
 > sep                           =  satisfy (\t -> catCode t == Sep)
 > noSep                         =  satisfy (\t -> catCode t == NoSep)
-> left                          =  satisfy (\t -> case catCode t of Del c -> c `elem` "(["; _-> False)
->
-> right                         :: (CToken tok) => tok -> Parser tok tok
-> right l                       =  satisfy (\c' -> case (catCode l, catCode c') of
->                                      (Del o, Del c) -> (o,c) `elem` zip "([" ")]"
+> left                          =  satisfy (\t -> case catCode t of Del c -> c `elem` ["(", "[", "'["]; _-> False)
+> right l                       =  satisfy (\c -> case (catCode l, catCode c) of
+>                                      (Del o, Del c) -> (o,c) `elem` zip ["(","["] [")","]"]
 >                                      _     -> False)
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
@@ -135,9 +135,9 @@ Position von |=| oder |::| heranzuziehen ist gef"ahrlich; wenn z.B.
 >     _                         -> False
 >
 > instance Functor Line where
->     fmap _f Blank             =  Blank
->     fmap  f (Three l c r)     =  Three (f l) (f c) (f r)
->     fmap  f (Multi a)         =  Multi (f a)
+>     fmap f Blank              =  Blank
+>     fmap f (Three l c r)      =  Three (f l) (f c) (f r)
+>     fmap f (Multi a)          =  Multi (f a)
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Adding spaces}
@@ -149,16 +149,16 @@ indicates whether to insert a space or not; |after| means immediately
 after a keyword (hence |before b| really means not immediately after).
 
 > addSpaces                     :: (CToken tok) => [tok] -> [tok]
-> addSpaces ts0                 =  before False ts0
+> addSpaces ts                  =  before False ts
 >     where
->     before _b []              =  []
->     before  b (t : ts)        =  case token t of
+>     before b []               =  []
+>     before b (t : ts)         =  case token t of
 >         u | selfSpacing u     -> t : before False ts
 >         Special c
 >           | c `elem` ",;([{"  -> t : before False ts
 >         Keyword _             -> [ fromToken (TeX False sub'space) | b ] ++ t : after ts
 >         _                     -> t : before True ts
->
+> 
 >     after []                  =  []
 >     after (t : ts)            =  case token t of
 >         u | selfSpacing u     -> t : before False ts
@@ -187,14 +187,8 @@ Auch wenn |auto = False| wird der Stack auf dem laufenden gehalten.
 
 > type Stack                    =  [(Col, Doc, [Pos Token])]
 >
-> leftIndent ::
->   Formats
->   -> Bool
->   -> (Stack, Stack)
->   -> [Line [Pos Token]]
->   -> (Doc, (Stack, Stack))
-> leftIndent dict auto (lst0, rst0)
->                               =  loop lst0 rst0
+> leftIndent dict auto (lst, rst)
+>                               =  loop lst rst
 >   where
 >   copy d | auto               =  d
 >          | otherwise          =  Empty
@@ -203,21 +197,21 @@ Die Funktion |isInternal| pr"uft, ob |v| ein spezielles Symbol wie
 @::@, @=@ etc~oder ein Operator wie @++@ ist.
 
 >   loop lst rst []             =  (Empty, (lst, rst))
->   loop lst rst (l' : ls)      =  case l' of
+>   loop lst rst (l : ls)       =  case l of
 >       Blank                   -> loop lst rst ls
 >       Three l c r             -> (sub'column3 (copy lskip <<>> latexs dict l)
 >                                               (latexs dict c)
->                                               (copy rskip <<>> latexs dict r) <<>> sep' ls <<>> rest, st')
+>                                               (copy rskip <<>> latexs dict r) <<>> sep ls <<>> rest, st')
 >           where (lskip, lst') =  indent l lst
 >                 (rskip, rst') =  indent r rst
 >                 (rest, st')   =  loop lst' rst' ls -- does not work: |if null l && null c then rst' else []|
->       Multi m                 -> (sub'column1 (copy lskip <<>> latexs dict m) <<>> sep' ls <<>> rest, st')
+>       Multi m                 -> (sub'column1 (copy lskip <<>> latexs dict m) <<>> sep ls <<>> rest, st')
 >           where (lskip, lst') =  indent m lst
 >                 (rest, st')   =  loop lst' [] ls
 >
->   sep' []                     =  Empty
->   sep' (Blank : _ )           =  sub'blankline
->   sep' (_ : _)                =  sub'nl
+>   sep []                      =  Empty
+>   sep (Blank : _ )            =  sub'blankline
+>   sep (_ : _)                 =  sub'nl
 >
 >   indent                      :: [Pos Token] -> Stack -> (Doc, Stack)
 >   indent [] stack             =  (Empty, stack)
@@ -229,7 +223,7 @@ Die Funktion |isInternal| pr"uft, ob |v| ein spezielles Symbol wie
 >       GT                      -> (skip', (poscol t, skip', ts) : top : stack)
 >           where
 >           skip'               =  case span (\u -> poscol u < poscol t) line of
->               (us, v : _vs) | poscol v == poscol t
+>               (us, v : vs) | poscol v == poscol t
 >                               -> skip <<>> sub'phantom (latexs dict us)
 >               -- does not work: |(us, _) -> skip ++ [Phantom (fmap token us), Skip (col t - last (c : fmap col us))]|
 >               _               -> skip <<>> sub'hskip (Text em)

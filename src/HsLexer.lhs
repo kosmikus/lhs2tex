@@ -9,8 +9,8 @@
 > where
 > import Data.Char      (  isSpace, isUpper, isLower, isDigit, isAlphaNum, isPunctuation, toLower )
 > import qualified Data.Char ( isSymbol )
-> import Control.Applicative
 > import Control.Monad
+> import Control.Monad.Error.Class ()
 > import Document
 > import Auxiliaries
 > import TeXCommands    (  Lang(..)  )
@@ -27,6 +27,7 @@ A Haskell lexer, based on the Prelude function \hs{lex}.
 >                               |  Char String
 >                               |  String String
 >                               |  Special Char
+>                               |  SpecialS String
 >                               |  Comment String
 >                               |  Nested String
 >                               |  Pragma String
@@ -62,6 +63,7 @@ hierarchical modules. Also added Pragma.
 > string (Char s)               =  s
 > string (String s)             =  s
 > string (Special c)            =  [c]
+> string (SpecialS s)           =  s
 > string (Comment s)            =  "--" ++ s
 > string (Nested s)             =  "{-" ++ s ++ "-}"
 > string (Pragma s)             =  "{-#" ++ s ++ "#-}"
@@ -92,23 +94,33 @@ ks, 28.08.2008: New: Agda and Haskell modes.
 
 > lexify                        :: Lang -> [Char] -> Either Exc [Token]
 > lexify _lang []               =  return []
-> lexify lang  s@(_ : _)        =  case lex' lang s of
+> lexify lang s@(_ : _)         =  case lex' lang s of
 >     Nothing                   -> Left ("lexical error", s)
 >     Just (t, s')              -> do ts <- lexify lang s'; return (t : ts)
 >
 > lex'                          :: Lang -> String -> Maybe (Token, String)
 > lex' _lang ""                 =  Nothing
-> lex' _lang ('\'' : s)         =  do let (t, u) = lexLitChar s
->                                     v <- match "\'" u
->                                     return (Char ("'" ++ t ++ "'"), v)
+> lex' _lang ('\'' : '[' : s)   =  Just (SpecialS "\'[", s)
+> lex' lang ('\'' : s0)         =  do let (t, u) = lexLitChar s0
+>                                     case match "\'" u of
+>                                         Just v  -> return (Char ("'" ++ t ++ "'"), v)
+>                                         Nothing -> do
+>                                             (t', u') <- lex' lang s0
+>                                             case t' of
+>                                                 Conid s   -> return (Conid  ('\'' : s), u')
+>                                                 Consym s  -> return (Consym ('\'' : s), u')
+>                                                 Varsym s  -> return (Varsym ('\'' : s), u')
+>                                                 Special c -> return (Consym (['\'', c]), u')
+>                                                 _         -> Nothing
+>
 > lex' _lang ('"' : s)          =  do let (t, u) = lexLitStr s
 >                                     v <- match "\"" u
 >                                     return (String ("\"" ++ t ++ "\""), v)
-> lex' lang  ('-' : '-' : s)
+> lex' lang ('-' : '-' : s)
 >   | not (null s') && isSymbol lang (head s')
 >                               =  case s' of
 >                                    (c : s'') -> return (varsymid lang ("--" ++ d ++ [c]), s'')
->                                    [] -> impossible "lex'"
+>                                    _         -> fail "lex' --"
 >   | otherwise                 =  return (Comment t, u)
 >   where (d, s') = span (== '-') s
 >         (t, u)  = break (== '\n') s'
@@ -143,27 +155,27 @@ ks, 28.08.2008: New: Agda and Haskell modes.
 >     where
 >     numeral Agda              =  Varid
 >     numeral Haskell           =  Numeral
->     classify s'
->         | s' `elem` keywords lang
->                               =  Keyword s'
->         | otherwise           =  Varid   s'
+>     classify s0
+>         | s0 `elem` keywords lang
+>                               =  Keyword s0
+>         | otherwise           =  Varid   s0
 >
 >
 > lexFracExp                    :: String -> Maybe (String, String)
-> lexFracExp s                  =   do t <- match "." s
->                                      (ds, u) <- lexDigits' t
->                                      (e, v)  <- lexExp u
->                                      return ('.' : ds ++ e, v)
->                               <|> lexExp s
+> lexFracExp s                  =  do t <- match "." s
+>                                     (ds, u) <- lexDigits' t
+>                                     (e, v)  <- lexExp u
+>                                     return ('.' : ds ++ e, v)
+>                               `mplus` lexExp s
 >
 > lexExp                        :: String -> Maybe (String, String)
 > lexExp (e:s)
->      | e `elem` "eE"          =   do (c : t) <- Just s
->                                      unless (c `elem` "+-") Nothing
->                                      (ds, u) <- lexDigits' t
->                                      return (e : c : ds, u)
->                               <|> do (ds, t) <- lexDigits' s
->                                      return (e : ds, t)
+>      | e `elem` "eE"          =  do (c : t) <- Just s
+>                                     unless (c `elem` "+-") Nothing
+>                                     (ds, u) <- lexDigits' t
+>                                     return (e : c : ds, u)
+>                               `mplus` do (ds, t) <- lexDigits' s
+>                                          return (e : ds, t)
 > lexExp s                      =  Just ("", s)
 >
 > lexDigits'                    :: String -> Maybe (String, String)
@@ -203,12 +215,19 @@ incorrectly reject programs that contain comments like the
 following one: {- start normal, but close as pragma #-} ...
 I don't expect this to be a problem, though.
 
-> lexLitChar, lexLitStr         :: String -> (String, String)
+> lexLitChar, lexLitChar'         :: String -> (String, String)
 > lexLitChar []                 =  ([], [])
-> lexLitChar ('\'' : s)         =  ([], '\'' : s)
-> lexLitChar ('\\' : c : s)     =  '\\' <| c <| lexLitChar s
-> lexLitChar (c : s)            =  c <| lexLitChar s
+> lexLitChar ('\\' : c : s)     =  '\\' <| c <| lexLitChar' s
+> lexLitChar (c : '\'' : s)     =  c <| ("", '\'' : s )
+> lexLitChar _                  =  ([], [])
 >
+> lexLitChar' []                 =  ([], [])
+> lexLitChar' ('\'' : s)         =  ([], '\'' : s)
+> lexLitChar' (c : s)            =  c <| lexLitChar' s
+
+05.08.2016, DataKinds need treating of apostroph to be more strict. |lexLitChar'| lexes the char expression after the backslash, i.e. until another apostroph
+
+> lexLitStr         :: String -> (String, String)
 > lexLitStr []                  =  ([], [])
 > lexLitStr ('"' : s)           =  ([], '"' : s)
 > lexLitStr ('\\' : c : s)      =  '\\' <| c <| lexLitStr s
@@ -243,7 +262,7 @@ Keywords
 >                                    "import",   "in",       "infix", "infixl",
 >                                    "infixr",   "instance", "let",   "module",
 >                                    "newtype",  "of",       "then",  "type",
->                                    "where" ]
+>                                    "where",    "family" ]
 > keywords Agda                 =  [ "let", "in", "where", "field", "with",
 >                                    "postulate", "primitive", "open", "import",
 >                                    "module", "data", "codata", "record", "infix",
@@ -338,7 +357,7 @@ non-separators.
 
 > data CatCode                  =  White
 >                               |  Sep
->                               |  Del Char
+>                               |  Del String
 >                               |  NoSep
 >                                  deriving (Eq)
 
@@ -369,8 +388,9 @@ an improvement.
 >     catCode (Char _)          =  NoSep
 >     catCode (String _)        =  NoSep
 >     catCode (Special c)
->         | c `elem` "([{}])"   =  Del c
+>         | c `elem` "([{}])"   =  Del [c]
 >         | otherwise           =  Sep
+>     catCode (SpecialS s)      =  Del s
 
 \NB Only @([])@ are classified as delimiters; @{}@ are separators since
 they do not bracket expressions.
