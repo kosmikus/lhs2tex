@@ -18,7 +18,8 @@
 > import System.Process
 > import Control.Arrow
 > import Control.Monad
-> import Control.Monad.Except
+> import Control.Monad.Except ( MonadError(..) )
+> import Control.Monad.IO.Class ( liftIO )
 > import Control.Monad.State ( MonadState(..), modify )
 > import Data.Maybe (fromMaybe)
 > import Prelude hiding ( getContents, pi )
