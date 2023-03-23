@@ -30,7 +30,7 @@ Deterministische Mini-Parser.
 > instance Functor (Parser tok) where
 >     fmap f m                  =  m >>= \a -> return (f a)
 > instance Monad (Parser tok) where
->     return a                  =  MkParser (\inp -> Just (a, inp))
+>     return                    =  pure
 >     m >>= k                   =  MkParser (\inp -> case unParser m inp of
 >                                      Nothing        -> Nothing
 >                                      Just (a, rest) -> unParser (k a) rest)
@@ -38,7 +38,7 @@ Deterministische Mini-Parser.
 >     mzero                     =  MkParser (\_inp -> Nothing)
 >     m `mplus` n               =  MkParser (\inp -> unParser m inp `mplus` unParser n inp)
 > instance Applicative (Parser tok) where
->     pure                      =  return
+>     pure a                    =  MkParser (\inp -> Just (a, inp))
 >     (<*>)                     =  ap
 > instance Alternative (Parser tok) where
 >     empty                     =  mzero
