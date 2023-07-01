@@ -246,10 +246,14 @@ Keywords
 >                                    "where" ]
 > keywords Agda                 =  [ "let", "in", "where", "field", "with",
 >                                    "postulate", "primitive", "open", "import",
->                                    "module", "data", "codata", "record", "infix",
+>                                    "module", "data", "record", "infix",
 >                                    "infixl", "infixr", "mutual", "abstract",
 >                                    "private", "forall", "using", "hiding",
->                                    "renaming", "public" ]
+>                                    "renaming", "public" , "coinductive",  "constructor", "do",
+>                                    "eta-equality", "inductive", "instance", "interleaved",
+>                                    "macro", "no-eta-equality", "overlap", "pattern", "quote",
+>                                    "quoteTerm", "rewrite", "syntax", "tactic", "unquote", 
+>                                    "unquoteDecl", "unquoteDef", "variable" ]
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Phase 2}
