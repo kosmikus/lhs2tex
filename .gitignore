@@ -24,3 +24,5 @@
 /lhs2TeX
 /Lhs2TeX
 /dist
+/dist-newstyle
+.ghc.environment.*

@@ -17,7 +17,7 @@ are subtle differences, and they will grow over time \dots
 > import Data.List              (  partition, nub, sort, transpose )
 > import Control.Applicative
 > import Control.Arrow          (  (>>>) )
-> import Control.Monad          (  (>=>) )
+> import Control.Monad          (  (>=>), mplus )
 >
 > import Verbatim               (  expand, trim )
 > import MathCommon
@@ -96,7 +96,7 @@ This variant can handle unbalanced parentheses in some cases (see below).
 >
 > chunk                         :: (CToken tok) => Int -> Parser (Pos tok) (Chunk (Pos tok))
 > chunk d                       =  do a <- many (atom d)
->                                     as <- many (do s <- csep; a' <- many (atom d); return (Delim s : offside a'))
+>                                     as <- many (do s <- sep; a' <- many (atom d); return (Delim s : offside a'))
 >                                     return (offside a ++ concat as)
 >     where offside []          =  []
 >           -- old: |opt a =  [Apply a]|
@@ -106,7 +106,7 @@ This variant can handle unbalanced parentheses in some cases (see below).
 >           col' (Paren a _ _)  =  poscol a
 >
 > atom                          :: (CToken tok) => Int -> Parser (Pos tok) (Atom (Pos tok))
-> atom d                        =   fmap Atom cnoSep
+> atom d                        =   fmap Atom noSep
 >                               <|> do l <- left
 >                                      e <- chunk (d+1)
 >                                      r <- right l
@@ -123,18 +123,16 @@ parsed as an arbitrary amount of right parentheses.
 
 Primitive parser.
 
-> csep, cnoSep, left, anyright  :: (CToken tok) => Parser tok tok
-> csep                          =  satisfy (\t -> catCode t == Sep)
-> cnoSep                        =  satisfy (\t -> catCode t == NoSep)
-> left                          =  satisfy (\t -> case catCode t of Del c -> c `elem` "([{"; _ -> False)
-> anyright                      =  satisfy (\t -> case catCode t of Del c -> c `elem` ")]}"; _ -> False)
->
-> right                         :: (CToken tok) => tok -> Parser tok tok
-> right l                       =   satisfy (\c' -> case (catCode l, catCode c') of
->                                     (Del o, Del c) -> (o,c) `elem` zip "([{" ")]}"
->                                     _     -> False)
->                               <|> do eof
->                                      return (fromToken $ TeX False Empty)
+> sep, noSep, left, anyright    :: (CToken tok) => Parser tok tok
+> sep                           =  satisfy (\t -> catCode t == Sep)
+> noSep                         =  satisfy (\t -> catCode t == NoSep)
+> left                          =  satisfy (\t -> case catCode t of Del c -> c `elem` ["(","[","{","'["]; _ -> False)
+> anyright                      =  satisfy (\t -> case catCode t of Del c -> c `elem` [")","]","}"]; _ -> False)
+> right l                       =  satisfy (\c -> case (catCode l, catCode c) of
+>                                      (Del o, Del c) -> (o,c) `elem` zip ["(","[","{","'["] [")","]","}","]"]
+>                                      _     -> False)
+>                                   `mplus` do eof
+>                                              return (fromToken $ TeX False Empty)
 
 ks, 06.09.2003: Modified the |right| parser to accept the end of file,
 to allow for unbalanced parentheses. This behaviour is not (yet) backported
