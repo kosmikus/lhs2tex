@@ -417,6 +417,7 @@ Printing documents.
 >         select Markdown st    =  NewCode.inline (lang st) (fmts st) s
 >         select CodeOnly _st   =  return Empty
 >         select NewCode _st    =  return Empty   -- generate PRAGMA or something?
+>         select Pre _st        =  return Empty
 >         select _ _            =  impossible "inline.select"
 
 > display s                     =  do st <- get
@@ -437,6 +438,7 @@ Printing documents.
 >         select Markdown st    =  do d <- NewCode.display (lang st) (fmts st) s
 >                                     return (d, st)
 >         select CodeOnly st    =  return (Text (trim s), st)
+>         select Pre st         =  return (Text (trim s), st)
 >         select _ _            =  impossible "display.select"
 
 > auto                          :: String
