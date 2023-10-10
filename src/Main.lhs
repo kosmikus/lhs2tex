@@ -23,6 +23,7 @@
 > import Control.Monad.State ( MonadState(..), modify )
 > import Data.Maybe (fromMaybe)
 > import Prelude hiding ( getContents, pi )
+> import GHC.IO.Encoding (setLocaleEncoding)
 >
 > import qualified Version as V
 > import TeXCommands
@@ -58,6 +59,7 @@
 >   (o,n,[])                    -> do hSetEncoding stdin  utf8
 >                                     hSetEncoding stdout utf8
 >                                     hSetEncoding stderr utf8
+>                                     setLocaleEncoding utf8 -- for readFile
 >                                     (flags,initdirs,styles)
 >                                        <- foldM (\(s,d,x) (sf,df,ns) -> do s' <- sf s
 >                                                                            return (s',df d,ns ++ x))
