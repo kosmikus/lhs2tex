@@ -72,7 +72,7 @@ hierarchical modules. Also added Pragma.
 This change is by ks, 14.05.2003, to make the @poly@ formatter work.
 This should probably be either documented better or be removed again.
 
-> string (TeX _ _)              =  "" -- |impossible "string"|
+> string (TeX _ _)              =  ""
 > string (Qual m s)             =  concatMap (++".") m ++ string s
 > string (Op s)                 =  "`" ++ string s ++ "`"
 
