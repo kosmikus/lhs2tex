@@ -1,3 +1,12 @@
+# lhs2tex-1.25 (2023-11-13)
+
+- Support for up to ghc-9.8.1.
+- Drop support for ghc versions older than 8.2.
+- Update bundled version of polytable.sty to 0.8.6.
+- Working GitHub CI.
+- Better error messages for --pre.
+- Add some missing keywords for Agda.
+
 # lhs2tex-1.24 (2020-05-01)
 
 - Fix line number calculation for LINE pragmas (#81).
