@@ -1,5 +1,4 @@
 cabal-version:  2.0
-  -- autogen-modules
 name:           lhs2tex
 version:        1.24
 license:        GPL
