@@ -72,7 +72,7 @@ hierarchical modules. Also added Pragma.
 This change is by ks, 14.05.2003, to make the @poly@ formatter work.
 This should probably be either documented better or be removed again.
 
-> string (TeX _ _)              =  "" -- |impossible "string"|
+> string (TeX _ _)              =  ""
 > string (Qual m s)             =  concatMap (++".") m ++ string s
 > string (Op s)                 =  "`" ++ string s ++ "`"
 
@@ -388,7 +388,7 @@ they do not bracket expressions.
 The following change is by ks, 14.05.2003.
 This is related to the change above in function |string|.
 
->     catCode (TeX _ _)         =  NoSep -- |impossible "catCode"|
+>     catCode (TeX _ _)         =  NoSep
 >     catCode (Qual _ t)        =  catCode t
 >     catCode (Op _)            =  Sep
 >     token                     =  id

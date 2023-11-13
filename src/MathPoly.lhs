@@ -158,7 +158,7 @@ to |math| style. Also added |anyright|.
 >                               $  toks
 >   where
 >   findCols                    :: (CToken tok,Show tok) => [Pos tok] -> [Col]
->   findCols ts                 =  case {- |trace (show ts)| -}
+>   findCols ts                 =  case {- trace (show ts) -}
 >                                       (break (\t -> not . isNotSpace . token $ t) ts) of
 >       (_, [])                 -> []   -- done
 >       (_, [_v])               -> []   -- last token is whitespace, doesn't matter
@@ -166,20 +166,20 @@ to |math| style. Also added |anyright|.
 >         | posrow v' == 0 && poscol v' == 0
 >                               -> findCols (v:vs)  -- skip internal tokens (automatically added spaces)
 >         | length (string (token v)) >= sep
->                               -> {- |trace ("found: " ++ show (col v')) $| -} poscol v' : findCols (v':vs)
->         | otherwise           -> {- |trace ("found too short")|            -} findCols (v':vs)
+>                               -> {- trace ("found: " ++ show (col v')) $ -} poscol v' : findCols (v':vs)
+>         | otherwise           -> {- trace ("found too short")            -} findCols (v':vs)
 
 ks, 21.11.2005: I've fixed a bug that was known to me since long ago, but I never got
 around to investigate. When a parametrized formatting directive directly precedes a
 token that should be aligned, then sometimes that token was not aligned. The reason
 was that in |findCols| above, the recursive calls used |vs| instead of |(v':vs)|.
 
-> align                         :: (CToken tok) => [(String,Int)]   -- alignment-info (Name, Spalte)
->                                               -> Int              -- "Trennung"
->                                               -> Int              -- "Traegheit"
->                                               -> [[Pos tok]]      -- positionierte tokens per Zeile
+> align                         :: (CToken tok) => [(String,Int)]   -- alignment info (name, column)
+>                                               -> Int              -- separation
+>                                               -> Int              -- latency
+>                                               -> [[Pos tok]]      -- positioned tokens per line
 >                                               -> [Line [Pos tok]]
-> align cs sep lat toks         =  fmap (\t -> {- |trace (show (map token t) ++ "\n") $| -}
+> align cs sep lat toks         =  fmap (\t -> {- trace (show (map token t) ++ "\n") $ -}
 >                                              let res = splitn ("B",0) False cs t
 >                                              in  if null [x | x <- t
 >                                                          , (posrow x /= 0 || poscol x /= 0) && isNotSpace (token x)]
@@ -244,7 +244,7 @@ same amount of space.
 >                                 -- length 2, because space tokens are always there
 >     where
 >     cts                       = transpose (concatMap (deline cs) ats)
->     maxlengths                = {- |trace (show cts) $ |-} map (maximum . map length) cts
+>     maxlengths                = {- trace (show cts) $ -} map (maximum . map length) cts
 >     anyinternals              = map (any (any isInternal)) cts
 >
 >     deline                    :: [(String,Int)] -> Line [a] -> [[[a]]]
@@ -294,7 +294,7 @@ Operators are `self spacing'.
 > selfSpacing (Consym _)        =  True
 > selfSpacing (Varsym _)        =  True
 > selfSpacing (Op _)            =  True
-> -- |selfSpacing (TeX _) =  True|
+> -- selfSpacing (TeX _) =  True
 > selfSpacing _                 =  False
 
 \NB It's not a good idea to regard inline \TeX\ as self spacing -- consider,
@@ -343,7 +343,7 @@ As a final step, the current line is placed on the stack.
 >   loop _first stack []        =  (Empty, stack)  -- done
 >   loop  first stack (l:ls)    =  case l of
 >       Blank                   -> loop True stack ls -- ignore blank lines
->    {-| Poly x || trace (show x) False -> undefined |-}
+>       -- Poly x || trace (show x) False -> undefined
 >       Poly []                 -> loop True stack ls -- next line
 >       Poly (((_n,_c),[],_ind):rs)
 >         | first               -> loop True stack (Poly rs:ls) -- ignore leading blank columns

@@ -172,7 +172,7 @@ that would remove the parentheses in @deriving (Eq)@ and @module M (a)@
 as well.
 
 >   args                        :: (CToken tok) => [Atom (Pos tok)] -> [Pos tok]
->   args es                     =  concat [ sp ++ snd (eval'' False i []) | i <- es ] -- $\cong$ Applikation
+>   args es                     =  concat [ sp ++ snd (eval'' False i []) | i <- es ]
 >   sp                          :: (CToken tok) => [Pos tok]
 >   sp | auto                   =  [fromToken (TeX False sub'space)]
 >      | otherwise              =  []

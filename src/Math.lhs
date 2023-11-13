@@ -173,7 +173,7 @@ Operators are `self spacing'.
 > selfSpacing (Consym _)        =  True
 > selfSpacing (Varsym _)        =  True
 > selfSpacing (Op _)            =  True
-> -- |selfSpacing (TeX _) =  True|
+> -- selfSpacing (TeX _) =  True
 > selfSpacing _                 =  False
 
 \NB It's not a good idea to regard inline \TeX\ as self spacing consider,

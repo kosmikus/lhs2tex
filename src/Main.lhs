@@ -110,7 +110,7 @@
 >                               ++ [("lang", Int (fromEnum (lang s)))]
 >                               ++ [ (decode s', Int (fromEnum s')) | s' <- [(minBound :: Style) .. maxBound] ]
 >                               ++ [ (decode s', Int (fromEnum s')) | s' <- [(minBound :: Lang) .. maxBound] ]
->                               -- |++ [ (s, Bool False) || s <- ["underlineKeywords", "spacePreserving", "meta", "array", "latex209", "times", "euler" ] ]|
+>                               -- ++ [ (s, Bool False) || s <- ["underlineKeywords", "spacePreserving", "meta", "array", "latex209", "times", "euler" ] ]
 
 > preprocess                    :: State -> [Class] -> Bool -> [String] -> IO ()
 
@@ -256,7 +256,7 @@ We abort immediately if an error has occured.
 >                                     formats ts
 
 > format                        :: Class -> Formatter
-> -- |format (Many ('%' : '%' : _))     =  return ()|   -- @%%@-comments used to be removed
+> -- format (Many ('%' : '%' : _))     =  return ()   -- (@%%@-comments used to be removed)
 > format (Many s)               =  out (Text s)
 > format (Inline s)             =  inline s
 > format (Command Hs s)         =  inline s
@@ -268,13 +268,9 @@ We abort immediately if an error has occured.
 > format (Command Perform s)    =  do st <- get
 >                                     unless (style st `elem` [CodeOnly,NewCode]) $
 >                                       do result <- external (map unNL s)
->                                          modify (\st'@State{file = f', lineno = l'} ->
->                                                    st'{file = "<perform>", files = (f', l') : files st'})
->                                          liftIO (when (verbose st) (hPutStr stderr $ "(" ++ "<perform>"))
+>                                          pushFile "<perform>"
 >                                          formatStr (addEndNL result)
->                                          modify (\st'@State{files = (f, l) : fs} ->
->                                                    st'{file = f, lineno = l, files = fs})
->                                          liftIO (when (verbose st) (hPutStrLn stderr $ ")"))
+>                                          popFile
 >     where
 >     addEndNL                  =  (++"\n") . unlines . lines
 
@@ -302,18 +298,12 @@ We abort immediately if an error has occured.
 > format (Directive Include arg)=  do st <- get
 >                                     let d  = path st
 >                                     let sp = searchpath st
->                                     modify (\st'@State{file = f', lineno = l'} ->
->                                         st'{file = arg', files = (f', l') : files st', path = d ++ dir arg'})
->                                     -- |d <- liftIO getCurrentDirectory|
->                                     -- |liftIO (setCurrentDirectory (dir f))|
 >                                     (str,f) <- liftIO (chaseFile sp (d ++ arg'))
->                                     modify (\st' -> st' { file = f })
->                                     liftIO (when (verbose st) (hPutStr stderr $ "(" ++ f))
+>                                     pushFile f
+>                                     modify (\st' -> st'{path = d ++ dir arg'})
 >                                     formatStr (addEndNL str)
->                                     -- |liftIO (setCurrentDirectory d)|
->                                     modify (\st'@State{files = (f', l) : fs} ->
->                                         st'{file = f', lineno = l, files = fs, path = d})
->                                     liftIO (when (verbose st) (hPutStrLn stderr $ ")"))
+>                                     modify (\st' -> st'{path = d})
+>                                     popFile
 >     where arg'                =  withoutSpaces arg
 >           addEndNL            =  (++"\n") . unlines . lines
 
@@ -333,11 +323,13 @@ also not be desired.
 
 > format (Directive Begin _)    =  modify (\st -> st{stack = fmts st : stack st})
 > format (Directive End _)      =  do st <- get
->                                     when (null (stack st)) $
->                                       do liftIO (hPutStrLn stderr $ "unbalanced %} in line "
->                                                                       ++ show (lineno st))
->                                          modify (\st' -> st'{stack = [fmts st']})
->                                     modify (\st'@State{stack = d:ds} -> st'{fmts = d, stack = ds})
+>                                     case stack st of
+>                                       [] -> do
+>                                               liftIO $
+>                                                 hPutStrLn stderr $ "unbalanced %} in line "
+>                                                   ++ show (lineno st)
+>                                       d : ds -> do
+>                                         put $ st{fmts = d, stack = ds}
 
 ks, 11.09.03: added exception handling for unbalanced grouping
 
@@ -400,6 +392,37 @@ Printing documents.
 >                                  \perhaps you forgot to include \"polycode.fmt\" (or \"lhs2TeX.fmt\")?"
 
 %}
+
+% - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
+\subsubsection{Source file handling}
+% - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
+
+Helper functions to maintain the state when we temporarily process another file,
+which can be either a virtual file (during perform calls) or an explicitly included
+file.
+
+> pushFile :: FilePath -> Formatter
+> pushFile filename = do
+>   st <- get
+>   put $ st{file = filename, files = (file st, lineno st) : files st}
+>   liftIO (when (verbose st) (hPutStr stderr $ "(" ++ filename))
+
+> popFile :: Formatter
+> popFile = do
+>   st <- get
+>   case files st of
+>     [] -> pure () -- should ideally not occur when this function is called
+>     (f, l) : fs' -> put $ st{file = f, lineno = l, files = fs'}
+>   liftIO (when (verbose st) (hPutStrLn stderr $ ")"))
+
+In a relatively naive way, determine the directory part of a filename. Set up
+in such a way that the returned path should be empty or end in a slash.
+
+> dir                           :: FilePath -> FilePath
+> dir filePath
+>     | null d                  =  ""
+>     | otherwise               =  reverse d
+>     where d                   =  dropWhile (/= '/') (reverse filePath)
 
 % - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
 \subsubsection{Style dependent formatting}
@@ -590,7 +613,7 @@ and the second |magic| plus prompt is the result we look for.
 > extract s                     =  v
 >     where (t, u)              =  breaks (isPrefixOf magic) s
 >           -- t contains everything up to magic, u starts with magic
->           -- |u'                      =  tail (dropWhile (/='\n') u)|
+>           -- u'                      =  tail (dropWhile (/='\n') u)
 >           pre                 =  reverse . takeWhile (/='\n') . reverse $ t
 >           prelength           =  if null pre then 0 else length pre + 1
 >           -- pre contains the prefix of magic on the same line
@@ -598,14 +621,4 @@ and the second |magic| plus prompt is the result we look for.
 >           -- we drop the magic string, plus the newline, plus the prefix
 >           (v, _)              =  breaks (isPrefixOf (pre ++ magic)) u'
 >           -- we look for the next occurrence of prefix plus magic
-
-% - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
-\subsubsection{Reading files}
-% - - - - - - - - - - - - - - - = - - - - - - - - - - - - - - - - - - - - - - -
-
-> dir                           :: FilePath -> FilePath
-> dir filePath
->     | null d                  =  ""
->     | otherwise               =  reverse d
->     where d                   =  dropWhile (/= '/') (reverse filePath)
 

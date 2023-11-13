@@ -1,7 +1,6 @@
 cabal-version:  2.0
-  -- autogen-modules
 name:           lhs2tex
-version:        1.24
+version:        1.25
 license:        GPL
 license-file:   LICENSE
 author:         Ralf Hinze <ralf.hinze@comlab.ox.ac.uk>, Andres Loeh <lhs2tex@andres-loeh.de>
@@ -25,9 +24,8 @@ description:
   be invoked in another mode to just extract the Haskell code.
 category:       Development, Language
 build-type:     Custom
-tested-with:    GHC == 7.4.2, GHC == 7.6.3, GHC == 7.8.4, GHC == 7.10.3, GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.4, GHC == 8.6.5, GHC == 8.8.3, GHC == 8.10.1
+tested-with:    GHC == 8.2.2, GHC == 8.4.4, GHC == 8.6.5, GHC == 8.8.3, GHC == 8.10.7, GHC == 9.2.7, GHC == 9.4.5, GHC == 9.6.3, GHC == 9.8.1
 extra-source-files:     AUTHORS
-                        CHANGELOG.md
                         INSTALL
                         TODO
                         doc/*.lhs
@@ -59,13 +57,14 @@ extra-source-files:     AUTHORS
                         configure
                         mkinstalldirs
                         install-sh
+extra-doc-files:        CHANGELOG.md
 
 custom-setup
-  setup-depends:        base,
-                        Cabal,
-                        directory,
-                        process,
-                        regex-compat
+  setup-depends:        base >= 4.2 && < 5,
+                        Cabal >= 2.0 && < 3.11,
+                        directory >= 1.3 && < 1.4,
+                        process >= 1.6 && < 1.7,
+                        regex-compat >= 0.95.2 && < 0.96
 
 source-repository head
   type:                 git
@@ -81,11 +80,11 @@ executable lhs2TeX
                         GeneralizedNewtypeDeriving
                         TypeSynonymInstances
   build-depends:        base >= 4.2 && < 5,
-                        regex-compat,
-                        mtl >= 2.2.1,
-                        filepath,
-                        directory,
-                        process
+                        regex-compat >= 0.95.2 && < 0.96,
+                        mtl >= 2.2.1 && < 2.4,
+                        filepath >= 1.4 && < 1.5,
+                        directory >= 1.3 && < 1.4,
+                        process >= 1.6 && < 1.7
   autogen-modules:      Version
   other-modules:        Auxiliaries
                         Directives
