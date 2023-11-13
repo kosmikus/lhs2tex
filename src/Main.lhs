@@ -74,7 +74,9 @@
 >                                       [Copying]     -> quitSuccess (programInfo ++ "\n\n" ++ copying)
 >                                       [Warranty]    -> quitSuccess (programInfo ++ "\n\n" ++ warranty)
 >                                       [Pre] | length n >= 3 -> preprocess flags (reverse initdirs) False n  -- used as preprocessor -pgmF -F
+>                                             | otherwise     -> quitError preTooFewArgsError
 >                                       [Pre,Help] | length n >= 3 -> preprocess flags (reverse initdirs) True n  -- used as literate preprocessor -pgmL
+>                                                  | otherwise     -> quitError preTooFewArgsError
 >                                       [s]    -> lhs2TeX s flags (reverse initdirs) n
 >                                       _      -> quitError (incompatibleStylesError styles)
 >                                     when (output flags /= stdout) (hClose (output flags))
@@ -88,6 +90,9 @@
 >                                     exitFailure
 >    incompatibleStylesError ss =  "only one style allowed from: "
 >                                     ++ unwords (map (\s -> "--" ++ decode s) ss) ++ "\n"
+>    preTooFewArgsError         =  "\nlhs2TeX --pre was used with less than 3 args.\n"++
+>                                  "Use this mode as a (literate) preprocessor like `ghci -pgmL lhs2TeX -optL--pre File.lhs`,\n" ++
+>                                  "or test its output with `lhs2TeX --pre -h File.lhs File.lhs output.hs`.\n"
 
 > type Formatter                =  XIO Exc State ()
 
