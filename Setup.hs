@@ -37,7 +37,7 @@ import System.Directory
 import System.Info (os)
 
 lhs2tex = "lhs2TeX"
-minPolytableVersion = [0,8,2]
+minPolytableVersion = [0,8,6]
 shortversion = show (numversion `div` 100) ++ "." ++ show (numversion `mod` 100)
 version = shortversion ++ if ispre then "pre" ++ show pre else ""
 numversion = 124
