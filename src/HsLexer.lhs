@@ -388,7 +388,7 @@ they do not bracket expressions.
 The following change is by ks, 14.05.2003.
 This is related to the change above in function |string|.
 
->     catCode (TeX _ _)         =  NoSep -- |impossible "catCode"|
+>     catCode (TeX _ _)         =  NoSep
 >     catCode (Qual _ t)        =  catCode t
 >     catCode (Op _)            =  Sep
 >     token                     =  id
