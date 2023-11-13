@@ -8,9 +8,9 @@
 #
 # For more information, see https://github.com/haskell-CI/haskell-ci
 #
-# version: 0.16.5
+# version: 0.17.20231110
 #
-# REGENDATA ("0.16.5",["github","lhs2tex.cabal"])
+# REGENDATA ("0.17.20231110",["github","lhs2tex.cabal"])
 #
 name: Haskell-CI
 on:
@@ -28,10 +28,30 @@ jobs:
     strategy:
       matrix:
         include:
-          - compiler: ghc-8.10.1
+          - compiler: ghc-9.8.1
             compilerKind: ghc
-            compilerVersion: 8.10.1
-            setup-method: hvr-ppa
+            compilerVersion: 9.8.1
+            setup-method: ghcup
+            allow-failure: false
+          - compiler: ghc-9.6.3
+            compilerKind: ghc
+            compilerVersion: 9.6.3
+            setup-method: ghcup
+            allow-failure: false
+          - compiler: ghc-9.4.5
+            compilerKind: ghc
+            compilerVersion: 9.4.5
+            setup-method: ghcup
+            allow-failure: false
+          - compiler: ghc-9.2.7
+            compilerKind: ghc
+            compilerVersion: 9.2.7
+            setup-method: ghcup
+            allow-failure: false
+          - compiler: ghc-8.10.7
+            compilerKind: ghc
+            compilerVersion: 8.10.7
+            setup-method: ghcup
             allow-failure: false
           - compiler: ghc-8.8.3
             compilerKind: ghc
@@ -84,13 +104,21 @@ jobs:
         run: |
           apt-get update
           apt-get install -y --no-install-recommends gnupg ca-certificates dirmngr curl git software-properties-common libtinfo5
-          apt-add-repository -y 'ppa:hvr/ghc'
-          apt-get update
-          apt-get install -y "$HCNAME"
-          mkdir -p "$HOME/.ghcup/bin"
-          curl -sL https://downloads.haskell.org/ghcup/0.1.19.2/x86_64-linux-ghcup-0.1.19.2 > "$HOME/.ghcup/bin/ghcup"
-          chmod a+x "$HOME/.ghcup/bin/ghcup"
-          "$HOME/.ghcup/bin/ghcup" install cabal 3.10.1.0 || (cat "$HOME"/.ghcup/logs/*.* && false)
+          if [ "${{ matrix.setup-method }}" = ghcup ]; then
+            mkdir -p "$HOME/.ghcup/bin"
+            curl -sL https://downloads.haskell.org/ghcup/0.1.20.0/x86_64-linux-ghcup-0.1.20.0 > "$HOME/.ghcup/bin/ghcup"
+            chmod a+x "$HOME/.ghcup/bin/ghcup"
+            "$HOME/.ghcup/bin/ghcup" install ghc "$HCVER" || (cat "$HOME"/.ghcup/logs/*.* && false)
+            "$HOME/.ghcup/bin/ghcup" install cabal 3.10.2.0 || (cat "$HOME"/.ghcup/logs/*.* && false)
+          else
+            apt-add-repository -y 'ppa:hvr/ghc'
+            apt-get update
+            apt-get install -y "$HCNAME"
+            mkdir -p "$HOME/.ghcup/bin"
+            curl -sL https://downloads.haskell.org/ghcup/0.1.20.0/x86_64-linux-ghcup-0.1.20.0 > "$HOME/.ghcup/bin/ghcup"
+            chmod a+x "$HOME/.ghcup/bin/ghcup"
+            "$HOME/.ghcup/bin/ghcup" install cabal 3.10.2.0 || (cat "$HOME"/.ghcup/logs/*.* && false)
+          fi
         env:
           HCKIND: ${{ matrix.compilerKind }}
           HCNAME: ${{ matrix.compiler }}
@@ -102,11 +130,22 @@ jobs:
           echo "CABAL_DIR=$HOME/.cabal" >> "$GITHUB_ENV"
           echo "CABAL_CONFIG=$HOME/.cabal/config" >> "$GITHUB_ENV"
           HCDIR=/opt/$HCKIND/$HCVER
-          HC=$HCDIR/bin/$HCKIND
-          echo "HC=$HC" >> "$GITHUB_ENV"
-          echo "HCPKG=$HCDIR/bin/$HCKIND-pkg" >> "$GITHUB_ENV"
-          echo "HADDOCK=$HCDIR/bin/haddock" >> "$GITHUB_ENV"
-          echo "CABAL=$HOME/.ghcup/bin/cabal-3.10.1.0 -vnormal+nowrap" >> "$GITHUB_ENV"
+          if [ "${{ matrix.setup-method }}" = ghcup ]; then
+            HC=$("$HOME/.ghcup/bin/ghcup" whereis ghc "$HCVER")
+            HCPKG=$(echo "$HC" | sed 's#ghc$#ghc-pkg#')
+            HADDOCK=$(echo "$HC" | sed 's#ghc$#haddock#')
+            echo "HC=$HC" >> "$GITHUB_ENV"
+            echo "HCPKG=$HCPKG" >> "$GITHUB_ENV"
+            echo "HADDOCK=$HADDOCK" >> "$GITHUB_ENV"
+            echo "CABAL=$HOME/.ghcup/bin/cabal-3.10.2.0 -vnormal+nowrap" >> "$GITHUB_ENV"
+          else
+            HC=$HCDIR/bin/$HCKIND
+            echo "HC=$HC" >> "$GITHUB_ENV"
+            echo "HCPKG=$HCDIR/bin/$HCKIND-pkg" >> "$GITHUB_ENV"
+            echo "HADDOCK=$HCDIR/bin/haddock" >> "$GITHUB_ENV"
+            echo "CABAL=$HOME/.ghcup/bin/cabal-3.10.2.0 -vnormal+nowrap" >> "$GITHUB_ENV"
+          fi
+
           HCNUMVER=$(${HC} --numeric-version|perl -ne '/^(\d+)\.(\d+)\.(\d+)(\.(\d+))?$/; print(10000 * $1 + 100 * $2 + ($3 == 0 ? $5 != 1 : $3))')
           echo "HCNUMVER=$HCNUMVER" >> "$GITHUB_ENV"
           echo "ARG_TESTS=--enable-tests" >> "$GITHUB_ENV"
