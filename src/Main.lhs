@@ -110,7 +110,7 @@
 >                               ++ [("lang", Int (fromEnum (lang s)))]
 >                               ++ [ (decode s', Int (fromEnum s')) | s' <- [(minBound :: Style) .. maxBound] ]
 >                               ++ [ (decode s', Int (fromEnum s')) | s' <- [(minBound :: Lang) .. maxBound] ]
->                               -- |++ [ (s, Bool False) || s <- ["underlineKeywords", "spacePreserving", "meta", "array", "latex209", "times", "euler" ] ]|
+>                               -- ++ [ (s, Bool False) || s <- ["underlineKeywords", "spacePreserving", "meta", "array", "latex209", "times", "euler" ] ]
 
 > preprocess                    :: State -> [Class] -> Bool -> [String] -> IO ()
 
@@ -256,7 +256,7 @@ We abort immediately if an error has occured.
 >                                     formats ts
 
 > format                        :: Class -> Formatter
-> -- |format (Many ('%' : '%' : _))     =  return ()|   -- @%%@-comments used to be removed
+> -- format (Many ('%' : '%' : _))     =  return ()   -- (@%%@-comments used to be removed)
 > format (Many s)               =  out (Text s)
 > format (Inline s)             =  inline s
 > format (Command Hs s)         =  inline s
@@ -613,7 +613,7 @@ and the second |magic| plus prompt is the result we look for.
 > extract s                     =  v
 >     where (t, u)              =  breaks (isPrefixOf magic) s
 >           -- t contains everything up to magic, u starts with magic
->           -- |u'                      =  tail (dropWhile (/='\n') u)|
+>           -- u'                      =  tail (dropWhile (/='\n') u)
 >           pre                 =  reverse . takeWhile (/='\n') . reverse $ t
 >           prelength           =  if null pre then 0 else length pre + 1
 >           -- pre contains the prefix of magic on the same line
