@@ -1,4 +1,4 @@
-# lhs2tex-1.25 (2023-11-13)
+# lhs2tex-1.25 (2023-11-14)
 
 - Support for up to ghc-9.8.1.
 - Drop support for ghc versions older than 8.2.
