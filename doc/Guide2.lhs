@@ -1893,6 +1893,17 @@ formatting directives unless you make sure that they do never span
 an aligned column.
 %TODO: Write example.
 
+\begin{problem}
+My document takes ages to compile compared to a document of similar size in pure TeX.
+\end{problem}
+Make sure your macro expansions don't needlessly leave math mode only to re-enter it.
+For example, @\newcommand{\varid}[1]{\textbf{\textcolor{Blue}{#1}}}@, 
+@%format tau = \varid{$\tau$}@ is a code smell.
+Better factor out @\newcommand{\varcolor}[1]{{\color{Blue} #1}}@ and 
+define @%format tau = \varcolor{\tau}@.
+This issue is exacerbated when @acmart@ is included, due to
+an interaction between @microtype@ and @newtxmath@~\cite{microtype-newtxmath}.
+
 \begin{thebibliography}{99}
 
 \bibitem{polytable}
@@ -1925,6 +1936,10 @@ an aligned column.
 \bibitem{platform}
   The Haskell Platform.
   \url{http://hackage.haskell.org/platform/}
+
+\bibitem{platform}
+  TeX Exchange: Speed up macros involving `\text` when using `microtype` and `newtxmath`.
+  \url{https://tex.stackexchange.com/questions/702854/speed-up-macros-involving-text-when-using-microtype-and-newtxmath}
 
 \end{thebibliography}
 
