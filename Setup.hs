@@ -11,7 +11,6 @@ import Distribution.Simple.Setup (CopyDest(..),ConfigFlags(..),BuildFlags(..),
                                   defaultCopyFlags)
 import Distribution.Simple  (UserHooks(..), simpleUserHooks, defaultMainWithHooks)
 import Distribution.Simple.LocalBuildInfo
-                            (LocalBuildInfo(..),absoluteInstallDirs)
 import Distribution.PackageDescription (PackageDescription(..))
 import Distribution.Simple.InstallDirs
                             (InstallDirs(..))
