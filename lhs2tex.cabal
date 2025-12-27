@@ -24,7 +24,7 @@ description:
   be invoked in another mode to just extract the Haskell code.
 category:       Development, Language
 build-type:     Custom
-tested-with:    GHC == 8.2.2, GHC == 8.4.4, GHC == 8.6.5, GHC == 8.8.3, GHC == 8.10.7, GHC == 9.2.7, GHC == 9.4.5, GHC == 9.6.3, GHC == 9.8.1, GHC == 9.10.3, GHC == 9.12.2
+tested-with:    GHC == 8.4.4, GHC == 8.6.5, GHC == 8.8.3, GHC == 8.10.7, GHC == 9.2.7, GHC == 9.4.5, GHC == 9.6.3, GHC == 9.8.1, GHC == 9.10.3, GHC == 9.12.2
 extra-source-files:     AUTHORS
                         INSTALL
                         TODO
