@@ -8,10 +8,12 @@
 import Distribution.Simple.Setup (CopyDest(..),ConfigFlags(..),BuildFlags(..),
                                   CopyFlags(..),RegisterFlags(..),InstallFlags(..),
                                   defaultRegisterFlags,fromFlagOrDefault,Flag(..),
+#if (MIN_VERSION_Cabal(3,14,0))
+                                  CommonSetupFlags(..),
+#endif
                                   defaultCopyFlags)
 import Distribution.Simple  (UserHooks(..), simpleUserHooks, defaultMainWithHooks)
 import Distribution.Simple.LocalBuildInfo
-                            (LocalBuildInfo(..),absoluteInstallDirs)
 import Distribution.PackageDescription (PackageDescription(..))
 import Distribution.Simple.InstallDirs
                             (InstallDirs(..))
@@ -22,6 +24,9 @@ import Distribution.Simple.Program
 import Distribution.Simple.Program.Db (ProgramDb)
 import Distribution.Simple.Utils
 import Distribution.Verbosity
+#if (MIN_VERSION_Cabal(3,14,0))
+import Distribution.Utils.Path (getSymbolicPath)
+#endif
 import Data.Char (isSpace, showLitChar)
 import Data.List (isSuffixOf,isPrefixOf)
 import Data.Maybe (listToMaybe,isJust)
@@ -123,7 +128,7 @@ lhs2texPostConf a cf pd lbi =
                         hugs <- case hugsExists of
                                   Nothing -> return ""
                                   Just _  -> fmap fst (getProgram "hugs" (withPrograms lbi))
-                        let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
+                        let lhs2texDir = buildDirString lbi `joinFileName` lhs2tex
                         let lhs2texBin = lhs2texDir `joinFileName` lhs2tex
                         readFile (f ++ ".in") >>= return .
                                                   -- these paths could contain backslashes, so we
@@ -141,10 +146,10 @@ lhs2texPostConf a cf pd lbi =
   where runKpseWhich v = runCommandProgramConf silent "kpsewhich" (withPrograms lbi) [v]
         runKpseWhichVar v = runKpseWhich $ "-expand-var='$" ++ v ++ "'"
 
-lhs2texPostBuild a bf@(BuildFlags { buildVerbosity = vf }) pd lbi =
-    do  let v = fromFlagOrDefault normal vf
+lhs2texPostBuild a bf@(BuildFlags { }) pd lbi =
+    do  let v = fromFlagOrDefault normal (buildVerbosity bf)
         ebi <- getPersistLhs2texBuildConfig
-        let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
+        let lhs2texDir = buildDirString lbi `joinFileName` lhs2tex
         let lhs2texBin = lhs2texDir `joinFileName` lhs2tex
         let lhs2texDocDir = lhs2texDir `joinFileName` "doc"
         callLhs2tex v lbi ["--code", "lhs2TeX.sty.lit"] (lhs2texDir `joinFileName` "lhs2TeX.sty")
@@ -153,9 +158,9 @@ lhs2texPostBuild a bf@(BuildFlags { buildVerbosity = vf }) pd lbi =
         if rebuildDocumentation ebi then lhs2texBuildDocumentation a bf pd lbi
                                     else copyFileVerbose v ("doc" `joinFileName` "Guide2.pdf") (lhs2texDocDir `joinFileName` "Guide2.pdf")
 
-lhs2texBuildDocumentation a (BuildFlags { buildVerbosity = vf }) pd lbi =
-    do  let v = fromFlagOrDefault normal vf
-        let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
+lhs2texBuildDocumentation a bf@(BuildFlags { }) pd lbi =
+    do  let v = fromFlagOrDefault normal (buildVerbosity bf)
+        let lhs2texDir = buildDirString lbi `joinFileName` lhs2tex
         let lhs2texBin = lhs2texDir `joinFileName` lhs2tex
         let lhs2texDocDir = lhs2texDir `joinFileName` "doc"
         snippets <- do  guide <- readFile $ "doc" `joinFileName` "Guide2.lhs"
@@ -195,13 +200,13 @@ lhs2texBuildDocumentation a (BuildFlags { buildVerbosity = vf }) pd lbi =
         loop
         setCurrentDirectory d
 
-lhs2texPostCopy a (CopyFlags { copyDest = cdf, copyVerbosity = vf }) pd lbi =
-    do  let v = fromFlagOrDefault normal vf
+lhs2texPostCopy a cf@(CopyFlags { copyDest = cdf }) pd lbi =
+    do  let v = fromFlagOrDefault normal (copyVerbosity cf)
         let cd = fromFlagOrDefault NoCopyDest cdf
         ebi <- getPersistLhs2texBuildConfig
         let dataPref = datadir (absoluteInstallDirs pd lbi cd)
         createDirectoryIfMissing True dataPref
-        let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
+        let lhs2texDir = buildDirString lbi `joinFileName` lhs2tex
         -- lhs2TeX.{fmt,sty}
         mapM_ (\f -> installOrdinaryFile v (lhs2texDir `joinFileName` f) (dataPref `joinFileName` f))
               ["lhs2TeX.fmt","lhs2TeX.sty"]
@@ -235,11 +240,21 @@ lhs2texPostCopy a (CopyFlags { copyDest = cdf, copyVerbosity = vf }) pd lbi =
                                   stys
           Nothing    -> return ()
 
+#if (MIN_VERSION_Cabal(3,14,0))
+lhs2texPostInst a (InstallFlags { installPackageDB = db, installCommonFlags = f }) pd lbi =
+    do  lhs2texPostCopy a (defaultCopyFlags { copyDest = Flag NoCopyDest, copyCommonFlags = f }) pd lbi
+        lhs2texRegHook pd lbi Nothing (defaultRegisterFlags { regPackageDB = db, registerCommonFlags = f })
+#else
 lhs2texPostInst a (InstallFlags { installPackageDB = db, installVerbosity = v }) pd lbi =
     do  lhs2texPostCopy a (defaultCopyFlags { copyDest = Flag NoCopyDest, copyVerbosity = v }) pd lbi
         lhs2texRegHook pd lbi Nothing (defaultRegisterFlags { regPackageDB = db, regVerbosity = v })
+#endif
 
+#if (MIN_VERSION_Cabal(3,14,0))
+lhs2texRegHook pd lbi _ (RegisterFlags { registerCommonFlags = CommonSetupFlags { setupVerbosity = vf } }) =
+#else
 lhs2texRegHook pd lbi _ (RegisterFlags { regVerbosity = vf }) =
+#endif
     do  let v = fromFlagOrDefault normal vf
         ebi <- getPersistLhs2texBuildConfig
         when (isJust . installPolyTable $ ebi) $
@@ -279,7 +294,7 @@ stripQuotes ('\'':s@(_:_)) = init s
 stripQuotes x              = x
 
 callLhs2tex v lbi params outf =
-    do  let lhs2texDir = buildDir lbi `joinFileName` lhs2tex
+    do  let lhs2texDir = buildDirString lbi `joinFileName` lhs2tex
         let lhs2texBin = lhs2texDir `joinFileName` lhs2tex
         let args    =  [ "-P" ++ lhs2texDir ++ sep ]
                      ++ [ "-o" ++ outf ]
@@ -356,7 +371,7 @@ writePersistLhs2texBuildConfig lbi = do
 tryIO :: IO a -> IO (Either IOError a)
 tryIO = try
 
--- HACKS because the Cabal API isn't sufficient:
+-- HACKS because the Cabal API is only sufficient once we may assume version >= 3.14
 
 -- Distribution.Compat.FilePath is supposed to be hidden in future
 -- versions, so we need our own version of it:
@@ -373,6 +388,13 @@ joinFileName dir fname
                  | otherwise = ( == '/' )
  pathSeparator   | isWindows = '\\'
                  | otherwise = '/'
+
+
+#if (MIN_VERSION_Cabal(3,14,0))
+buildDirString = getSymbolicPath . buildDir
+#else
+buildDirString = buildDir
+#endif
 
 -- It would be nice if there'd be a predefined way to detect this
 isWindows = "mingw" `isPrefixOf` os || "win" `isPrefixOf` os
