@@ -1,8 +1,8 @@
 \begin{code}
 %if False
 %
-% Permission is granted to include this file (or parts of this file) 
-% literally into other documents, regardless of the conditions or 
+% Permission is granted to include this file (or parts of this file)
+% literally into other documents, regardless of the conditions or
 % license applying to these documents.
 %
 %endif
@@ -29,16 +29,14 @@
 
 \begin{code}
 %if latex209
-\input{amstext.sty}
-\input{amssymb.sty}
+\input{newtxmath.sty}
 \input{stmaryrd.sty}
 \newcommand\ensuremath[1]{\ifmmode#1\else\mbox{$#1$}\fi}
 %if euler
 \input{euler.sty}
 %endif
 %else
-\usepackage{amstext}
-\usepackage{amssymb}
+\usepackage{newtxmath}
 \usepackage{stmaryrd}
 %if euler
 \usepackage{euler}
