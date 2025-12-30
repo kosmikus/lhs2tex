@@ -1,3 +1,10 @@
+# lhs2tex-1.26 (2025-12-30)
+
+- Support for up to ghc-9.14.1 and cabal-3.14
+  (thanks to Naïm Camille Favier and Sebastian Graf).
+- Replace amsmath with newtxmath
+  (thanks to Sebastian Graf).
+
 # lhs2tex-1.25 (2023-11-14)
 
 - Support for up to ghc-9.8.1.
